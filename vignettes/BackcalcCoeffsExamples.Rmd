@@ -1,0 +1,80 @@
+---
+title: "backcalc Coeffs Test Cases"
+output: rmarkdown::html_vignette
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = NA)
+```
+
+```{r, include=FALSE}
+if (!require(backcalc)) {
+  if (!require(remotes)) install.packages("remotes")
+  remotes::install_github("cwendorf/backcalc")
+}
+library(backcalc)
+```
+
+## Unstandardized Beta Cases
+
+```{r}
+# 1. Basic z-test with coefficient and SE; default 95% CI and 3 digits
+backcalc_coeffs(b = 0.5, se = 0.1)
+# → z-statistic, two-sided p-value, 95% CI, rounded to 3 digits
+
+# 2. Large sample z-test with coefficient and SE; high precision output
+backcalc_coeffs(b = 0.15, se = 0.02, sig_digits = 5)
+# → z-statistic, p-value, 95% CI, rounded to 5 digits
+
+# 3. T-test from coefficient and p-value with df; default 95% CI
+backcalc_coeffs(b = 1.2, p = 0.03, df = 28)
+# → Infers SE, t-statistic, two-sided p-value, and 95% CI
+
+# 4. Estimate and confidence interval given; infer SE and t-statistic with df
+backcalc_coeffs(b = 0.8, ci = c(0.2, 1.4), df = 45, sig_digits = 4)
+# → Uses 95% CI, calculates SE, t-statistic, p-value, output rounded to 4 digits
+
+# 5. Use all inputs: b, se, SDs, p-value, df, one-sided test, and custom digits
+backcalc_coeffs(b = 1.1, se = 0.3, sd_x = 2.5, sd_y = 5, p = 0.04, df = 30, one_sided = TRUE, sig_digits = 4)
+# → One-sided p-value named p_one, t-statistic, standardized beta, 95% CI, rounded to 4 digits
+
+# 6. One-sided t-test with coefficient, p-value, and df; 90% CI specified
+backcalc_coeffs(b = -0.7, p = 0.01, df = 20, one_sided = TRUE, conf.level = 0.90)
+# → 90% one-sided CI, t-statistic, and p_one
+
+# 7. Minimal input: coefficient and p-value with df; change CI level and rounding
+backcalc_coeffs(b = 1.5, p = 0.02, df = 25, conf.level = 0.90, sig_digits = 4)
+# → Reconstructs SE, t-statistic, one-sided p-value, 90% CI, rounded to 4 digits
+```
+
+## Standardized Beta and Conversion Cases
+
+```{r}
+# 8. Standardized beta and SE only; uses z-test by default
+backcalc_coeffs(std_beta = 0.25, se_std = 0.04, conf.level = 0.99)
+# → 99% CI, z-statistic, two-sided p-value for standardized beta
+
+# 9. Convert unstandardized b and SE to standardized beta using SDs; default CI and digits
+backcalc_coeffs(b = 2.0, se = 0.5, sd_x = 3, sd_y = 6)
+# → Computes standardized beta and SE, z-statistic, p-value, and 95% CI
+
+# 10. Standardized beta with confidence interval only; infer SE and stats, use 99% CI
+backcalc_coeffs(std_beta = 0.4, ci = c(0.1, 0.7), conf.level = 0.99)
+# → Infers SE, computes z-statistic, p-value, and 99% CI
+```
+
+## Cases That Should Not Work (Insufficient Input)
+
+```{r}
+# 11. No coefficient or standardized beta provided
+try(print(backcalc_coeffs(se = 0.1)))
+
+# 12. Only p-value provided, no coefficient or SE
+try(print(backcalc_coeffs(p = 0.05)))
+
+# 13. Only confidence interval given without coefficient or df
+try(print(backcalc_coeffs(ci = c(0.1, 0.3))))
+
+# 14. Standardized beta provided without SE or SDs to infer SE
+try(print(backcalc_coeffs(std_beta = 0.4)))
+```

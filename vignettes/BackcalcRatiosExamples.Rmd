@@ -1,0 +1,70 @@
+---
+title: "backcalc Ratios Test Cases"
+output: rmarkdown::html_vignette
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = NA)
+```
+
+```{r, include=FALSE}
+if (!require(backcalc)) {
+  if (!require(remotes)) install.packages("remotes")
+  remotes::install_github("cwendorf/backcalc")
+}
+library(backcalc)
+```
+
+## One Sample Ratio Cases
+
+```{r}
+# 1. Ratio + SE only (z-test)
+backcalc_ratios(ratio = 1.5, se = 0.2, sig_digits = 3)
+
+# 2. Ratio + p-value + df provided (t-test)
+backcalc_ratios(ratio = 2.0, p = 0.01, df = 15, sig_digits = 3)
+
+# 3. Ratio + confidence interval + df
+backcalc_ratios(ratio = 1.7, ci = c(1.1, 2.5), df = 18, sig_digits = 3)
+
+# 4. Ratio + SE + df
+backcalc_ratios(ratio = 1.4, se = 0.12, df = 20, sig_digits = 3)
+
+# 9. Ratio + p-value + n (df inferred)
+backcalc_ratios(ratio = 1.6, p = 0.03, n = 25, sig_digits = 3)
+```
+
+## Two Sample Ratio Cases
+
+```{r}
+# 5. Two-sample equal df
+backcalc_ratios(ratio = c(2.2, 1.5), se = c(0.15, 0.10), df = 20, sig_digits = 3)
+
+# 6. Two-sample unequal df (Welch correction)
+backcalc_ratios(ratio = c(2.5, 1.7), se = c(0.18, 0.12), df = c(18, 22), sig_digits = 3)
+
+# 7. Ratio difference + p-value + df (t-test)
+backcalc_ratios(ratio = 0.30, p = 0.04, df = 35, sig_digits = 3)
+
+# 8. Ratio difference + SE + df provided
+backcalc_ratios(ratio = 0.25, se = 0.09, df = 40, sig_digits = 3)
+
+# 10. Ratio difference + confidence interval + df
+backcalc_ratios(ratio = 0.35, ci = c(0.10, 0.60), df = 38, sig_digits = 3)
+```
+
+## Cases That Should Not Work (Insufficient Input)
+
+```{r}
+# 1. Missing ratio entirely
+backcalc_ratios(se = 0.2)
+
+# 2. Ratio provided but no SE or CI to infer variability
+backcalc_ratios(ratio = 1.5)
+
+# 3. Two ratios provided but no SE or CI for inference
+backcalc_ratios(ratio = c(2.0, 1.5))
+
+# 4. Ratio + p-value provided, but no SE, CI, or df to infer SE or statistic
+backcalc_ratios(ratio = 1.8, p = 0.05)
+```
