@@ -1,6 +1,3 @@
-backcalc Coeffs Examples
-================
-
 ## backcalc Coeffs Examples
 
 - [Unstandardized Beta Cases](#unstandardized-beta-cases)

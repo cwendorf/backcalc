@@ -1,6 +1,3 @@
-backcalc Props Examples
-================
-
 ## backcalc Props Examples
 
 - [One Sample Proportion Cases](#one-sample-proportion-cases)

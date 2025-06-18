@@ -1,6 +1,3 @@
-backcalc Corrs Examples
-================
-
 ## backcalc Corrs Examples
 
 - [One Sample Correlation Cases](#one-sample-correlation-cases)

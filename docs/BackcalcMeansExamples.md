@@ -1,6 +1,3 @@
-backcalc Means Examples
-================
-
 ## backcalc Means Examples
 
 - [One Sample Cases](#one-sample-cases)

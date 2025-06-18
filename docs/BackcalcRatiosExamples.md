@@ -1,6 +1,3 @@
-backcalc Ratios Examples
-================
-
 ## backcalc Ratios Examples
 
 - [One Sample Ratio Cases](#one-sample-ratio-cases)
