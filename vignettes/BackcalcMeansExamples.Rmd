@@ -1,10 +1,17 @@
 ---
-title: "backcalc Means Test Cases"
-output: rmarkdown::html_vignette
+title: "backcalc Means Examples"
+output:
+  github_document:
+    preserve_yaml: FALSE
+vignette: >
+  %\VignetteIndexEntry{backcalc Means Examples}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, comment = NA)
+knitr::opts_chunk$set(comment = NA)
+devtools::source_gist("8e6e5dc401e3fc1042ef7a030f9d19c7", filename = "revised_toc.R")
 ```
 
 ```{r, include=FALSE}
@@ -15,7 +22,16 @@ if (!require(backcalc)) {
 library(backcalc)
 ```
 
-## One Sample Cases
+## backcalc Means Examples
+
+```{r toc, echo=FALSE}
+thisfile <- knitr::current_input()
+revised_toc(thisfile, base_level = 3, toc_depth = 4)
+```
+
+---
+
+### One Sample Cases
 
 ```{r}
 # 1. Confidence interval only (m & SE inferred)
@@ -34,7 +50,7 @@ backcalc_means(m = 2.8, p = 0.023, df = 35, sig_digits = 4)
 backcalc_means(ci = c(4.5, 7.3), df = 15, sig_digits = 3)
 ```
 
-## Paired and Two Sample Cases
+### Paired and Two Sample Cases
 
 ```{r}
 # 6. Paired sample with m, se, and n only (df inferred)
@@ -51,20 +67,4 @@ backcalc_means(m = 2.4, sd = c(5, 6), n = c(30, 40), sig_digits = 2)
 
 # 10. m + two-group SDs + df + unequal ns (redundant info, Welch correction)
 backcalc_means(m = 4.1, sd = c(5.5, 6.0), n = c(20, 25), df = 43, sig_digits = 4)
-```
-
-## Cases That Should Not Work (Insufficient Input)
-
-```{r}
-# 11. Only p-value (insufficient to infer m or SE)
-backcalc_means(p = 0.05)
-
-# 12. m + n only (no SD or SE provided)
-backcalc_means(m = 1.7, n = 25)
-
-# 13. m + SD only (sample size missing)
-backcalc_means(m = 2.1, sd = 4.5)
-
-# 14. Two-group SDs + two sample sizes (no m provided)
-backcalc_means(sd = c(7, 8), n = c(25, 30))
 ```

@@ -1,10 +1,17 @@
 ---
-title: "backcalc Corrs Test Cases"
-output: rmarkdown::html_vignette
+title: "backcalc Corrs Examples"
+output:
+  github_document:
+    preserve_yaml: FALSE
+vignette: >
+  %\VignetteIndexEntry{backcalc Corrs Examples}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, comment = NA)
+knitr::opts_chunk$set(comment = NA)
+devtools::source_gist("8e6e5dc401e3fc1042ef7a030f9d19c7", filename = "revised_toc.R")
 ```
 
 ```{r, include=FALSE}
@@ -15,7 +22,16 @@ if (!require(backcalc)) {
 library(backcalc)
 ```
 
-## One Sample Correlation Cases
+## backcalc Corrs Examples
+
+```{r toc, echo=FALSE}
+thisfile <- knitr::current_input()
+revised_toc(thisfile, base_level = 3, toc_depth = 4)
+```
+
+---
+
+### One Sample Correlation Cases
 
 ```{r}
 # 1. r + SE + n (df inferred)
@@ -30,11 +46,11 @@ backcalc_corrs(r = 0.35, ci = c(0.10, 0.55), df = 20, sig_digits = 3)
 # 4. r + SE only (z-test)
 backcalc_corrs(r = 0.3, se = 0.08, sig_digits = 3)
 
-# 9. r + p-value + n (df inferred)
+# 5. r + p-value + n (df inferred)
 backcalc_corrs(r = 0.42, p = 0.04, n = 22, sig_digits = 3)
 ```
 
-## TwoSample Correlation Cases
+### TwoSample Correlation Cases
 
 ```{r}
 # 5. Two rs, equal n
@@ -51,20 +67,4 @@ backcalc_corrs(r = 0.18, p = 0.03, df = 45, sig_digits = 3)
 
 # 10. r difference + CI + df
 backcalc_corrs(r = 0.20, ci = c(0.05, 0.35), df = 40, sig_digits = 3)
-```
-
-## Cases That Should Not Work (Insufficient Input)
-
-```{r}
-# 11. No correlation coefficient (r) provided
-backcalc_corrs(se = 0.1, n = 30)
-
-# 12. Correlation coefficient outside valid range (-1 to 1)
-backcalc_corrs(r = 1.2, n = 30)
-
-# 13. Two correlations provided but sample sizes missing or incomplete
-backcalc_corrs(r = c(0.5, 0.3))
-
-# 14. One correlation but no SE, no sample size, and no CI provided
-backcalc_corrs(r = 0.4)
 ```

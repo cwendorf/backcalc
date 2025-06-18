@@ -1,10 +1,17 @@
 ---
-title: "backcalc Props Test Cases"
-output: rmarkdown::html_vignette
+title: "backcalc Props Examples"
+output:
+  github_document:
+    preserve_yaml: FALSE
+vignette: >
+  %\VignetteIndexEntry{backcalc Props Examples}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, comment = NA)
+knitr::opts_chunk$set(comment = NA)
+devtools::source_gist("8e6e5dc401e3fc1042ef7a030f9d19c7", filename = "revised_toc.R")
 ```
 
 ```{r, include=FALSE}
@@ -15,7 +22,16 @@ if (!require(backcalc)) {
 library(backcalc)
 ```
 
-## One Sample Proportion Cases
+## backcalc Props Examples
+
+```{r toc, echo=FALSE}
+thisfile <- knitr::current_input()
+revised_toc(thisfile, base_level = 3, toc_depth = 4)
+```
+
+---
+
+### One Sample Proportion Cases
 
 ```{r}
 # 1. Basic single-sample (Wald)
@@ -40,7 +56,7 @@ backcalc_props(x = 72, n = 120, one_sided = TRUE, interval_type = "exact", sig_d
 backcalc_props(x = 20, n = 50, interval_type = "exact", sig_digits = 3)
 ```
 
-## Two Sample Proportion Cases
+### Two Sample Proportion Cases
 
 ```{r}
 # 6. Two-sample proportions, Wald intervals
@@ -51,20 +67,4 @@ backcalc_props(prop = c(0.25, 0.35), n = c(100, 110), p = 0.04, sig_digits = 4)
 
 # 9. Two-sample proportions with estimates only
 backcalc_props(prop = c(0.65, 0.58), n = c(140, 135))
-```
-
-## Cases That Should Not Work (Insufficient Input)
-
-```{r}
-# 11. No inputs at all - nothing to compute
-backcalc_props()
-
-# 12. Single proportion but missing sample size 'n' (needed for SE estimation)
-backcalc_props(prop = 0.5)
-
-# 13. Two proportions provided but sample sizes missing (needed for two-sample calculation)
-backcalc_props(prop = c(0.3, 0.4))
-
-# 14. Exact interval requested without providing counts 'x' and sample size 'n'
-backcalc_props(prop = 0.6, interval_type = "exact")
 ```
