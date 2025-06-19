@@ -136,6 +136,13 @@ backcalc_coeffs <- function(b = NULL, se = NULL,
     ci_upper <- NA
   }
 
+  # Final check: is the input insufficient even for z-approximation?
+  if (is.null(estimate) || is.null(se_val)) {
+    messages <- c(messages, "Insufficient information: cannot estimate coefficient or SE, even approximately.")
+    cat(paste(messages, collapse = "\n"), "\n")
+    return(invisible(NULL))
+  }
+
   # Assemble result
   result <- c(
     coeff = round(estimate, sig_digits),

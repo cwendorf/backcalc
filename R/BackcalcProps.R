@@ -47,157 +47,168 @@
 #' @export
 backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL,
                            p = NULL, one_sided = FALSE, sig_digits = 3,
-                           interval_type = c("wald", "exact")) {
+                           interval_type = c("wald", "exact"),
+                           test_statistic = c("z", "t")) {
   interval_type <- match.arg(interval_type)
+  test_statistic <- match.arg(test_statistic)
   messages <- character(0)
   approx_notes <- character(0)
 
-  # Helper functions
   logit <- function(p) log(p / (1 - p))
   inv_logit <- function(l) exp(l) / (1 + exp(l))
   get_crit <- function() {
     alpha <- if (one_sided) 0.10 else 0.05
-    qnorm(1 - alpha / ifelse(one_sided, 1, 2))
-  }
-  exact_ci <- function(x, n, conf.level = 0.95) {
-    alpha <- 1 - conf.level
-    lower <- if (x == 0) 0 else qbeta(alpha / 2, x, n - x + 1)
-    upper <- if (x == n) 1 else qbeta(1 - alpha / 2, x + 1, n - x)
-    c(lower, upper)
+    if (test_statistic == "z") {
+      qnorm(1 - alpha / ifelse(one_sided, 1, 2))
+    } else {
+      qt(1 - alpha / ifelse(one_sided, 1, 2), df = 1000)
+    }
   }
 
-  # Sanitize input
+  # Validate inputs
+  if (is.null(prop) && (is.null(x) || is.null(n))) {
+    messages <- c(messages, "Provide 'prop' or both 'x' and 'n'.")
+    cat(paste(messages, collapse = "\n"), "\n")
+    return(invisible(NULL))
+  }
+
+  # Convert percentages
   estimate <- prop
   if (!is.null(estimate) && any(estimate > 1)) {
     estimate <- estimate / 100
-    approx_notes <- c(approx_notes, "Input proportions >1 assumed to be percentages and converted to proportions.")
+    approx_notes <- c(approx_notes, "Proportions >1 assumed percentages and converted.")
   }
 
-  # Compute estimate from x/n
+  # Compute from x and n if needed
   if (is.null(estimate) && !is.null(x) && !is.null(n)) {
     estimate <- x / n
-    approx_notes <- c(approx_notes, "Proportion estimated from x/n.")
+    approx_notes <- c(approx_notes, "Estimate computed as x/n.")
   }
 
-  # Detect two-sample case
-  two_sample_case <- !is.null(estimate) && length(estimate) == 2 && !is.null(n) && length(n) == 2
-
-  # SE estimation (single sample)
-  if (!two_sample_case && is.null(se) && !is.null(estimate) && !is.null(n)) {
-    se <- sqrt(1 / (n * estimate) + 1 / (n * (1 - estimate)))
-    approx_notes <- c(approx_notes, "SE estimated from proportion and sample size using Wald approximation on logit scale.")
+  if (!is.null(estimate) && any(estimate < 0 | estimate > 1)) {
+    messages <- c(messages, "Proportions must be between 0 and 1.")
+    cat(paste(messages, collapse = "\n"), "\n")
+    return(invisible(NULL))
   }
 
-  # Two-sample logit difference
-  if (two_sample_case) {
+  # Determine one-sample vs two-sample
+  is_two_sample <- length(estimate) == 2 && length(n) == 2
+  crit <- get_crit()
+
+  # Two-sample logic
+  if (is_two_sample) {
     p1 <- estimate[1]
     p2 <- estimate[2]
     n1 <- n[1]
     n2 <- n[2]
 
-    l1 <- logit(p1)
-    l2 <- logit(p2)
-    estimate <- l1 - l2
-    se1 <- sqrt(1 / (n1 * p1) + 1 / (n1 * (1 - p1)))
-    se2 <- sqrt(1 / (n2 * p2) + 1 / (n2 * (1 - p2)))
-    se <- sqrt(se1^2 + se2^2)
+    estimate_diff <- p1 - p2
+    se <- sqrt(p1 * (1 - p1) / n1 + p2 * (1 - p2) / n2)
+    statistic <- estimate_diff / se
+    ci_ll <- estimate_diff - crit * se
+    ci_ul <- estimate_diff + crit * se
+    approx_notes <- c(approx_notes, "Two-sample SE calculated using Wald formula for difference in proportions.")
 
-    approx_notes <- c(approx_notes, "Two-sample log-odds ratio and SE computed from proportions and sample sizes.")
+    # Compute p if missing
+    if (is.null(p)) {
+      p <- if (one_sided) {
+        if (test_statistic == "z") 1 - pnorm(statistic) else 1 - pt(statistic, df = 1000)
+      } else {
+        if (test_statistic == "z") 2 * (1 - pnorm(abs(statistic))) else 2 * (1 - pt(abs(statistic), df = 1000))
+      }
+    }
+
+    out <- c(
+      prop = round(estimate_diff, sig_digits),
+      se = round(se, sig_digits),
+      ci_ll = round(ci_ll, sig_digits),
+      ci_ul = round(ci_ul, sig_digits),
+      z = round(statistic, sig_digits),
+      p = round(p, sig_digits)
+    )
   }
 
-  # Back-calculate from CI
-  if (!is.null(ci)) {
-    if (length(ci) == 2 && all(ci >= 0 & ci <= 1)) {
+  # One-sample logic
+  else {
+    if (is.null(se) && !is.null(estimate) && !is.null(n)) {
+      if (any(estimate == 0) || any(estimate == 1)) {
+        messages <- c(messages, "Cannot calculate SE for proportions exactly 0 or 1.")
+        cat(paste(messages, collapse = "\n"), "\n")
+        return(invisible(NULL))
+      }
+      se <- sqrt(1 / (n * estimate) + 1 / (n * (1 - estimate)))
+      approx_notes <- c(approx_notes, "SE estimated from prop and n using Wald approximation.")
+    }
+
+    # Back-calc from CI if needed
+    if (!is.null(ci) && length(ci) == 2 && all(ci >= 0 & ci <= 1)) {
+      if (any(ci == 0) || any(ci == 1)) {
+        messages <- c(messages, "CI bounds cannot be exactly 0 or 1 for logit transformation.")
+        cat(paste(messages, collapse = "\n"), "\n")
+        return(invisible(NULL))
+      }
       ci_logit <- logit(ci)
       if (is.null(estimate)) {
         estimate <- mean(ci_logit)
-        approx_notes <- c(approx_notes, "Estimate approximated as midpoint of logit-transformed CI.")
+        approx_notes <- c(approx_notes, "Estimate approximated as midpoint of logit CI.")
       }
       if (is.null(se)) {
-        se <- abs(ci_logit[2] - ci_logit[1]) / (2 * get_crit())
-        approx_notes <- c(approx_notes, "SE approximated from width of logit-transformed CI.")
+        se <- abs(ci_logit[2] - ci_logit[1]) / (2 * crit)
+        approx_notes <- c(approx_notes, "SE approximated from width of logit CI.")
       }
-    } else {
-      messages <- c(messages, "CI must be length 2 and within [0, 1]. Ignoring CI.")
     }
-  }
 
-  # Statistic from estimate & SE
-  if (!is.null(estimate) && !is.null(se)) {
-    statistic <- estimate / se
-  } else if (!is.null(p) && !is.null(estimate)) {
-    crit_val <- if (one_sided) qnorm(1 - p) else qnorm(1 - p / 2)
-    statistic <- sign(estimate) * crit_val
-    se <- estimate / statistic
-    approx_notes <- c(approx_notes, "SE approximated from estimate and p-value.")
-  } else {
-    statistic <- NA
-  }
-
-  # Compute p-value if missing
-  if (is.null(p) && !is.na(statistic)) {
-    p <- if (one_sided) 1 - pnorm(statistic) else 2 * (1 - pnorm(abs(statistic)))
-  }
-
-  crit <- get_crit()
-
-  # Compute CI
-  if (interval_type == "wald" && !is.null(estimate) && !is.null(se)) {
-    if (two_sample_case) {
-      ci_lower <- exp(estimate - crit * se)
-      ci_upper <- exp(estimate + crit * se)
-      estimate_exp <- exp(estimate)
-    } else {
-      ci_lower <- inv_logit(estimate - crit * se)
-      ci_upper <- inv_logit(estimate + crit * se)
-      estimate_exp <- inv_logit(estimate)
+    # Compute from estimate and p if needed
+    if (is.null(se) && !is.null(p) && !is.null(estimate)) {
+      crit_val <- if (one_sided) {
+        if (test_statistic == "z") qnorm(1 - p) else qt(1 - p, df = 1000)
+      } else {
+        if (test_statistic == "z") qnorm(1 - p / 2) else qt(1 - p / 2, df = 1000)
+      }
+      statistic <- sign(estimate) * crit_val
+      se <- estimate / statistic
+      approx_notes <- c(approx_notes, "SE approximated from estimate and p-value.")
     }
-  } else if (interval_type == "exact" && !two_sample_case) {
-    if (!is.null(x) && !is.null(n)) {
-      bounds <- exact_ci(x, n, conf.level = ifelse(one_sided, 0.90, 0.95))
-      ci_lower <- bounds[1]
-      ci_upper <- bounds[2]
-      estimate_exp <- estimate
-      approx_notes <- c(approx_notes, "Exact CI calculated using Clopper-Pearson method.")
-    } else {
-      messages <- c(messages, "Exact interval requested but x or n missing. CI not calculated.")
-      ci_lower <- ci_upper <- NA
-      estimate_exp <- if (!is.null(estimate)) inv_logit(estimate) else NA
-    }
-  } else {
-    ci_lower <- ci_upper <- NA
-    estimate_exp <- if (!is.null(estimate)) inv_logit(estimate) else NA
-  }
 
-  # Compile result
-  if (two_sample_case) {
-    result <- c(
-      log_odds_ratio = round(estimate, sig_digits),
-      se_log_odds_ratio = round(se, sig_digits),
-      odds_ratio = round(estimate_exp, sig_digits),
-      ci_ll = round(ci_lower, sig_digits),
-      ci_ul = round(ci_upper, sig_digits),
-      z = round(statistic, sig_digits),
-      p = round(p, sig_digits)
-    )
-  } else {
-    result <- c(
-      logit_p = round(estimate, sig_digits),
-      se_logit_p = round(se, sig_digits),
-      proportion = round(estimate_exp, sig_digits),
-      ci_ll = round(ci_lower, sig_digits),
-      ci_ul = round(ci_upper, sig_digits),
+    if (!is.null(estimate) && !is.null(se)) {
+      statistic <- estimate / se
+    } else {
+      messages <- c(messages, "Insufficient information: provide 'se', 'n', 'ci', or 'p' with 'estimate'.")
+      cat(paste(messages, collapse = "\n"), "\n")
+      return(invisible(NULL))
+    }
+
+    # Compute p if missing
+    if (is.null(p)) {
+      p <- if (one_sided) {
+        if (test_statistic == "z") 1 - pnorm(statistic) else 1 - pt(statistic, df = 1000)
+      } else {
+        if (test_statistic == "z") 2 * (1 - pnorm(abs(statistic))) else 2 * (1 - pt(abs(statistic), df = 1000))
+      }
+    }
+
+    # CI on logit scale
+    ci_ll <- inv_logit(estimate - crit * se)
+    ci_ul <- inv_logit(estimate + crit * se)
+
+    out <- c(
+      prop = round(estimate, sig_digits),
+      se = round(se, sig_digits),
+      ci_ll = round(ci_ll, sig_digits),
+      ci_ul = round(ci_ul, sig_digits),
       z = round(statistic, sig_digits),
       p = round(p, sig_digits)
     )
   }
 
-  # Rename p for sidedness
-  names(result)[names(result) == "p"] <- if (one_sided) "p_one" else "p"
+  # Label output correctly
+  stat_label <- test_statistic
+  p_label <- if (one_sided) "p_one" else "p"
+  names(out)[5:6] <- c(stat_label, p_label)
 
-  # Print notes and messages
+  # Show messages/notes
   if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
   if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n")
 
-  return(result)
+  return(out)
 }

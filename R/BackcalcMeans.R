@@ -126,15 +126,11 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
     }
   }
 
-  # Check minimum info
+  # Check minimum info - updated to print message only, no table output
   if (is.null(estimate) || (is.null(se) && is.null(p) && is.null(ci))) {
     messages <- c(messages, "Insufficient input: Provide estimate and at least one of SE, p-value, or CI.")
-    result <- c(m = NA, se = NA, df = NA, ci_ll = NA, ci_ul = NA,
-                statistic = NA, p = NA)
-    names(result)[names(result) == "p"] <- ifelse(one_sided, "p-one", "p")
-    names(result)[names(result) == "statistic"] <- if (!is.null(df)) "t" else "z"
     if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
-    return(result)
+    return(invisible(NULL))
   }
 
   # Test type
