@@ -44,25 +44,18 @@
 #'
 #' @export
 backcalc_coeffs <- function(b = NULL, se = NULL,
-                                 std_beta = NULL, se_std = NULL,
-                                 sd_x = NULL, sd_y = NULL,
-                                 df = NULL,
-                                 p = NULL,
-                                 ci = NULL,
-                                 one_sided = FALSE, 
-                                 conf.level = 0.95,
-                                 sig_digits = 3) {
-  # Select coefficient to prioritize
-  estimate <- if (!is.null(std_beta)) std_beta else b
-  se_val <- if (!is.null(std_beta)) se_std else se
+                            std_beta = NULL, se_std = NULL,
+                            sd_x = NULL, sd_y = NULL,
+                            df = NULL,
+                            p = NULL,
+                            ci = NULL,
+                            one_sided = FALSE, 
+                            conf.level = 0.95,
+                            sig_digits = 3) {
+  messages <- character(0)
+  approx_notes <- character(0)
 
-  # Infer standardized beta if not supplied directly
-  if (is.null(std_beta) && !is.null(b) && !is.null(sd_x) && !is.null(sd_y)) {
-    estimate <- b * (sd_x / sd_y)
-    if (!is.null(se)) se_val <- se * (sd_x / sd_y)
-  }
-
-  # Infer SE from CI
+  # Helper: critical value based on df and conf.level
   get_crit <- function(df = NULL) {
     alpha <- 1 - conf.level
     if (one_sided) {
@@ -72,30 +65,60 @@ backcalc_coeffs <- function(b = NULL, se = NULL,
     }
   }
 
-  if (!is.null(ci)) {
-    if (length(ci) != 2) stop("ci must be a numeric vector of length 2.")
-    if (is.null(estimate)) estimate <- mean(ci)
-    if (is.null(se_val)) {
-      crit <- get_crit(df)
-      se_val <- abs(ci[2] - ci[1]) / (2 * crit)
+  # Choose estimate and SE
+  estimate <- if (!is.null(std_beta)) std_beta else b
+  se_val <- if (!is.null(std_beta)) se_std else se
+
+  # Infer standardized beta
+  if (is.null(std_beta) && !is.null(b) && !is.null(sd_x) && !is.null(sd_y)) {
+    estimate <- b * (sd_x / sd_y)
+    approx_notes <- c(approx_notes, "Standardized beta approximated from unstandardized beta and standard deviations.")
+    if (!is.null(se)) {
+      se_val <- se * (sd_x / sd_y)
+      approx_notes <- c(approx_notes, "SE of standardized beta approximated from unstandardized SE and SDs.")
     }
   }
 
-  # Infer stat and SE from p-value if needed
-  stat_type <- if (!is.null(df)) "t" else "z"
-  stat <- if (!is.null(estimate) && !is.null(se_val)) estimate / se_val else NULL
+  # Infer from CI
+  if (!is.null(ci)) {
+    if (length(ci) != 2) {
+      messages <- c(messages, "CI must be a numeric vector of length 2.")
+    } else {
+      if (is.null(estimate)) {
+        estimate <- mean(ci)
+        approx_notes <- c(approx_notes, "Estimate approximated as midpoint of CI.")
+      }
+      if (is.null(se_val)) {
+        crit <- get_crit(df)
+        se_val <- abs(ci[2] - ci[1]) / (2 * crit)
+        approx_notes <- c(approx_notes, "SE approximated from CI width.")
+      }
+    }
+  }
 
-  if (is.null(stat) && !is.null(p) && !is.null(estimate)) {
+  # Determine statistic type
+  stat_type <- if (!is.null(df)) "t" else "z"
+
+  # Compute statistic
+  stat <- if (!is.null(estimate) && !is.null(se_val)) {
+    estimate / se_val
+  } else if (!is.null(p) && !is.null(estimate)) {
     crit_val <- if (one_sided) {
       if (!is.null(df)) qt(1 - p, df) else qnorm(1 - p)
     } else {
       if (!is.null(df)) qt(1 - p / 2, df) else qnorm(1 - p / 2)
     }
+    approx_notes <- c(approx_notes, "Test statistic approximated from p-value and estimate.")
     stat <- sign(estimate) * crit_val
     se_val <- estimate / stat
+    approx_notes <- c(approx_notes, "SE approximated from estimate and reconstructed statistic.")
+    stat
+  } else {
+    NA
   }
 
-  if (is.null(p) && !is.null(stat)) {
+  # Compute p if missing
+  if (is.null(p) && !is.na(stat)) {
     p <- if (stat_type == "t") {
       if (one_sided) 1 - pt(stat, df) else 2 * (1 - pt(abs(stat), df))
     } else {
@@ -103,12 +126,17 @@ backcalc_coeffs <- function(b = NULL, se = NULL,
     }
   }
 
-  # Compute CI from estimate and SE
-  crit <- get_crit(df)
-  ci_lower <- estimate - crit * se_val
-  ci_upper <- estimate + crit * se_val
+  # Compute CI if possible
+  if (!is.null(estimate) && !is.null(se_val)) {
+    crit <- get_crit(df)
+    ci_lower <- estimate - crit * se_val
+    ci_upper <- estimate + crit * se_val
+  } else {
+    ci_lower <- NA
+    ci_upper <- NA
+  }
 
-  # Build result in requested order
+  # Assemble result
   result <- c(
     coeff = round(estimate, sig_digits),
     se = round(se_val, sig_digits),
@@ -117,21 +145,15 @@ backcalc_coeffs <- function(b = NULL, se = NULL,
     ci_ul = round(ci_upper, sig_digits)
   )
 
-  # Add stat with dynamic name "t" or "z"
-  if (!is.null(stat)) {
-    stat_name <- stat_type
-    result <- c(result, setNames(round(stat, sig_digits), stat_name))
-  } else {
-    result <- c(result, t = NA)  # fallback if stat missing
-  }
+  stat_name <- stat_type
+  result <- c(result, setNames(round(stat, sig_digits), stat_name))
 
-  # Add p-value last with possible rename for one-sided
-  if (!is.null(p)) {
-    p_name <- if (one_sided) "p_one" else "p"
-    result <- c(result, setNames(round(p, sig_digits), p_name))
-  } else {
-    result <- c(result, p = NA)
-  }
+  p_name <- if (one_sided) "p_one" else "p"
+  result <- c(result, setNames(round(p, sig_digits), p_name))
+
+  # Show notes
+  if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
+  if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n")
 
   return(result)
 }

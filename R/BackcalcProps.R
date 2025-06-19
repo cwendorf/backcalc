@@ -46,136 +46,130 @@
 #'
 #' @export
 backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL,
-                                  p = NULL, one_sided = FALSE, sig_digits = 3,
-                                  interval_type = c("wald", "exact")) {
-  estimate <- prop
+                           p = NULL, one_sided = FALSE, sig_digits = 3,
+                           interval_type = c("wald", "exact")) {
   interval_type <- match.arg(interval_type)
-  
-  # Helper: logit and inverse logit
+  messages <- character(0)
+  approx_notes <- character(0)
+
+  # Helper functions
   logit <- function(p) log(p / (1 - p))
   inv_logit <- function(l) exp(l) / (1 + exp(l))
-  
-  # Exact binomial CI (Clopper-Pearson)
+  get_crit <- function() {
+    alpha <- if (one_sided) 0.10 else 0.05
+    qnorm(1 - alpha / ifelse(one_sided, 1, 2))
+  }
   exact_ci <- function(x, n, conf.level = 0.95) {
     alpha <- 1 - conf.level
     lower <- if (x == 0) 0 else qbeta(alpha / 2, x, n - x + 1)
     upper <- if (x == n) 1 else qbeta(1 - alpha / 2, x + 1, n - x)
     c(lower, upper)
   }
-  
-  # Convert percentage to proportion if needed
-  if (!is.null(estimate)) {
-    if (any(estimate > 1)) estimate <- estimate / 100
+
+  # Sanitize input
+  estimate <- prop
+  if (!is.null(estimate) && any(estimate > 1)) {
+    estimate <- estimate / 100
+    approx_notes <- c(approx_notes, "Input proportions >1 assumed to be percentages and converted to proportions.")
   }
-  
-  # If x and n are given but estimate missing, compute estimate
-  if (!is.null(x) && !is.null(n) && is.null(estimate)) {
+
+  # Compute estimate from x/n
+  if (is.null(estimate) && !is.null(x) && !is.null(n)) {
     estimate <- x / n
+    approx_notes <- c(approx_notes, "Proportion estimated from x/n.")
   }
-  
-  # Check if two-sample (two estimates and two ns)
+
+  # Detect two-sample case
   two_sample_case <- !is.null(estimate) && length(estimate) == 2 && !is.null(n) && length(n) == 2
-  
-  # Function to get critical value for CI and tests
-  get_crit <- function() {
-    alpha <- 0.05
-    if (one_sided) qnorm(1 - alpha) else qnorm(1 - alpha / 2)
+
+  # SE estimation (single sample)
+  if (!two_sample_case && is.null(se) && !is.null(estimate) && !is.null(n)) {
+    se <- sqrt(1 / (n * estimate) + 1 / (n * (1 - estimate)))
+    approx_notes <- c(approx_notes, "SE estimated from proportion and sample size using Wald approximation on logit scale.")
   }
-  
-  # Infer SE for single sample if not provided (Wald approx on logit scale)
-  if (!two_sample_case) {
-    if (is.null(se)) {
-      if (!is.null(estimate) && !is.null(n)) {
-        se_logit <- sqrt(1 / (n * estimate) + 1 / (n * (1 - estimate)))
-        se <- se_logit
-      }
-    }
-  }
-  
-  # For two-sample, calculate difference of logits and SE of difference
+
+  # Two-sample logit difference
   if (two_sample_case) {
     p1 <- estimate[1]
     p2 <- estimate[2]
     n1 <- n[1]
     n2 <- n[2]
-    
-    # Logits
+
     l1 <- logit(p1)
     l2 <- logit(p2)
-    estimate_diff <- l1 - l2
-    
-    # SE of difference
+    estimate <- l1 - l2
     se1 <- sqrt(1 / (n1 * p1) + 1 / (n1 * (1 - p1)))
     se2 <- sqrt(1 / (n2 * p2) + 1 / (n2 * (1 - p2)))
-    se_diff <- sqrt(se1^2 + se2^2)
-    
-    # Override estimate and se with difference scale values
-    estimate <- estimate_diff
-    se <- se_diff
+    se <- sqrt(se1^2 + se2^2)
+
+    approx_notes <- c(approx_notes, "Two-sample log-odds ratio and SE computed from proportions and sample sizes.")
   }
-  
-  # If CI is provided but estimate or SE missing, infer on logit scale
+
+  # Back-calculate from CI
   if (!is.null(ci)) {
-    if (length(ci) != 2) stop("ci must be length 2: c(lower, upper)")
-    if (any(ci < 0 | ci > 1)) stop("CI bounds must be between 0 and 1")
-    ci_logit <- logit(ci)
-    if (is.null(estimate)) estimate <- mean(ci_logit)
-    if (is.null(se)) {
-      crit <- get_crit()
-      se <- abs(ci_logit[2] - ci_logit[1]) / (2 * crit)
+    if (length(ci) == 2 && all(ci >= 0 & ci <= 1)) {
+      ci_logit <- logit(ci)
+      if (is.null(estimate)) {
+        estimate <- mean(ci_logit)
+        approx_notes <- c(approx_notes, "Estimate approximated as midpoint of logit-transformed CI.")
+      }
+      if (is.null(se)) {
+        se <- abs(ci_logit[2] - ci_logit[1]) / (2 * get_crit())
+        approx_notes <- c(approx_notes, "SE approximated from width of logit-transformed CI.")
+      }
+    } else {
+      messages <- c(messages, "CI must be length 2 and within [0, 1]. Ignoring CI.")
     }
   }
-  
-  # Calculate test statistic (z)
+
+  # Statistic from estimate & SE
   if (!is.null(estimate) && !is.null(se)) {
     statistic <- estimate / se
   } else if (!is.null(p) && !is.null(estimate)) {
     crit_val <- if (one_sided) qnorm(1 - p) else qnorm(1 - p / 2)
     statistic <- sign(estimate) * crit_val
     se <- estimate / statistic
+    approx_notes <- c(approx_notes, "SE approximated from estimate and p-value.")
   } else {
     statistic <- NA
   }
-  
-  # Calculate p-value if missing
+
+  # Compute p-value if missing
   if (is.null(p) && !is.na(statistic)) {
-    if (one_sided) {
-      p <- 1 - pnorm(statistic)
-    } else {
-      p <- 2 * (1 - pnorm(abs(statistic)))
-    }
+    p <- if (one_sided) 1 - pnorm(statistic) else 2 * (1 - pnorm(abs(statistic)))
   }
-  
+
   crit <- get_crit()
-  
-  # Calculate confidence interval
-  if (interval_type == "wald") {
-    # Wald CI on logit scale, then back-transform
-    ci_lower <- inv_logit(estimate - crit * se)
-    ci_upper <- inv_logit(estimate + crit * se)
-  } else if (interval_type == "exact") {
-    # Exact Clopper-Pearson for single proportion only
+
+  # Compute CI
+  if (interval_type == "wald" && !is.null(estimate) && !is.null(se)) {
     if (two_sample_case) {
-      stop("Exact intervals not supported for two-sample difference case.")
+      ci_lower <- exp(estimate - crit * se)
+      ci_upper <- exp(estimate + crit * se)
+      estimate_exp <- exp(estimate)
+    } else {
+      ci_lower <- inv_logit(estimate - crit * se)
+      ci_upper <- inv_logit(estimate + crit * se)
+      estimate_exp <- inv_logit(estimate)
     }
-    if (is.null(x) || is.null(n)) {
-      stop("Exact interval requires counts 'x' and sample size 'n'.")
+  } else if (interval_type == "exact" && !two_sample_case) {
+    if (!is.null(x) && !is.null(n)) {
+      bounds <- exact_ci(x, n, conf.level = ifelse(one_sided, 0.90, 0.95))
+      ci_lower <- bounds[1]
+      ci_upper <- bounds[2]
+      estimate_exp <- estimate
+      approx_notes <- c(approx_notes, "Exact CI calculated using Clopper-Pearson method.")
+    } else {
+      messages <- c(messages, "Exact interval requested but x or n missing. CI not calculated.")
+      ci_lower <- ci_upper <- NA
+      estimate_exp <- if (!is.null(estimate)) inv_logit(estimate) else NA
     }
-    ci_bounds <- exact_ci(x, n, conf.level = ifelse(one_sided, 0.90, 0.95))
-    ci_lower <- ci_bounds[1]
-    ci_upper <- ci_bounds[2]
-  }
-  
-  # For two-sample difference, back-transform difference to odds ratio scale
-  if (two_sample_case) {
-    estimate_exp <- exp(estimate)
-    ci_lower <- exp(estimate - crit * se)
-    ci_upper <- exp(estimate + crit * se)
   } else {
-    estimate_exp <- inv_logit(estimate)
+    ci_lower <- ci_upper <- NA
+    estimate_exp <- if (!is.null(estimate)) inv_logit(estimate) else NA
   }
-  
-  # Round outputs and prepare result vector
+
+  # Compile result
   if (two_sample_case) {
     result <- c(
       log_odds_ratio = round(estimate, sig_digits),
@@ -197,9 +191,13 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
       p = round(p, sig_digits)
     )
   }
-  
+
   # Rename p for sidedness
-  names(result)[names(result) == "p"] <- ifelse(one_sided, "p_one", "p")
-  
+  names(result)[names(result) == "p"] <- if (one_sided) "p_one" else "p"
+
+  # Print notes and messages
+  if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
+  if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n")
+
   return(result)
 }

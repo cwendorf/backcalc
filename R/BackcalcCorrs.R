@@ -1,56 +1,120 @@
+#' Backcalc Missing Inferential Statistics for Correlations
+#'
+#' \code{backcalc_corrs()} reconstructs inferential statistics for correlation coefficients
+#' using Fisher's z-transform. It supports reconstructing standard errors, confidence intervals,
+#' p-values, and test statistics partial or varied combinations of summary and inferential statistics.
+#'
+#' @param r Numeric. Correlation coefficient. Can be a single value or a vector of length 2 (for group comparisons).
+#' @param se Numeric. Standard error of the Fisher z-transformed correlation.
+#' @param n Numeric. Sample size. For two-sample cases, provide a vector of length 2.
+#' @param df Numeric. Degrees of freedom (optional). If not provided, will be inferred from \code{n}.
+#' @param p Numeric. p-value (optional). If not provided, it will be inferred.
+#' @param ci Numeric vector of length 2. Confidence interval for the correlation (on raw scale, not Fisher z).
+#' @param one_sided Logical. Whether the test is one-sided (default is FALSE).
+#' @param sig_digits Integer. Number of significant digits for rounding results (default = 3).
+#'
+#' @return A named numeric vector with the following elements:
+#' \describe{
+#'   \item{r}{Estimated correlation or difference in correlations.}
+#'   \item{se}{Standard error of the Fisher z-transformed correlation.}
+#'   \item{df}{Degrees of freedom (if available or inferred).}
+#'   \item{ci_ll}{Lower bound of the confidence interval (on correlation scale).}
+#'   \item{ci_ul}{Upper bound of the confidence interval (on correlation scale).}
+#'   \item{t or z}{Test statistic (depending on whether df is available).}
+#'   \item{p or p-one}{Two-sided or one-sided p-value.}
+#' }
+#'
+#' @examples
+#' # One-sample: r + SE + n (df inferred)
+#' backcalc_corrs(r = 0.45, se = 0.1, n = 25, sig_digits = 3)
+#' # One-sample: r + p-value + df provided (t-test)
+#' backcalc_corrs(r = 0.52, p = 0.02, df = 18, sig_digits = 3)
+#' # One-sample: r + confidence interval + df
+#' backcalc_corrs(r = 0.35, ci = c(0.10, 0.55), df = 20, sig_digits = 3)
+#' # Two-sample: Provide two rs, equal n, infer difference & df
+#' backcalc_corrs(r = c(0.60, 0.40), n = c(30, 30), sig_digits = 3)
+#' # Two-sample: Provide two rs with unequal ns, infer df
+#' backcalc_corrs(r = c(0.70, 0.50), n = c(40, 25), sig_digits = 3)
+#' # Two-sample: r difference + p-value + df (t-test)
+#' backcalc_corrs(r = 0.18, p = 0.03, df = 45, sig_digits = 3)
+#'
+#' @export
 backcalc_corrs <- function(r = NULL, se = NULL, n = NULL, df = NULL,
                            p = NULL, ci = NULL, one_sided = FALSE, sig_digits = 3) {
-  if (is.null(r)) stop("Correlation coefficient (r) must be provided.")
-  if (any(abs(r) > 1)) stop("Correlation coefficients must be between -1 and 1.")
+
+  approx_notes <- character(0)
+  messages <- character(0)
+
+  # Initial checks
+  if (is.null(r)) {
+    messages <- c(messages, "Correlation coefficient (r) must be provided.")
+    return(setNames(rep(NA, 7), c("r", "se", "df", "ci_ll", "ci_ul", "statistic", "p")))
+  }
+
+  if (any(abs(r) > 1, na.rm = TRUE)) {
+    messages <- c(messages, "Correlation coefficients must be between -1 and 1.")
+    return(setNames(rep(NA, 7), c("r", "se", "df", "ci_ll", "ci_ul", "statistic", "p")))
+  }
 
   estimate <- r
 
-  # Handle two-sample case
+  # Two-sample case
   if (length(estimate) == 2) {
-    if (is.null(n) || length(n) != 2) stop("For comparing two correlations, supply sample sizes for both groups.")
+    if (is.null(n) || length(n) != 2) {
+      messages <- c(messages, "Two-sample comparison requires sample sizes for both groups.")
+      return(setNames(rep(NA, 7), c("r", "se", "df", "ci_ll", "ci_ul", "statistic", "p")))
+    }
+
     z1 <- atanh(estimate[1])
     z2 <- atanh(estimate[2])
     estimate <- z1 - z2
     se <- sqrt(1 / (n[1] - 3) + 1 / (n[2] - 3))
-    df <- min(n) - 3  # Conservative estimate
+    df <- min(n) - 3
+    approx_notes <- c(approx_notes, "Estimate calculated as Fisher z-difference of two correlations.", 
+                      "SE derived from z difference formula. df conservatively approximated as min(n) - 3.")
   } else {
     # One-sample case
     if (is.null(se)) {
       if (!is.null(n)) {
         se <- 1 / sqrt(n - 3)
         df <- if (is.null(df)) n - 2 else df
+        approx_notes <- c(approx_notes, "SE approximated using 1 / sqrt(n - 3).", "df approximated as n - 2.")
       } else if (!is.null(ci)) {
-        if (length(ci) != 2) stop("Confidence interval must be a numeric vector of length 2.")
-        z_ci <- atanh(ci)
-        z_r <- atanh(estimate)
-        crit <- if (is.null(df)) qnorm(1 - 0.05 / (if (one_sided) 1 else 2)) else qt(1 - 0.05 / (if (one_sided) 1 else 2), df)
-        se <- (max(z_ci) - min(z_ci)) / (2 * crit)
-      } else if (!is.null(p) && !is.null(df)) {
-        # Infer se from p-value and df
-        stat <- if (one_sided) {
-          qt(1 - p, df)
+        if (length(ci) == 2 && all(abs(ci) < 1)) {
+          z_ci <- atanh(ci)
+          z_r <- atanh(r)
+          crit <- if (!is.null(df)) qt(1 - 0.05 / ifelse(one_sided, 1, 2), df)
+                  else qnorm(1 - 0.05 / ifelse(one_sided, 1, 2))
+          se <- (diff(range(z_ci))) / (2 * crit)
+          approx_notes <- c(approx_notes, "SE approximated from CI in Fisher z scale.")
         } else {
-          qt(1 - p / 2, df)
+          messages <- c(messages, "CI must be a numeric vector of length 2 with values between -1 and 1.")
+          return(setNames(rep(NA, 7), c("r", "se", "df", "ci_ll", "ci_ul", "statistic", "p")))
         }
+      } else if (!is.null(p) && !is.null(df)) {
+        stat <- if (one_sided) qt(1 - p, df) else qt(1 - p / 2, df)
         estimate <- atanh(r)
         se <- estimate / stat
+        approx_notes <- c(approx_notes, "SE approximated from p-value and df.")
       } else {
-        stop("Insufficient information: provide se, n, ci, or p with df.")
+        messages <- c(messages, "Insufficient information: provide se, n, ci, or p with df.")
+        return(setNames(rep(NA, 7), c("r", "se", "df", "ci_ll", "ci_ul", "statistic", "p")))
       }
     } else {
       if (is.null(df) && !is.null(n)) {
         df <- n - 2
+        approx_notes <- c(approx_notes, "df approximated as n - 2.")
       }
     }
 
-    estimate <- atanh(r)  # Convert to Fisher z
+    estimate <- atanh(r)
   }
 
-  # Compute test statistic
+  # Test statistic and type
   stat <- estimate / se
   stat_type <- if (!is.null(df)) "t" else "z"
 
-  # Compute p-value if missing
+  # p-value
   if (is.null(p)) {
     if (stat_type == "t") {
       p <- if (one_sided) 1 - pt(stat, df) else 2 * (1 - pt(abs(stat), df))
@@ -59,15 +123,16 @@ backcalc_corrs <- function(r = NULL, se = NULL, n = NULL, df = NULL,
     }
   }
 
-  # Compute confidence interval in raw correlation scale
-  crit_val <- if (!is.null(df)) qt(1 - 0.05 / (if (one_sided) 1 else 2), df) else qnorm(1 - 0.05 / (if (one_sided) 1 else 2))
-  ci_z <- c(estimate - crit_val * se, estimate + crit_val * se)
+  # Confidence interval (in Fisher z scale)
+  crit <- if (!is.null(df)) qt(1 - 0.05 / ifelse(one_sided, 1, 2), df)
+          else qnorm(1 - 0.05 / ifelse(one_sided, 1, 2))
+  ci_z <- estimate + c(-1, 1) * crit * se
   ci_r <- tanh(ci_z)
 
-  # Convert estimate back to r scale
+  # Final r (if two-sample, back-transform)
   final_r <- if (length(r) == 2) tanh(estimate) else r
 
-  # Assemble results
+  # Result
   result <- c(
     r = round(final_r, sig_digits),
     se = round(se, sig_digits),
@@ -78,8 +143,12 @@ backcalc_corrs <- function(r = NULL, se = NULL, n = NULL, df = NULL,
     p_value = round(p, sig_digits)
   )
 
-  names(result)[which(names(result) == "statistic")] <- stat_type
-  names(result)[which(names(result) == "p_value")] <- ifelse(one_sided, "p-one", "p")
+  names(result)[names(result) == "statistic"] <- stat_type
+  names(result)[names(result) == "p_value"] <- if (one_sided) "p-one" else "p"
+
+  # Output user messages and notes
+  if (length(messages)) cat(paste0(messages, collapse = "\n"), "\n")
+  if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n")
 
   return(result)
 }

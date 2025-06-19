@@ -45,8 +45,12 @@
 #'
 #' @export
 backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
-                        p = NULL, ci = NULL, paired = FALSE, one_sided = FALSE, sig_digits = 3) {
+                           p = NULL, ci = NULL, paired = FALSE, one_sided = FALSE,
+                           sig_digits = 3) {
   estimate <- m
+  messages <- character(0)
+  approx_notes <- character(0)  # collect notes about approximations
+
   get_crit <- function(df = NULL) {
     alpha <- 0.05
     if (one_sided) {
@@ -61,113 +65,112 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
     estimate <- estimate[1] - estimate[2]
   }
 
-  # Check input lengths for sd and n
+  # Check input lengths
   len_sd <- ifelse(is.null(sd), 0, length(sd))
   len_n <- ifelse(is.null(n), 0, length(n))
 
-  # --- Handle paired samples ---
+  # Handle paired
   if (paired) {
     if (is.null(df) && !is.null(n)) {
       df <- n - 1
+      approx_notes <- c(approx_notes, "Degrees of freedom approximated as n - 1 for paired design.")
     }
     if (is.null(df)) {
-      warning("Paired = TRUE but df and n not provided: using normal approximation.")
+      approx_notes <- c(approx_notes, "Normal approximation used due to missing df in paired design.")
     }
   }
 
-  # --- Handle two-sample case ---
+  # Two-sample case
   two_sample_case <- (len_sd == 2 && len_n == 2 && !paired)
-
   if (two_sample_case) {
-    # Calculate SE and df for two independent samples
-
-    # Variances
     var1 <- sd[1]^2
     var2 <- sd[2]^2
     n1 <- n[1]
     n2 <- n[2]
-
-    # Equal n and sd? Use pooled variance, else Welch correction
     if (var1 == var2 && n1 == n2) {
-      # Pooled SD and SE
       pooled_var <- ((n1 - 1) * var1 + (n2 - 1) * var2) / (n1 + n2 - 2)
       se <- sqrt(pooled_var * (1 / n1 + 1 / n2))
       if (is.null(df)) df <- n1 + n2 - 2
     } else {
-      # Welch's SE
       se <- sqrt(var1 / n1 + var2 / n2)
       if (is.null(df)) {
         numerator <- (var1 / n1 + var2 / n2)^2
         denominator <- ((var1 / n1)^2) / (n1 - 1) + ((var2 / n2)^2) / (n2 - 1)
         df <- numerator / denominator
+        approx_notes <- c(approx_notes, "Welch-Satterthwaite approximation used for df.")
       }
     }
   }
 
-  # --- Single sample case: infer SE from sd and n if needed ---
+  # Single sample: infer SE
   if (!two_sample_case && is.null(se) && !is.null(sd) && !is.null(n)) {
     if (length(sd) != length(n) && length(sd) != 1 && length(n) != 1) {
-      stop("Lengths of sd and n must be equal or one of them must be length 1")
+      messages <- c(messages, "Length mismatch: sd and n must have equal length or one of them must be length 1.")
+    } else {
+      se <- sd / sqrt(n)
+      approx_notes <- c(approx_notes, "SE approximated from sd and n.")
     }
-    se <- sd / sqrt(n)
   }
 
-  # --- Infer estimate and SE from CI if needed ---
+  # Infer from CI
   if (!is.null(ci)) {
-    if (length(ci) != 2) stop("ci must be length 2: c(lower, upper)")
-    if (is.null(estimate)) estimate <- mean(ci)
-    if (is.null(se)) {
-      crit <- get_crit(df)
-      se <- abs(ci[2] - ci[1]) / (2 * crit)
+    if (length(ci) != 2) {
+      messages <- c(messages, "Confidence interval must be length 2.")
+    } else {
+      if (is.null(estimate)) estimate <- mean(ci)
+      if (is.null(se)) {
+        crit <- get_crit(df)
+        se <- abs(ci[2] - ci[1]) / (2 * crit)
+        approx_notes <- c(approx_notes, "SE approximated from CI width.")
+      }
     }
   }
 
-  # *** Check for insufficient input ***
+  # Check minimum info
   if (is.null(estimate) || (is.null(se) && is.null(p) && is.null(ci))) {
-    stop("Insufficient input: must provide estimate plus either SE, p-value, or CI for inference.")
+    messages <- c(messages, "Insufficient input: Provide estimate and at least one of SE, p-value, or CI.")
+    result <- c(m = NA, se = NA, df = NA, ci_ll = NA, ci_ul = NA,
+                statistic = NA, p = NA)
+    names(result)[names(result) == "p"] <- ifelse(one_sided, "p-one", "p")
+    names(result)[names(result) == "statistic"] <- if (!is.null(df)) "t" else "z"
+    if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
+    return(result)
   }
 
-  # Determine statistic type: t if df present, else z
+  # Test type
   statistic_type <- if (!is.null(df)) "t" else "z"
 
-  # Calculate test statistic (z or t)
+  # Compute test statistic
   if (!is.null(estimate) && !is.null(se)) {
     statistic <- estimate / se
   } else if (!is.null(p) && !is.null(estimate)) {
-    if (one_sided) {
-      crit_val <- if (!is.null(df)) qt(1 - p, df) else qnorm(1 - p)
+    crit_val <- if (one_sided) {
+      if (!is.null(df)) qt(1 - p, df) else qnorm(1 - p)
     } else {
-      crit_val <- if (!is.null(df)) qt(1 - p / 2, df) else qnorm(1 - p / 2)
+      if (!is.null(df)) qt(1 - p / 2, df) else qnorm(1 - p / 2)
     }
     statistic <- sign(estimate) * crit_val
     se <- estimate / statistic
+    approx_notes <- c(approx_notes, "Test statistic and SE approximated from p-value and estimate.")
   } else {
     statistic <- NA
   }
 
-  # Calculate p-value if missing
+  # Compute p-value if needed
   if (is.null(p) && !is.na(statistic)) {
     if (statistic_type == "t") {
-      if (one_sided) {
-        p <- 1 - pt(statistic, df)
-      } else {
-        p <- 2 * (1 - pt(abs(statistic), df))
-      }
+      p <- if (one_sided) 1 - pt(statistic, df) else 2 * (1 - pt(abs(statistic), df))
     } else {
-      if (one_sided) {
-        p <- 1 - pnorm(statistic)
-      } else {
-        p <- 2 * (1 - pnorm(abs(statistic)))
-      }
+      p <- if (one_sided) 1 - pnorm(statistic) else 2 * (1 - pnorm(abs(statistic)))
     }
   }
 
-  # Calculate confidence interval
+  # Compute CI
   crit <- get_crit(df)
   ci_lower <- estimate - crit * se
   ci_upper <- estimate + crit * se
 
-  # Round outputs
+  # Round and return
   result <- c(
     m = round(estimate, sig_digits),
     se = round(se, sig_digits),
@@ -178,10 +181,12 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
     p = round(p, sig_digits)
   )
 
-  # Rename p to indicate sidedness
   names(result)[names(result) == "p"] <- ifelse(one_sided, "p-one", "p")
-  # statistic name remains just "t" or "z"
   names(result)[names(result) == "statistic"] <- statistic_type
+
+  # Show messages and approximation notes
+  if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
+  if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n")
 
   return(result)
 }
