@@ -68,3 +68,19 @@ backcalc_coeffs(b = 2.0, se = 0.5, sd_x = 3, sd_y = 6)
 # 10. Standardized beta with confidence interval only; infer SE and stats, use 99% CI
 backcalc_coeffs(std_beta = 0.4, ci = c(0.1, 0.7), conf.level = 0.99)
 ```
+
+### Cases That Do Not Work
+
+```{r}
+# 11. No coefficient or standardized beta provided
+backcalc_coeffs(se = 0.1)
+
+# 12. Only p-value provided, no coefficient or SE
+backcalc_coeffs(p = 0.05)
+
+# 13. Only df and se provided — missing estimate (b or std_beta), no CI or p-value
+backcalc_coeffs(se = 0.1, df = 30)
+
+# 14. Standardized beta provided without SE or SDs to infer SE
+backcalc_coeffs(std_beta = 0.4)
+```

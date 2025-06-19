@@ -1,7 +1,12 @@
+backcalc Coeffs Examples
+================
+
 ## backcalc Coeffs Examples
 
 - [Unstandardized Beta Cases](#unstandardized-beta-cases)
-- [Standardized Beta and Conversion Cases](#standardized-beta-and-conversion-cases)
+- [Standardized Beta and Conversion
+  Cases](#standardized-beta-and-conversion-cases)
+- [Cases That Do Not Work](#cases-that-do-not-work)
 
 ------------------------------------------------------------------------
 
@@ -28,6 +33,10 @@ backcalc_coeffs(b = 0.15, se = 0.02, sig_digits = 5)
 backcalc_coeffs(b = 1.2, p = 0.03, df = 28)
 ```
 
+    Note(s):
+     Test statistic approximated from p-value and estimate.
+    SE approximated from estimate and reconstructed statistic. 
+
      coeff     se     df  ci_ll  ci_ul      t      p 
      1.200  0.525 28.000  0.125  2.275  2.286  0.030 
 
@@ -35,6 +44,9 @@ backcalc_coeffs(b = 1.2, p = 0.03, df = 28)
 # 4. Estimate and confidence interval given; infer SE and t-statistic with df
 backcalc_coeffs(b = 0.8, ci = c(0.2, 1.4), df = 45, sig_digits = 4)
 ```
+
+    Note(s):
+     SE approximated from CI width. 
 
       coeff      se      df   ci_ll   ci_ul       t       p 
      0.8000  0.2979 45.0000  0.2000  1.4000  2.6855  0.0101 
@@ -44,6 +56,10 @@ backcalc_coeffs(b = 0.8, ci = c(0.2, 1.4), df = 45, sig_digits = 4)
 backcalc_coeffs(b = 1.1, se = 0.3, sd_x = 2.5, sd_y = 5, p = 0.04, df = 30, one_sided = TRUE, sig_digits = 4)
 ```
 
+    Note(s):
+     Standardized beta approximated from unstandardized beta and standard deviations.
+    SE of standardized beta approximated from unstandardized SE and SDs. 
+
       coeff      se      df   ci_ll   ci_ul       t   p_one 
      0.5500  0.1500 30.0000  0.2954  0.8046  3.6667  0.0400 
 
@@ -52,6 +68,10 @@ backcalc_coeffs(b = 1.1, se = 0.3, sd_x = 2.5, sd_y = 5, p = 0.04, df = 30, one_
 backcalc_coeffs(b = -0.7, p = 0.01, df = 20, one_sided = TRUE, conf.level = 0.90)
 ```
 
+    Note(s):
+     Test statistic approximated from p-value and estimate.
+    SE approximated from estimate and reconstructed statistic. 
+
      coeff     se     df  ci_ll  ci_ul      t  p_one 
     -0.700  0.277 20.000 -1.067 -0.333 -2.528  0.010 
 
@@ -59,6 +79,10 @@ backcalc_coeffs(b = -0.7, p = 0.01, df = 20, one_sided = TRUE, conf.level = 0.90
 # 7. Minimal input: coefficient and p-value with df; change CI level and rounding
 backcalc_coeffs(b = 1.5, p = 0.02, df = 25, conf.level = 0.90, sig_digits = 4)
 ```
+
+    Note(s):
+     Test statistic approximated from p-value and estimate.
+    SE approximated from estimate and reconstructed statistic. 
 
       coeff      se      df   ci_ll   ci_ul       t       p 
      1.5000  0.6036 25.0000  0.4690  2.5310  2.4851  0.0200 
@@ -78,6 +102,10 @@ backcalc_coeffs(std_beta = 0.25, se_std = 0.04, conf.level = 0.99)
 backcalc_coeffs(b = 2.0, se = 0.5, sd_x = 3, sd_y = 6)
 ```
 
+    Note(s):
+     Standardized beta approximated from unstandardized beta and standard deviations.
+    SE of standardized beta approximated from unstandardized SE and SDs. 
+
     coeff    se    df ci_ll ci_ul     z     p 
      1.00  0.25    NA  0.51  1.49  4.00  0.00 
 
@@ -86,5 +114,38 @@ backcalc_coeffs(b = 2.0, se = 0.5, sd_x = 3, sd_y = 6)
 backcalc_coeffs(std_beta = 0.4, ci = c(0.1, 0.7), conf.level = 0.99)
 ```
 
+    Note(s):
+     SE approximated from CI width. 
+
     coeff    se    df ci_ll ci_ul     z     p 
     0.400 0.116    NA 0.100 0.700 3.434 0.001 
+
+### Cases That Do Not Work
+
+``` r
+# 11. No coefficient or standardized beta provided
+backcalc_coeffs(se = 0.1)
+```
+
+    Insufficient information: cannot estimate coefficient or SE, even approximately. 
+
+``` r
+# 12. Only p-value provided, no coefficient or SE
+backcalc_coeffs(p = 0.05)
+```
+
+    Insufficient information: cannot estimate coefficient or SE, even approximately. 
+
+``` r
+# 13. Only df and se provided — missing estimate (b or std_beta), no CI or p-value
+backcalc_coeffs(se = 0.1, df = 30)
+```
+
+    Insufficient information: cannot estimate coefficient or SE, even approximately. 
+
+``` r
+# 14. Standardized beta provided without SE or SDs to infer SE
+backcalc_coeffs(std_beta = 0.4)
+```
+
+    Insufficient information: cannot estimate coefficient or SE, even approximately. 
