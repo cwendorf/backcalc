@@ -1,4 +1,4 @@
-#' backcalc
+#' backcalc: Reconstruct Inferential Statistics from Partial Summary Data
 #'
 #' This package provides a set of functions to reconstruct key inferential statistics
 #' such as standard errors, confidence intervals, test statistics, and p-values
@@ -20,6 +20,5 @@
 #' inferential details from published results to enable accurate synthesis, reporting,
 #' or further analysis.
 #'
-#' @docType package
-#' @name backcalc
-NULL
+#' @keywords internal
+"_PACKAGE"

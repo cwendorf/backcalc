@@ -12,7 +12,8 @@ backcalc_ratios(
   p = NULL,
   ci = NULL,
   one_sided = FALSE,
-  sig_digits = 3
+  sig_digits = 3,
+  conf.level = 0.95
 )
 }
 \arguments{
@@ -32,6 +33,8 @@ If a vector of two values is given, inference is based on the difference in thei
 \item{one_sided}{Logical. Whether the test is one-sided (default is FALSE).}
 
 \item{sig_digits}{Integer. Number of significant digits to round results to (default = 3).}
+
+\item{conf.level}{Numeric. Confidence level for interval (default = 0.95).}
 }
 \value{
 A named numeric vector with the following components:
@@ -42,7 +45,7 @@ A named numeric vector with the following components:
 \item{ci_ll}{Lower limit of the confidence interval on the ratio scale.}
 \item{ci_ul}{Upper limit of the confidence interval on the ratio scale.}
 \item{z or t}{Test statistic (either z or t, depending on whether \code{df} is provided).}
-\item{p or p_one}{Two-sided or one-sided p-value (depending on \code{one_sided}).}
+\item{p or p-one}{Two-sided or one-sided p-value (depending on \code{one_sided}).}
 }
 }
 \description{
@@ -50,19 +53,4 @@ A named numeric vector with the following components:
 (e.g., odds ratios, risk ratios) using log-transformation internally. It supports
 reconstructing standard errors, confidence intervals, p-values, and test statistics
 from partial or varied combinations of summary and inferential statistics.
-}
-\examples{
-# One-sample: Ratio + SE only (z-test)
-backcalc_ratios(ratio = 1.5, se = 0.2, sig_digits = 3)
-# One-sample: Ratio + p-value + df provided (t-test)
-backcalc_ratios(ratio = 2.0, p = 0.01, df = 15, sig_digits = 3)
-# One-sample: Ratio + confidence interval + df
-backcalc_ratios(ratio = 1.7, ci = c(1.1, 2.5), df = 18, sig_digits = 3)
-# Two-sample: Provide two ratios, equal df, calculate difference (log scale)
-backcalc_ratios(ratio = c(2.2, 1.5), se = c(0.15, 0.10), df = 20, sig_digits = 3)
-# Two-sample: Two ratios with unequal dfs, approximate df (pooled)
-backcalc_ratios(ratio = c(2.5, 1.7), se = c(0.18, 0.12), df = c(18, 22), sig_digits = 3)
-# Two-sample: Ratio difference + confidence interval + df
-backcalc_ratios(ratio = 0.35, ci = c(0.10, 0.60), df = 38, sig_digits = 3)
-
 }

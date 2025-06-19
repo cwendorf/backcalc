@@ -13,7 +13,8 @@ backcalc_props(
   p = NULL,
   one_sided = FALSE,
   sig_digits = 3,
-  interval_type = c("wald", "exact")
+  interval_type = c("wald", "exact"),
+  test_statistic = c("z", "t")
 )
 }
 \arguments{
