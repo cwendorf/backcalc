@@ -123,7 +123,8 @@ backcalc_ratios <- function(ratio = NULL, se = NULL, n = NULL, df = NULL,
   names(result)[names(result) == "statistic"] <- statistic_type
   names(result)[names(result) == "p_value"] <- if (one_sided) "p-one" else "p"
 
-  if (length(approx_notes)) message("Note(s):\n", paste(approx_notes, collapse = "\n"))
+  # Show messages/notes
+  if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
 
   return(result)
 }

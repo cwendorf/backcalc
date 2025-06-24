@@ -208,7 +208,7 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
 
   # Show messages/notes
   if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
-  if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n")
+  if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
 
   return(out)
 }

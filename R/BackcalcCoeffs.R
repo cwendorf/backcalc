@@ -158,9 +158,9 @@ backcalc_coeffs <- function(b = NULL, se = NULL,
   p_name <- if (one_sided) "p_one" else "p"
   result <- c(result, setNames(round(p, sig_digits), p_name))
 
-  # Show notes
+  # Show messages/notes
   if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
-  if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n")
+  if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
 
   return(result)
 }

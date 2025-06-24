@@ -180,9 +180,9 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
   names(result)[names(result) == "p"] <- ifelse(one_sided, "p-one", "p")
   names(result)[names(result) == "statistic"] <- statistic_type
 
-  # Show messages and approximation notes
+  # Show messages/notes
   if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
-  if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n")
+  if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
 
   return(result)
 }

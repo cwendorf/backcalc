@@ -148,10 +148,9 @@ backcalc_corrs <- function(r = NULL, se = NULL, n = NULL, df = NULL,
   names(result)[names(result) == "statistic"] <- stat_type
   names(result)[names(result) == "p_value"] <- if (one_sided) "p-one" else "p"
 
-  # Print any approximation notes
-  if (length(approx_notes)) {
-    cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n")
-  }
+  # Show messages/notes
+  if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
+
 
   return(result)
 }
