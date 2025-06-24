@@ -8,7 +8,7 @@
 
 ### Overview
 
-**backcalc** is an R package that provides a set of functions to reconstruct key inferential statistics such as standard errors, confidence intervals, test statistics, and p-values from partial or incomplete summary information commonly reported in scientific literature. The functions support a variety of data types and designs, including single-sample, two-sample (independent or paired), one- and two-sided tests, and accommodate both z and t distributions.
+`backcalc` is an R package that provides a set of functions to reconstruct key inferential statistics such as standard errors, confidence intervals, test statistics, and p-values from partial or incomplete summary information commonly reported in scientific literature. The functions support a variety of data types and designs, including single-sample, two-sample (independent or paired), one- and two-sided tests, and accommodate both z and t distributions.
 
 Specifically, the package offers tailored functions for:
 - Means (`backcalc_means`)
