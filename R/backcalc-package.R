@@ -1,5 +1,9 @@
-#' backcalc: Reconstruct Inferential Statistics from Partial Summary Data
+#' backcalc: Reconstruct Missing Inferential Statistics
 #'
+#' Tools to reconstruct inferential statistics -- like standard errors, p-values, and confidence intervals -- 
+#' from incomplete summary data reported in scientific research.
+#' 
+#' @details
 #' This package provides a set of functions to reconstruct key inferential statistics
 #' such as standard errors, confidence intervals, test statistics, and p-values
 #' from partial or incomplete summary information commonly reported in scientific
@@ -20,5 +24,11 @@
 #' inferential details from published results to enable accurate synthesis, reporting,
 #' or further analysis.
 #'
-#' @keywords internal
+#' @author
+#' **Maintainer**: Craig Wendorf 
+#' \email{cwendorf@uwsp.edu}
+#'
+#' @docType package
+#' @name backcalc
+#' @aliases backcalc-package
 "_PACKAGE"
