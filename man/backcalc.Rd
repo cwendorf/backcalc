@@ -6,8 +6,9 @@
 \alias{backcalc-package}
 \title{backcalc: Reconstruct Missing Inferential Statistics}
 \description{
-Tools to reconstruct inferential statistics -- like standard errors, p-values, and confidence intervals --
-from incomplete summary data reported in scientific research.
+This package provides functions to reconstruct key inferential statistics such as standard errors,
+confidence intervals, test statistics, and p-values from partial or incomplete summary information
+commonly reported in scientific literature.
 }
 \details{
 This package provides a set of functions to reconstruct key inferential statistics
