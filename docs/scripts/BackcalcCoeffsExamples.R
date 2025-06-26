@@ -1,39 +1,10 @@
----
-title: "backcalc Coefficients Examples"
-output:
-  github_document:
-    preserve_yaml: FALSE
-vignette: >
-  %\VignetteIndexEntry{backcalc Coefficients Examples}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
+# backcalc 
+## Coefficients Examples
 
-```{r, include=FALSE}
-knitr::opts_chunk$set(comment = NA)
-devtools::source_gist("8e6e5dc401e3fc1042ef7a030f9d19c7", filename = "revised_toc.R")
-```
-
-```{r, include=FALSE}
-if (!require(backcalc)) {
-  if (!require(remotes)) install.packages("remotes")
-  remotes::install_github("cwendorf/backcalc")
-}
-library(backcalc)
-```
-
-## backcalc Coefficient Examples
-
-```{r toc, echo=FALSE}
-thisfile <- knitr::current_input()
-revised_toc(thisfile, base_level = 3, toc_depth = 4)
-```
-
----
+source("http://raw.githubusercontent.com/cwendorf/backcalc/main/source-backcalc.R")
 
 ### Unstandardized Beta Cases
 
-```{r}
 # 1. Basic z-test with coefficient and SE; default 95% CI and 3 digits
 backcalc_coeffs(b = 0.5, se = 0.1)
 
@@ -54,11 +25,9 @@ backcalc_coeffs(b = -0.7, p = 0.01, df = 20, one_sided = TRUE, conf.level = 0.90
 
 # 7. Minimal input: coefficient and p-value with df; change CI level and rounding
 backcalc_coeffs(b = 1.5, p = 0.02, df = 25, conf.level = 0.90, sig_digits = 4)
-```
 
 ### Standardized Beta and Conversion Cases
 
-```{r}
 # 8. Standardized beta and SE only; uses z-test by default
 backcalc_coeffs(std_beta = 0.25, se_std = 0.04, conf.level = 0.99)
 
@@ -67,11 +36,9 @@ backcalc_coeffs(b = 2.0, se = 0.5, sd_x = 3, sd_y = 6)
 
 # 10. Standardized beta with confidence interval only; infer SE and stats, use 99% CI
 backcalc_coeffs(std_beta = 0.4, ci = c(0.1, 0.7), conf.level = 0.99)
-```
 
 ### Cases That Do Not Work
 
-```{r}
 # 11. No coefficient or standardized beta provided
 backcalc_coeffs(se = 0.1)
 
@@ -83,4 +50,3 @@ backcalc_coeffs(se = 0.1, df = 30)
 
 # 14. Standardized beta provided without SE or SDs to infer SE
 backcalc_coeffs(std_beta = 0.4)
-```

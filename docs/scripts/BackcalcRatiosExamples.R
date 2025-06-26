@@ -1,39 +1,10 @@
----
-title: "backcalc Ratios Examples"
-output:
-  github_document:
-    preserve_yaml: FALSE
-vignette: >
-  %\VignetteIndexEntry{backcalc Ratios Examples}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
+# backcalc 
+## Ratios Examples
 
-```{r, include=FALSE}
-knitr::opts_chunk$set(comment = NA)
-devtools::source_gist("8e6e5dc401e3fc1042ef7a030f9d19c7", filename = "revised_toc.R")
-```
-
-```{r, include=FALSE}
-if (!require(backcalc)) {
-  if (!require(remotes)) install.packages("remotes")
-  remotes::install_github("cwendorf/backcalc")
-}
-library(backcalc)
-```
-
-## backcalc Ratios Examples
-
-```{r toc, echo=FALSE}
-thisfile <- knitr::current_input()
-revised_toc(thisfile, base_level = 3, toc_depth = 4)
-```
-
----
+source("http://raw.githubusercontent.com/cwendorf/backcalc/main/source-backcalc.R")
 
 ### One Sample Cases
 
-```{r}
 # 1. Ratio + SE only (z-test)
 backcalc_ratios(ratio = 1.5, se = 0.2, sig_digits = 3)
 
@@ -48,11 +19,9 @@ backcalc_ratios(ratio = 1.7, ci = c(1.1, 2.5), df = 18, sig_digits = 3)
 
 # 5. Ratio + SE + df
 backcalc_ratios(ratio = 1.4, se = 0.12, df = 20, sig_digits = 3)
-```
 
 ### Two Sample Cases
 
-```{r}
 # 6. Two-sample equal df
 backcalc_ratios(ratio = c(2.2, 1.5), se = c(0.15, 0.10), df = 20, sig_digits = 3)
 
@@ -67,11 +36,9 @@ backcalc_ratios(ratio = 0.35, ci = c(0.10, 0.60), df = 38, sig_digits = 3)
 
 # 10. Two-sample with different ratios and SEs, equal df
 backcalc_ratios(ratio = c(1.8, 1.2), se = c(0.14, 0.09), df = 24, sig_digits = 3)
-```
 
 ### Cases That Do Not Work
 
-```{r}
 # 11. Missing ratio entirely
 backcalc_ratios(se = 0.2)
 
@@ -83,4 +50,3 @@ backcalc_ratios(ratio = c(2.0, 1.5))
 
 # 14. Ratio + p-value provided, but no SE, CI, or df to infer SE or statistic
 backcalc_ratios(ratio = 1.8, p = 0.05)
-```

@@ -17,7 +17,7 @@ backcalc_means(ci = c(2.1, 4.9), sig_digits = 2)
 ```
 
     Note(s):
-     SE approximated from CI width. 
+    SE approximated from CI width.
 
         m    se    df ci_ll ci_ul     z     p 
      3.50  0.71    NA  2.10  4.90  4.90  0.00 
@@ -44,7 +44,7 @@ backcalc_means(m = 2.8, p = 0.023, df = 35, sig_digits = 4)
 ```
 
     Note(s):
-     Test statistic and SE approximated from p-value and estimate. 
+    Test statistic and SE approximated from p-value and estimate.
 
           m      se      df   ci_ll   ci_ul       t       p 
      2.8000  1.1775 35.0000  0.4096  5.1904  2.3780  0.0230 
@@ -55,7 +55,7 @@ backcalc_means(ci = c(4.5, 7.3), df = 15, sig_digits = 3)
 ```
 
     Note(s):
-     SE approximated from CI width. 
+    SE approximated from CI width.
 
          m     se     df  ci_ll  ci_ul      t      p 
      5.900  0.657 15.000  4.500  7.300  8.983  0.000 
@@ -68,7 +68,7 @@ backcalc_means(m = 1.5, se = 0.5, n = 15, paired = TRUE, sig_digits = 3)
 ```
 
     Note(s):
-     Degrees of freedom approximated as n - 1 for paired design. 
+    Degrees of freedom approximated as n - 1 for paired design.
 
          m     se     df  ci_ll  ci_ul      t      p 
      1.500  0.500 14.000  0.428  2.572  3.000  0.010 
@@ -79,8 +79,8 @@ backcalc_means(m = 1.2, p = 0.03, n = 12, paired = TRUE, one_sided = TRUE, sig_d
 ```
 
     Note(s):
-     Degrees of freedom approximated as n - 1 for paired design.
-    Test statistic and SE approximated from p-value and estimate. 
+    Degrees of freedom approximated as n - 1 for paired design.
+    Test statistic and SE approximated from p-value and estimate.
 
          m     se     df  ci_ll  ci_ul      t  p-one 
      1.200  0.572 11.000  0.172  2.228  2.096  0.030 
@@ -91,7 +91,7 @@ backcalc_means(m = 1.2, sd = c(10, 11), n = c(30, 30), sig_digits = 3)
 ```
 
     Note(s):
-     Welch-Satterthwaite approximation used for df. 
+    Welch-Satterthwaite approximation used for df.
 
          m     se     df  ci_ll  ci_ul      t      p 
      1.200  2.714 57.000 -4.234  6.634  0.442  0.660 
@@ -102,7 +102,7 @@ backcalc_means(m = 2.4, sd = c(5, 6), n = c(30, 40), sig_digits = 2)
 ```
 
     Note(s):
-     Welch-Satterthwaite approximation used for df. 
+    Welch-Satterthwaite approximation used for df.
 
         m    se    df ci_ll ci_ul     t     p 
      2.40  1.32 67.00 -0.23  5.03  1.82  0.07 

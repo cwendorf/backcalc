@@ -1,39 +1,10 @@
----
-title: "backcalc Proportions Examples"
-output:
-  github_document:
-    preserve_yaml: FALSE
-vignette: >
-  %\VignetteIndexEntry{backcalc Proportions Examples}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
+# backcalc 
+## Proportions Examples
 
-```{r, include=FALSE}
-knitr::opts_chunk$set(comment = NA)
-devtools::source_gist("8e6e5dc401e3fc1042ef7a030f9d19c7", filename = "revised_toc.R")
-```
-
-```{r, include=FALSE}
-if (!require(backcalc)) {
-  if (!require(remotes)) install.packages("remotes")
-  remotes::install_github("cwendorf/backcalc")
-}
-library(backcalc)
-```
-
-## backcalc Proportions Examples
-
-```{r toc, echo=FALSE}
-thisfile <- knitr::current_input()
-revised_toc(thisfile, base_level = 3, toc_depth = 4)
-```
-
----
+source("http://raw.githubusercontent.com/cwendorf/backcalc/main/source-backcalc.R")
 
 ### One Sample Cases
 
-```{r}
 # 1. Basic single-sample (Wald)
 backcalc_props(prop = 0.45, n = 100)
 
@@ -54,11 +25,9 @@ backcalc_props(x = 72, n = 120, one_sided = TRUE, interval_type = "exact", sig_d
 
 # 7. Exact interval with explicit x
 backcalc_props(x = 20, n = 50, interval_type = "exact", sig_digits = 3)
-```
 
 ### Two Sample Cases
 
-```{r}
 # 8. Two-sample proportions, Wald intervals
 backcalc_props(prop = c(0.55, 0.40), n = c(150, 130))
 
@@ -67,11 +36,9 @@ backcalc_props(prop = c(0.25, 0.35), n = c(100, 110), p = 0.04, sig_digits = 4)
 
 # 10. Two-sample proportions with estimates only
 backcalc_props(prop = c(0.65, 0.58), n = c(140, 135))
-```
 
 ### Cases That Do Not Work
 
-```{r}
 # 11. No inputs at all - nothing to compute
 backcalc_props()
 
@@ -83,4 +50,3 @@ backcalc_props(prop = c(0.3, 0.4))
 
 # 14. Exact interval requested without providing counts 'x' and sample size 'n'
 backcalc_props(prop = 0.6, interval_type = "exact")
-```

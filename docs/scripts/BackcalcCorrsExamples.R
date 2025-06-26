@@ -1,39 +1,10 @@
----
-title: "backcalc Correlations Examples"
-output:
-  github_document:
-    preserve_yaml: FALSE
-vignette: >
-  %\VignetteIndexEntry{backcalc Correlations Examples}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
+# backcalc 
+## Correlations Examples
 
-```{r, include=FALSE}
-knitr::opts_chunk$set(comment = NA)
-devtools::source_gist("8e6e5dc401e3fc1042ef7a030f9d19c7", filename = "revised_toc.R")
-```
-
-```{r, include=FALSE}
-if (!require(backcalc)) {
-  if (!require(remotes)) install.packages("remotes")
-  remotes::install_github("cwendorf/backcalc")
-}
-library(backcalc)
-```
-
-## backcalc Correlations Examples
-
-```{r toc, echo=FALSE}
-thisfile <- knitr::current_input()
-revised_toc(thisfile, base_level = 3, toc_depth = 4)
-```
-
----
+source("http://raw.githubusercontent.com/cwendorf/backcalc/main/source-backcalc.R")
 
 ### One Sample Cases
 
-```{r}
 # 1. r + SE + n (df inferred)
 backcalc_corrs(r = 0.45, se = 0.1, n = 25, sig_digits = 3)
 
@@ -48,11 +19,9 @@ backcalc_corrs(r = 0.3, se = 0.08, sig_digits = 3)
 
 # 5. r + p-value + n (df inferred)
 backcalc_corrs(r = 0.42, p = 0.04, n = 22, sig_digits = 3)
-```
 
 ### Two Sample Cases
 
-```{r}
 # 6. Two rs, equal n
 backcalc_corrs(r = c(0.60, 0.40), n = c(30, 30), sig_digits = 3)
 
@@ -67,11 +36,9 @@ backcalc_corrs(r = 0.18, p = 0.03, df = 45, sig_digits = 3)
 
 # 10. r difference + CI + df
 backcalc_corrs(r = 0.20, ci = c(0.05, 0.35), df = 40, sig_digits = 3)
-```
 
 ### Cases That Do Not Work
 
-```{r}
 # 11. No correlation coefficient (r) provided
 backcalc_corrs(se = 0.1, n = 30)
 
@@ -83,4 +50,3 @@ backcalc_corrs(r = c(0.5, 0.3))
 
 # 14. One correlation but no SE, no sample size, and no CI provided
 backcalc_corrs(r = 0.4)
-```

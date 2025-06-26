@@ -3,13 +3,13 @@ backcalc Ratios Examples
 
 ## backcalc Ratios Examples
 
-- [One Sample Ratio Cases](#one-sample-ratio-cases)
-- [Two Sample Ratio Cases](#two-sample-ratio-cases)
+- [One Sample Cases](#one-sample-cases)
+- [Two Sample Cases](#two-sample-cases)
 - [Cases That Do Not Work](#cases-that-do-not-work)
 
 ------------------------------------------------------------------------
 
-### One Sample Ratio Cases
+### One Sample Cases
 
 ``` r
 # 1. Ratio + SE only (z-test)
@@ -61,7 +61,7 @@ backcalc_ratios(ratio = 1.4, se = 0.12, df = 20, sig_digits = 3)
      ratio     se     df  ci_ll  ci_ul      t      p 
      1.400  0.120 20.000  1.090  1.798  2.804  0.011 
 
-### Two Sample Ratio Cases
+### Two Sample Cases
 
 ``` r
 # 6. Two-sample equal df
