@@ -5,25 +5,12 @@
 #' commonly reported in scientific literature.
 #' 
 #' @details
-#' This package provides a set of functions to reconstruct key inferential statistics
-#' such as standard errors, confidence intervals, test statistics, and p-values
-#' from partial or incomplete summary information commonly reported in scientific
-#' literature. The functions support a variety of data types and designs, including
-#' single-sample, two-sample (independent or paired), one- and two-sided tests,
-#' and accommodate both z and t distributions.
-#'
-#' Specifically, the package offers tailored functions for:
-#' \itemize{
-#'   \item Means (\code{backcalc_means})
-#'   \item Regression coefficients (\code{backcalc_coeffs})
-#'   \item Correlations (\code{backcalc_corrs})
-#'   \item Ratio measures (\code{backcalc_ratios})
-#'   \item Proportions (\code{backcalc_props})
-#' }
-#'
-#' These tools facilitate meta-analysts, researchers, and students in recovering missing
-#' inferential details from published results to enable accurate synthesis, reporting,
-#' or further analysis.
+#' `backcalc` is an R package designed to help researchers and students reconstruct key inferential statistics —- 
+#' such as standard errors, confidence intervals, test statistics, and p-values —- 
+#' from partial or incomplete summary data commonly found in scientific literature. 
+#' Supporting various data types and designs, including single- and two-sample (independent or paired) tests 
+#' with z or t distributions, it offers tailored functions for 
+#' means, correlations, regression coefficients, proportions, and ratio measures. 
 #'
 #' @author
 #' **Maintainer**: Craig Wendorf 
