@@ -1,7 +1,4 @@
-backcalc Means Examples
-================
-
-## backcalc Means Examples
+## Means Examples
 
 - [One Sample Cases](#one-sample-cases)
 - [Paired and Two Sample Cases](#paired-and-two-sample-cases)

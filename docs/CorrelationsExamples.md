@@ -1,7 +1,4 @@
-backcalc Correlations Examples
-================
-
-## backcalc Correlations Examples
+## Correlations Examples
 
 - [One Sample Cases](#one-sample-cases)
 - [Two Sample Cases](#two-sample-cases)

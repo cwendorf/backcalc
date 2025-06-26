@@ -1,10 +1,10 @@
 ---
-title: "backcalc Correlations Examples"
+title: "Correlations Examples"
 output:
   github_document:
     preserve_yaml: FALSE
 vignette: >
-  %\VignetteIndexEntry{backcalc Correlations Examples}
+  %\VignetteIndexEntry{Correlations Examples}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -22,7 +22,7 @@ if (!require(backcalc)) {
 library(backcalc)
 ```
 
-## backcalc Correlations Examples
+## Correlations Examples
 
 ```{r toc, echo=FALSE}
 thisfile <- knitr::current_input()

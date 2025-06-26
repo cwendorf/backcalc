@@ -1,10 +1,10 @@
 ---
-title: "backcalc Coefficients Examples"
+title: "Coefficients Examples"
 output:
   github_document:
     preserve_yaml: FALSE
 vignette: >
-  %\VignetteIndexEntry{backcalc Coefficients Examples}
+  %\VignetteIndexEntry{Coefficients Examples}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -22,7 +22,7 @@ if (!require(backcalc)) {
 library(backcalc)
 ```
 
-## backcalc Coefficient Examples
+## Coefficient Examples
 
 ```{r toc, echo=FALSE}
 thisfile <- knitr::current_input()

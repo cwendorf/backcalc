@@ -1,7 +1,4 @@
-backcalc Coefficients Examples
-================
-
-## backcalc Coefficient Examples
+## Coefficient Examples
 
 - [Unstandardized Beta Cases](#unstandardized-beta-cases)
 - [Standardized Beta and Conversion

@@ -1,10 +1,10 @@
 ---
-title: "backcalc Ratios Examples"
+title: "Ratios Examples"
 output:
   github_document:
     preserve_yaml: FALSE
 vignette: >
-  %\VignetteIndexEntry{backcalc Ratios Examples}
+  %\VignetteIndexEntry{Ratios Examples}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -22,7 +22,7 @@ if (!require(backcalc)) {
 library(backcalc)
 ```
 
-## backcalc Ratios Examples
+## Ratios Examples
 
 ```{r toc, echo=FALSE}
 thisfile <- knitr::current_input()

@@ -1,7 +1,4 @@
-backcalc Ratios Examples
-================
-
-## backcalc Ratios Examples
+## Ratios Examples
 
 - [One Sample Cases](#one-sample-cases)
 - [Two Sample Cases](#two-sample-cases)

@@ -30,11 +30,11 @@ source("http://raw.githubusercontent.com/cwendorf/backcalc/main/source-backcalc.
 
 This package contains a set of examples to demonstrate its use:
 
-- [backcalc Means Examples](./docs/BackcalcMeansExamples.md) - Means and mean differences
-- [backcalc Corrs Examples](./docs/BackcalcCorrsExamples.md) - Correlations and correlation differences
-- [backcalc Coeffs Examples](./docs/BackcalcCoeffsExamples.md) - Raw and standardized regresssion coefficients
-- [backcalc Props Examples](./docs/BackcalcPropsExamples.md) - Proportions and proportion differences
-- [backcalc Ratios Examples](./docs/BackcalcRatiosExamples.md) - Ratios and ratio differences
+- [Means Examples](./docs/MeansExamples.md) - Means and mean differences
+- [Correlations Examples](./docs/CorrelationsExamples.md) - Correlations and correlation differences
+- [Coefficients Examples](./docs/CoefficientsExamples.md) - Raw and standardized regresssion coefficients
+- [Proportions Examples](./docs/ProportionsExamples.md) - Proportions and proportion differences
+- [Ratios Examples](./docs/RatiosExamples.md) - Ratios and ratio differences
 
 ### Contact Me
 

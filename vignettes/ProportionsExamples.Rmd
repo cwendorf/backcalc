@@ -1,10 +1,10 @@
 ---
-title: "backcalc Proportions Examples"
+title: "Proportions Examples"
 output:
   github_document:
     preserve_yaml: FALSE
 vignette: >
-  %\VignetteIndexEntry{backcalc Proportions Examples}
+  %\VignetteIndexEntry{Proportions Examples}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -22,7 +22,7 @@ if (!require(backcalc)) {
 library(backcalc)
 ```
 
-## backcalc Proportions Examples
+## Proportions Examples
 
 ```{r toc, echo=FALSE}
 thisfile <- knitr::current_input()

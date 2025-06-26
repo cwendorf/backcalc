@@ -1,7 +1,4 @@
-backcalc Proportions Examples
-================
-
-## backcalc Proportions Examples
+## Proportions Examples
 
 - [One Sample Cases](#one-sample-cases)
 - [Two Sample Cases](#two-sample-cases)

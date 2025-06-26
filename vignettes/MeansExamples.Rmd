@@ -1,10 +1,10 @@
 ---
-title: "backcalc Means Examples"
+title: "Means Examples"
 output:
   github_document:
     preserve_yaml: FALSE
 vignette: >
-  %\VignetteIndexEntry{backcalc Means Examples}
+  %\VignetteIndexEntry{Means Examples}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -22,7 +22,7 @@ if (!require(backcalc)) {
 library(backcalc)
 ```
 
-## backcalc Means Examples
+## Means Examples
 
 ```{r toc, echo=FALSE}
 thisfile <- knitr::current_input()
