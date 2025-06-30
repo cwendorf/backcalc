@@ -38,22 +38,22 @@ revised_toc(thisfile, base_level = 3, toc_depth = 4)
 backcalc_coeffs(b = 0.5, se = 0.1)
 
 # 2. Large sample z-test with coefficient and SE; high precision output
-backcalc_coeffs(b = 0.15, se = 0.02, sig_digits = 5)
+backcalc_coeffs(b = 0.15, se = 0.02, digits = 5)
 
 # 3. T-test from coefficient and p-value with df; default 95% CI
 backcalc_coeffs(b = 1.2, p = 0.03, df = 28)
 
 # 4. Estimate and confidence interval given; infer SE and t-statistic with df
-backcalc_coeffs(b = 0.8, ci = c(0.2, 1.4), df = 45, sig_digits = 4)
+backcalc_coeffs(b = 0.8, ci = c(0.2, 1.4), df = 45, digits = 4)
 
 # 5. Use all inputs: b, se, SDs, p-value, df, one-sided test, and custom digits
-backcalc_coeffs(b = 1.1, se = 0.3, sd_x = 2.5, sd_y = 5, p = 0.04, df = 30, one_sided = TRUE, sig_digits = 4)
+backcalc_coeffs(b = 1.1, se = 0.3, sd_x = 2.5, sd_y = 5, p = 0.04, df = 30, one_sided = TRUE, digits = 4)
 
 # 6. One-sided t-test with coefficient, p-value, and df; 90% CI specified
 backcalc_coeffs(b = -0.7, p = 0.01, df = 20, one_sided = TRUE, conf.level = 0.90)
 
 # 7. Minimal input: coefficient and p-value with df; change CI level and rounding
-backcalc_coeffs(b = 1.5, p = 0.02, df = 25, conf.level = 0.90, sig_digits = 4)
+backcalc_coeffs(b = 1.5, p = 0.02, df = 25, conf.level = 0.90, digits = 4)
 ```
 
 ### Standardized Beta and Conversion Cases
