@@ -1,7 +1,7 @@
 #' Backcalc Missing Inferential Statistics for Means
 #'
 #' \code{backcalc_means()} reconstructs inferential statistics for means. It supports 
-#' recovering standard errors, confidence intervals, #' p-values, and test statistics 
+#' recovering standard errors, confidence intervals, p-values, and test statistics 
 #' from partial or varied combinations of summary and inferential statistics.
 #'
 #' @param m Numeric or length-2 numeric vector. The point m(s) (e.g., mean for one group,
@@ -14,42 +14,48 @@
 #' @param ci Numeric vector of length 2. Confidence interval as c(lower, upper).
 #' @param paired Logical. Whether the data are from a paired/matched design.
 #' @param one_sided Logical. Whether the test is one-sided (default is two-sided).
-#' @param sig_digits Integer. Number of significant digits to round results to (default = 3).
+#' @param digits Integer. Number of decimal digits to round results to (default = 3).
 #'
 #' @return Named numeric vector with:
 #' \describe{
-#'   \item{m}{Point estimate (difference if two values provided)}
-#'   \item{se}{Standard error}
-#'   \item{df}{Degrees of freedom (if available)}
-#'   \item{ci_ll}{Lower bound of the confidence interval}
-#'   \item{ci_ul}{Upper bound of the confidence interval}
+#'   \item{Estimate}{Point estimate (difference if two values provided)}
+#'   \item{SE}{Standard error
 #'   \item{t / z}{Test statistic}
+#'   \item{df}{Degrees of freedom (if available)}
 #'   \item{p / p-one}{Two- or one-sided p-value}
+#'   \item{LL}{Lower bound of the confidence interval}
+#'   \item{UL}{Upper bound of the confidence interval}
 #' }
 #'
 #' @examples
 #' # One-sample: m + SE only (z-test)
-#' backcalc_means(m = 40.8, se = 1.19, sig_digits = 3)
+#' backcalc_means(m = 40.8, se = 1.19, digits = 3)
+#' 
 #' # Two-sample: Provide two ms, function calculates difference
-#' backcalc_means(m = c(10.5, 7.3), sd = c(5.0, 6.0), n = c(30, 40), sig_digits = 3)
+#' backcalc_means(m = c(10.5, 7.3), sd = c(5.0, 6.0), n = c(30, 40), digits = 3)
+#' 
 #' # One-sample: m + p-value + df (t-test)
-#' backcalc_means(m = 2.99, p = 0.045, df = 19, sig_digits = 4)
+#' backcalc_means(m = 2.99, p = 0.045, df = 19, digits = 4)
+#' 
 #' # Paired-sample: m + SE + df (direct calculation)
-#' backcalc_means(m = 0.15, se = 0.05, df = 39, paired = TRUE, sig_digits = 2)
+#' backcalc_means(m = 0.15, se = 0.05, df = 39, paired = TRUE, digits = 2)
+#' 
 #' # Paired-sample: m + p + n (df inferred)
-#' backcalc_means(m = 1.2, p = 0.03, n = 12, paired = TRUE, sig_digits = 3)
+#' backcalc_means(m = 1.2, p = 0.03, n = 12, paired = TRUE, digits = 3)
+#' 
 #' # Two-sample: m + SDs + unequal ns (Welch t-test, df inferred)
-#' backcalc_means(m = c(5.0, 2.6), sd = c(5.0, 6.0), n = c(30, 40), sig_digits = 2)
+#' backcalc_means(m = c(5.0, 2.6), sd = c(5.0, 6.0), n = c(30, 40), digits = 2)
+#' 
 #' # Two-sample: m + p + df (SE inferred)
-#' backcalc_means(m = 0.32, p = 0.005, df = 58, sig_digits = 4)
+#' backcalc_means(m = 0.32, p = 0.005, df = 58, digits = 4)
 #'
 #' @export
 backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
                            p = NULL, ci = NULL, paired = FALSE, one_sided = FALSE,
-                           sig_digits = 3) {
+                           digits = 3) {
   estimate <- m
   messages <- character(0)
-  approx_notes <- character(0)  # collect notes about approximations
+  approx_notes <- character(0)
 
   get_crit <- function(df = NULL) {
     alpha <- 0.05
@@ -60,16 +66,13 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
     }
   }
 
-  # If estimate has length 2, calculate difference
   if (!is.null(estimate) && length(estimate) == 2) {
     estimate <- estimate[1] - estimate[2]
   }
 
-  # Check input lengths
   len_sd <- ifelse(is.null(sd), 0, length(sd))
   len_n <- ifelse(is.null(n), 0, length(n))
 
-  # Handle paired
   if (paired) {
     if (is.null(df) && !is.null(n)) {
       df <- n - 1
@@ -80,7 +83,6 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
     }
   }
 
-  # Two-sample case
   two_sample_case <- (len_sd == 2 && len_n == 2 && !paired)
   if (two_sample_case) {
     var1 <- sd[1]^2
@@ -102,7 +104,6 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
     }
   }
 
-  # Single sample: infer SE
   if (!two_sample_case && is.null(se) && !is.null(sd) && !is.null(n)) {
     if (length(sd) != length(n) && length(sd) != 1 && length(n) != 1) {
       messages <- c(messages, "Length mismatch: sd and n must have equal length or one of them must be length 1.")
@@ -112,7 +113,6 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
     }
   }
 
-  # Infer from CI
   if (!is.null(ci)) {
     if (length(ci) != 2) {
       messages <- c(messages, "Confidence interval must be length 2.")
@@ -126,17 +126,14 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
     }
   }
 
-  # Check minimum info - updated to print message only, no table output
   if (is.null(estimate) || (is.null(se) && is.null(p) && is.null(ci))) {
     messages <- c(messages, "Insufficient input: Provide estimate and at least one of SE, p-value, or CI.")
     if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
     return(invisible(NULL))
   }
 
-  # Test type
   statistic_type <- if (!is.null(df)) "t" else "z"
 
-  # Compute test statistic
   if (!is.null(estimate) && !is.null(se)) {
     statistic <- estimate / se
   } else if (!is.null(p) && !is.null(estimate)) {
@@ -152,7 +149,6 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
     statistic <- NA
   }
 
-  # Compute p-value if needed
   if (is.null(p) && !is.na(statistic)) {
     if (statistic_type == "t") {
       p <- if (one_sided) 1 - pt(statistic, df) else 2 * (1 - pt(abs(statistic), df))
@@ -161,26 +157,23 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
     }
   }
 
-  # Compute CI
   crit <- get_crit(df)
   ci_lower <- estimate - crit * se
   ci_upper <- estimate + crit * se
 
-  # Round and return
   result <- c(
-    m = round(estimate, sig_digits),
-    se = round(se, sig_digits),
+    Estimate = round(estimate, digits),
+    SE = round(se, digits),
+    statistic = round(statistic, digits),
     df = if (!is.null(df)) round(df, 0) else NA,
-    ci_ll = round(ci_lower, sig_digits),
-    ci_ul = round(ci_upper, sig_digits),
-    statistic = round(statistic, sig_digits),
-    p = round(p, sig_digits)
+    p = round(p, digits),
+    LL = round(ci_lower, digits),
+    UL = round(ci_upper, digits)
   )
 
   names(result)[names(result) == "p"] <- ifelse(one_sided, "p-one", "p")
   names(result)[names(result) == "statistic"] <- statistic_type
 
-  # Show messages/notes
   if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
   if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
 

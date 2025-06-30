@@ -1,12 +1,12 @@
 #' Backcalc Missing Inferential Statistics for Proportions and Percentages
 #'
-#' \code{backcalc_correlations()} reconstructs inferential statistics for proportions and 
+#' \code{backcalc_props()} reconstructs inferential statistics for proportions and 
 #' percentages using log-odds scales as appropriate. It supports reconstructing standard errors, 
-#' Wald and exact confidence intervals, p-values, and test statistics partial or 
+#' Wald and exact confidence intervals, p-values, and test statistics from partial or 
 #' varied combinations of summary and inferential statistics.
 #'
 #' @param prop Numeric scalar or vector of length 2. Estimated proportion(s) (between 0 and 1,
-#'   or as percentages 0-100). If two values are provided with corresponding sample sizes, the function
+#'   or as percentages 0–100). If two values are provided with corresponding sample sizes, the function
 #'   calculates the log-odds difference.
 #' @param se Numeric scalar or vector of length 1 or 2. Standard error(s) on the logit scale.
 #' @param n Integer scalar or vector of length 2. Sample size(s) corresponding to estimate(s).
@@ -15,38 +15,42 @@
 #' @param p Numeric scalar. P-value for the test statistic.
 #' @param one_sided Logical. If \code{TRUE}, calculate one-sided p-value and confidence interval.
 #'   Default is \code{FALSE}.
-#' @param sig_digits Integer. Number of significant digits to round output to. Default is 3.
+#' @param digits Integer. Number of decimal digits to round output to. Default is 3.
 #' @param interval_type Character string specifying type of confidence interval:
 #'   \code{"wald"} (default) for Wald intervals on the logit scale,
 #'   or \code{"exact"} for Clopper-Pearson exact intervals (single sample only).
 #'
 #' @return Named numeric vector containing reconstructed inferential statistics, including:
 #' \itemize{
-#'   \item \code{logit_p} or \code{log_odds_ratio}: estimate on the logit or log-odds scale
-#'   \item \code{se_logit_p} or \code{se_log_odds_ratio}: standard error on logit or log-odds scale
-#'   \item \code{proportion} or \code{odds_ratio}: estimate back-transformed to proportion or odds ratio
-#'   \item \code{ci_ll}, \code{ci_ul}: confidence interval bounds (on proportion or odds ratio scale)
-#'   \item \code{z}: test statistic value (z-score)
-#'   \item \code{p} or \code{p_one}: two-sided or one-sided p-value
+#'   \item{Estimate}{Estimate based on logit_p, proportion, or odds_ratio.}
+#'   \item{SE}{Standard error on logit or log-odds scale.}
+#'   \item{z}{Test statistic value (z-score).}
+#'   \item{p}{two-sided or one-sided p-value.}
+#'   \item{LL, UL}{Confidence interval bounds (on proportion or odds ratio scale).}
 #' }
 #'
 #' @examples
 #' # Single-sample proportion, basic (Wald interval, default rounding)
 #' backcalc_props(prop = 0.45, n = 100)
-#' # Single-sample with exact interval, counts provided, increased precision
-#' backcalc_props(x = 45, n = 100, interval_type = "exact", sig_digits = 4)
+#' 
+#' # Single-sample with exact interval, counts provided, more digits shown
+#' backcalc_props(x = 45, n = 100, interval_type = "exact", digits = 4)
+#' 
 #' # Single-sample with exact interval and one-sided test
 #' backcalc_props(x = 30, n = 80, interval_type = "exact", one_sided = TRUE)
+#' 
 #' # Two-sample proportions with sample sizes, Wald intervals (exact intervals not supported here)
 #' backcalc_props(prop = c(0.55, 0.40), n = c(150, 130))
-#' # Two-sample proportions with provided p-value and adjusted rounding
-#' backcalc_props(prop = c(0.25, 0.35), n = c(100, 110), p = 0.04, sig_digits = 4)
-#' # One-sided test for a single proportion with custom rounding and exact interval
-#' backcalc_props(x = 72, n = 120, one_sided = TRUE, interval_type = "exact", sig_digits = 4)
+#' 
+#' # Two-sample proportions with provided p-value and 4-digit rounding
+#' backcalc_props(prop = c(0.25, 0.35), n = c(100, 110), p = 0.04, digits = 4)
+#' 
+#' # One-sided test for a single proportion with exact interval and 4-digit output
+#' backcalc_props(x = 72, n = 120, one_sided = TRUE, interval_type = "exact", digits = 4)
 #'
 #' @export
 backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL,
-                           p = NULL, one_sided = FALSE, sig_digits = 3,
+                           p = NULL, one_sided = FALSE, digits = 3,
                            interval_type = c("wald", "exact"),
                            test_statistic = c("z", "t")) {
   interval_type <- match.arg(interval_type)
@@ -65,21 +69,18 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
     }
   }
 
-  # Validate inputs
   if (is.null(prop) && (is.null(x) || is.null(n))) {
     messages <- c(messages, "Provide 'prop' or both 'x' and 'n'.")
     cat(paste(messages, collapse = "\n"), "\n")
     return(invisible(NULL))
   }
 
-  # Convert percentages
   estimate <- prop
   if (!is.null(estimate) && any(estimate > 1)) {
     estimate <- estimate / 100
     approx_notes <- c(approx_notes, "Proportions >1 assumed percentages and converted.")
   }
 
-  # Compute from x and n if needed
   if (is.null(estimate) && !is.null(x) && !is.null(n)) {
     estimate <- x / n
     approx_notes <- c(approx_notes, "Estimate computed as x/n.")
@@ -91,11 +92,9 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
     return(invisible(NULL))
   }
 
-  # Determine one-sample vs two-sample
   is_two_sample <- length(estimate) == 2 && length(n) == 2
   crit <- get_crit()
 
-  # Two-sample logic
   if (is_two_sample) {
     p1 <- estimate[1]
     p2 <- estimate[2]
@@ -105,11 +104,10 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
     estimate_diff <- p1 - p2
     se <- sqrt(p1 * (1 - p1) / n1 + p2 * (1 - p2) / n2)
     statistic <- estimate_diff / se
-    ci_ll <- estimate_diff - crit * se
-    ci_ul <- estimate_diff + crit * se
+    ll <- estimate_diff - crit * se
+    ul <- estimate_diff + crit * se
     approx_notes <- c(approx_notes, "Two-sample SE calculated using Wald formula for difference in proportions.")
 
-    # Compute p if missing
     if (is.null(p)) {
       p <- if (one_sided) {
         if (test_statistic == "z") 1 - pnorm(statistic) else 1 - pt(statistic, df = 1000)
@@ -119,17 +117,14 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
     }
 
     out <- c(
-      prop = round(estimate_diff, sig_digits),
-      se = round(se, sig_digits),
-      ci_ll = round(ci_ll, sig_digits),
-      ci_ul = round(ci_ul, sig_digits),
-      z = round(statistic, sig_digits),
-      p = round(p, sig_digits)
+      Estimate = round(estimate_diff, digits),
+      SE = round(se, digits),
+      z = round(statistic, digits),
+      p = round(p, digits),
+      LL = round(ll, digits),
+      UL = round(ul, digits)
     )
-  }
-
-  # One-sample logic
-  else {
+  } else {
     if (is.null(se) && !is.null(estimate) && !is.null(n)) {
       if (any(estimate == 0) || any(estimate == 1)) {
         messages <- c(messages, "Cannot calculate SE for proportions exactly 0 or 1.")
@@ -140,7 +135,6 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
       approx_notes <- c(approx_notes, "SE estimated from prop and n using Wald approximation.")
     }
 
-    # Back-calc from CI if needed
     if (!is.null(ci) && length(ci) == 2 && all(ci >= 0 & ci <= 1)) {
       if (any(ci == 0) || any(ci == 1)) {
         messages <- c(messages, "CI bounds cannot be exactly 0 or 1 for logit transformation.")
@@ -158,7 +152,6 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
       }
     }
 
-    # Compute from estimate and p if needed
     if (is.null(se) && !is.null(p) && !is.null(estimate)) {
       crit_val <- if (one_sided) {
         if (test_statistic == "z") qnorm(1 - p) else qt(1 - p, df = 1000)
@@ -178,7 +171,6 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
       return(invisible(NULL))
     }
 
-    # Compute p if missing
     if (is.null(p)) {
       p <- if (one_sided) {
         if (test_statistic == "z") 1 - pnorm(statistic) else 1 - pt(statistic, df = 1000)
@@ -187,26 +179,23 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
       }
     }
 
-    # CI on logit scale
-    ci_ll <- inv_logit(estimate - crit * se)
-    ci_ul <- inv_logit(estimate + crit * se)
+    ll <- inv_logit(estimate - crit * se)
+    ul <- inv_logit(estimate + crit * se)
 
     out <- c(
-      prop = round(estimate, sig_digits),
-      se = round(se, sig_digits),
-      ci_ll = round(ci_ll, sig_digits),
-      ci_ul = round(ci_ul, sig_digits),
-      z = round(statistic, sig_digits),
-      p = round(p, sig_digits)
+      Estimate = round(estimate, digits),
+      SE = round(se, digits),
+      z = round(statistic, digits),
+      p = round(p, digits),
+      LL = round(ll, digits),
+      UL = round(ul, digits)
     )
   }
 
-  # Label output correctly
   stat_label <- test_statistic
   p_label <- if (one_sided) "p_one" else "p"
-  names(out)[5:6] <- c(stat_label, p_label)
+  names(out)[3:4] <- c(stat_label, p_label)
 
-  # Show messages/notes
   if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
   if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
 

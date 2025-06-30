@@ -13,24 +13,37 @@
 #' @param p Numeric. p-value.
 #' @param ci Numeric vector of length 2. Confidence interval on ratio scale.
 #' @param one_sided Logical. Whether the test is one-sided (default is FALSE).
-#' @param sig_digits Integer. Number of significant digits to round results to (default = 3).
+#' @param digits Integer. Number of digits to round results to (default = 3).
 #' @param conf.level Numeric. Confidence level for interval (default = 0.95).
 #'
 #' @return A named numeric vector with the following components:
 #' \describe{
-#'   \item{ratio}{Exponentiated estimate (i.e., the ratio on original scale).}
-#'   \item{se}{Standard error of the log-transformed estimate.}
-#'   \item{df}{Degrees of freedom used for test statistic (if applicable; otherwise \code{NA}).}
-#'   \item{ci_ll}{Lower limit of the confidence interval on the ratio scale.}
-#'   \item{ci_ul}{Upper limit of the confidence interval on the ratio scale.}
+#'   \item{Estimate}{Exponentiated estimate (i.e., the ratio on original scale).}
+#'   \item{SE}{Standard error of the log-transformed estimate.}
 #'   \item{z or t}{Test statistic (either z or t, depending on whether \code{df} is provided).}
+#'   \item{df}{Degrees of freedom used for test statistic (if applicable; otherwise \code{NA}).}
 #'   \item{p or p-one}{Two-sided or one-sided p-value (depending on \code{one_sided}).}
+#'   \item{LL}{Lower limit of the confidence interval on the ratio scale.}
+#'   \item{UL}{Upper limit of the confidence interval on the ratio scale.}
 #' }
+#'
+#' @examples
+#' # One-sample odds ratio with SE
+#' backcalc_ratios(ratio = 2.5, se = 0.2)
+#'
+#' # Two-sample ratio with SEs and Welch-Satterthwaite df
+#' backcalc_ratios(ratio = c(2.5, 1.5), se = c(0.2, 0.15), df = c(50, 40))
+#'
+#' # Infer SE from CI
+#' backcalc_ratios(ratio = 2.5, ci = c(1.8, 3.2))
+#'
+#' # Using one-sided p-value and 4-digit rounding
+#' backcalc_ratios(ratio = 1.9, se = 0.3, one_sided = TRUE, digits = 4)
 #'
 #' @export
 backcalc_ratios <- function(ratio = NULL, se = NULL, n = NULL, df = NULL,
                             p = NULL, ci = NULL, one_sided = FALSE,
-                            sig_digits = 3, conf.level = 0.95) {
+                            digits = 3, conf.level = 0.95) {
 
   if (is.null(ratio)) {
     message("Insufficient information: a ratio (or two ratios) must be provided.")
@@ -110,13 +123,13 @@ backcalc_ratios <- function(ratio = NULL, se = NULL, n = NULL, df = NULL,
 
   # Result vector
   result <- c(
-    ratio = round(estimate_exp, sig_digits),
-    se = round(se, sig_digits),
+    Estimate = round(estimate_exp, digits),
+    SE = round(se, digits),
+    statistic = round(statistic, digits),
     df = if (!is.null(df)) round(df, 0) else NA,
-    ci_ll = round(ci_lower, sig_digits),
-    ci_ul = round(ci_upper, sig_digits),
-    statistic = round(statistic, sig_digits),
-    p_value = round(p, sig_digits)
+    p_value = round(p, digits),
+    LL = round(ci_lower, digits),
+    UL = round(ci_upper, digits)
   )
 
   # Rename for sidedness and statistic type

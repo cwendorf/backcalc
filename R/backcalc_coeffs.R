@@ -15,16 +15,16 @@
 #' @param ci Numeric vector of length 2. Confidence interval for the coefficient.
 #' @param one_sided Logical. Use one-sided test? Default is FALSE.
 #' @param conf.level Numeric between 0 and 1. Confidence level for confidence intervals. Default is 0.95.
-#' @param sig_digits Integer. Digits to round the output. Default is 3.
+#' @param digits Integer. Number of decimal digits to round the output. Default is 3.
 #'
 #' @return Named numeric vector with:
 #' \describe{
-#'   \item{coeff}{Coefficient (standardized or unstandardized)}
-#'   \item{se}{Standard error}
-#'   \item{df}{Degrees of freedom, if provided; otherwise NA}
-#'   \item{ci_ll, ci_ul}{Confidence interval lower and upper bounds, based on \code{conf.level}}
+#'   \item{Estimate}{Coefficient (standardized or unstandardized)}
+#'   \item{SE}{Standard error}
 #'   \item{t / z}{Test statistic (t if \code{df} provided, otherwise z)}
+#'   \item{df}{Degrees of freedom, if provided; otherwise NA}
 #'   \item{p / p_one}{Two-sided or one-sided p-value (named \code{p_one} if \code{one_sided = TRUE})}
+#'   \item{LL, UL}{Confidence interval lower and upper bounds, based on \code{conf.level}}
 #' }
 #'
 #' @examples
@@ -33,12 +33,12 @@
 #' # t-test from coefficient and p-value with df; default 95% CI
 #' backcalc_coeffs(b = 1.2, p = 0.03, df = 28)
 #' # Estimate and confidence interval given; infer SE and t-statistic with df and 4 digits rounding
-#' backcalc_coeffs(b = 0.8, ci = c(0.2, 1.4), df = 45, sig_digits = 4)
+#' backcalc_coeffs(b = 0.8, ci = c(0.2, 1.4), df = 45, digits = 4)
 #' # Standardized beta and SE only; uses z-test by default with 99% CI
 #' backcalc_coeffs(std_beta = 0.25, se_std = 0.04, conf.level = 0.99)
 #' # Use all inputs including one-sided test and custom rounding digits
 #' backcalc_coeffs(b = 1.1, se = 0.3, sd_x = 2.5, sd_y = 5,
-#'                      p = 0.04, df = 30, one_sided = TRUE, sig_digits = 4)
+#'                      p = 0.04, df = 30, one_sided = TRUE, digits = 4)
 #' # One-sided t-test with coefficient, p-value, df, and 90% CI
 #' backcalc_coeffs(b = -0.7, p = 0.01, df = 20, one_sided = TRUE, conf.level = 0.90)
 #'
@@ -51,7 +51,7 @@ backcalc_coeffs <- function(b = NULL, se = NULL,
                             ci = NULL,
                             one_sided = FALSE, 
                             conf.level = 0.95,
-                            sig_digits = 3) {
+                            digits = 3) {
   messages <- character(0)
   approx_notes <- character(0)
 
@@ -65,11 +65,11 @@ backcalc_coeffs <- function(b = NULL, se = NULL,
     }
   }
 
-  # Choose estimate and SE
+  # Choose estimate and SE (standardized if provided, otherwise unstandardized)
   estimate <- if (!is.null(std_beta)) std_beta else b
   se_val <- if (!is.null(std_beta)) se_std else se
 
-  # Infer standardized beta
+  # Infer standardized beta if not given but possible
   if (is.null(std_beta) && !is.null(b) && !is.null(sd_x) && !is.null(sd_y)) {
     estimate <- b * (sd_x / sd_y)
     approx_notes <- c(approx_notes, "Standardized beta approximated from unstandardized beta and standard deviations.")
@@ -79,7 +79,7 @@ backcalc_coeffs <- function(b = NULL, se = NULL,
     }
   }
 
-  # Infer from CI
+  # Infer from CI if provided
   if (!is.null(ci)) {
     if (length(ci) != 2) {
       messages <- c(messages, "CI must be a numeric vector of length 2.")
@@ -96,10 +96,10 @@ backcalc_coeffs <- function(b = NULL, se = NULL,
     }
   }
 
-  # Determine statistic type
+  # Determine test statistic type
   stat_type <- if (!is.null(df)) "t" else "z"
 
-  # Compute statistic
+  # Compute test statistic from estimate and SE (or reconstruct from p)
   stat <- if (!is.null(estimate) && !is.null(se_val)) {
     estimate / se_val
   } else if (!is.null(p) && !is.null(estimate)) {
@@ -117,7 +117,7 @@ backcalc_coeffs <- function(b = NULL, se = NULL,
     NA
   }
 
-  # Compute p if missing
+  # Compute p-value if missing
   if (is.null(p) && !is.na(stat)) {
     p <- if (stat_type == "t") {
       if (one_sided) 1 - pt(stat, df) else 2 * (1 - pt(abs(stat), df))
@@ -126,7 +126,7 @@ backcalc_coeffs <- function(b = NULL, se = NULL,
     }
   }
 
-  # Compute CI if possible
+  # Compute CI if estimate and SE are available
   if (!is.null(estimate) && !is.null(se_val)) {
     crit <- get_crit(df)
     ci_lower <- estimate - crit * se_val
@@ -136,29 +136,28 @@ backcalc_coeffs <- function(b = NULL, se = NULL,
     ci_upper <- NA
   }
 
-  # Final check: is the input insufficient even for z-approximation?
+  # Final check: stop if insufficient input
   if (is.null(estimate) || is.null(se_val)) {
     messages <- c(messages, "Insufficient information: cannot estimate coefficient or SE, even approximately.")
     cat(paste(messages, collapse = "\n"), "\n")
     return(invisible(NULL))
   }
 
-  # Assemble result
+  # Assemble result in new desired order: Estimate, SE, stat, df, p, LL, UL
+  stat_name <- stat_type
+  p_name <- if (one_sided) "p_one" else "p"
+
   result <- c(
-    coeff = round(estimate, sig_digits),
-    se = round(se_val, sig_digits),
+    Estimate = round(estimate, digits),
+    SE = round(se_val, digits),
+    setNames(round(stat, digits), stat_name),
     df = if (!is.null(df)) round(df, 0) else NA,
-    ci_ll = round(ci_lower, sig_digits),
-    ci_ul = round(ci_upper, sig_digits)
+    setNames(round(p, digits), p_name),
+    LL = round(ci_lower, digits),
+    UL = round(ci_upper, digits)
   )
 
-  stat_name <- stat_type
-  result <- c(result, setNames(round(stat, sig_digits), stat_name))
-
-  p_name <- if (one_sided) "p_one" else "p"
-  result <- c(result, setNames(round(p, sig_digits), p_name))
-
-  # Show messages/notes
+  # Show any warnings or approximations
   if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
   if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
 
