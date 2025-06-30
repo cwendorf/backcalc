@@ -44,7 +44,7 @@ backcalc_props(x = 45, n = 100, interval_type = "exact", digits = 4)
 backcalc_props(x = 30, n = 80, interval_type = "exact", one_sided = TRUE)
 
 # 4. Given confidence interval (Wald)
-backcalc_props(ci = c(0.30, 0.50), n = 80)
+backcalc_props(ci = c(0.30, 0.50), prop = 0.40, n = 80)
 
 # 5. SE and p-value provided (Wald)
 backcalc_props(prop = 0.52, se = 0.05, p = 0.03, n = 90)
