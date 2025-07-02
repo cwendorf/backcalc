@@ -1,64 +1,61 @@
 #' Backcalc Missing Inferential Statistics for Means
 #'
-#' \code{backcalc_means()} reconstructs inferential statistics for means. It supports 
-#' recovering standard errors, confidence intervals, p-values, and test statistics 
-#' from partial or varied combinations of summary and inferential statistics.
+#' \code{backcalc_means()} reconstructs inferential statistics related to means from partial information.
+#' It can estimate standard errors, confidence intervals, p-values, test statistics (t or z), degrees of freedom,
+#' and point estimates when some components are missing, supporting one-sample, paired, and two-sample cases.
 #'
-#' @param m Numeric or length-2 numeric vector. The point m(s) (e.g., mean for one group,
+#' @param m Numeric or length-2 numeric vector. Point estimate(s) (e.g., mean for one group,
 #' or two values for two groups where difference = m[1] - m[2]).
 #' @param se Numeric. Standard error of the estimate.
-#' @param sd Numeric or length-2 vector. Standard deviation(s) for one or two groups.
-#' @param n Numeric or length-2 vector. Sample size(s) for one or two groups.
+#' @param sd Numeric or length-2 numeric vector. Standard deviation(s) for one or two groups.
+#' @param n Numeric or length-2 numeric vector. Sample size(s) for one or two groups.
 #' @param df Numeric. Degrees of freedom.
-#' @param p Numeric. p-value.
+#' @param p Numeric. P-value.
 #' @param ci Numeric vector of length 2. Confidence interval as c(lower, upper).
-#' @param paired Logical. Whether the data are from a paired/matched design.
-#' @param one_sided Logical. Whether the test is one-sided (default is two-sided).
-#' @param digits Integer. Number of decimal digits to round results to (default = 3).
+#' @param paired Logical. Whether data come from a paired/matched design (default FALSE).
+#' @param one_sided Logical. Whether the test is one-sided (default FALSE).
+#' @param digits Integer. Number of decimal digits to round the results (default 3).
+#' @param statistic Numeric. Test statistic value (t or z).
+#' @param conf.level Numeric. Confidence level for intervals (default 0.95).
 #'
-#' @return Named numeric vector with:
+#' @return Named numeric vector containing:
 #' \describe{
 #'   \item{Estimate}{Point estimate (difference if two values provided)}
-#'   \item{SE}{Standard error
-#'   \item{t / z}{Test statistic}
+#'   \item{SE}{Standard error of estimate}
+#'   \item{t / z}{Test statistic (t if df provided, otherwise z)}
 #'   \item{df}{Degrees of freedom (if available)}
-#'   \item{p / p-one}{Two- or one-sided p-value}
+#'   \item{p / p-one}{Two-sided or one-sided p-value}
 #'   \item{LL}{Lower bound of the confidence interval}
 #'   \item{UL}{Upper bound of the confidence interval}
 #' }
 #'
+#' @details
+#' The function infers missing statistics using provided inputs. For two-sample tests,
+#' it calculates standard error and degrees of freedom using pooled or Welch's approximation as appropriate.
+#' When sample sizes are provided, it defaults to using the t-distribution for inference rather than normal approximation.
+#' The confidence interval is computed based on the specified \code{conf.level}.
+#'
 #' @examples
-#' # One-sample: m + SE only (z-test)
-#' backcalc_means(m = 40.8, se = 1.19, digits = 3)
+#' # One-sample example: Mean, SE, and sample size given (uses t-distribution)
+#' backcalc_means(m = 25.4, se = 2.1, n = 30)
 #' 
-#' # Two-sample: Provide two ms, function calculates difference
-#' backcalc_means(m = c(10.5, 7.3), sd = c(5.0, 6.0), n = c(30, 40), digits = 3)
+#' # Two-sample example: Means, SDs, and sample sizes given (Welch t-test inference)
+#' backcalc_means(m = c(15, 12), sd = c(4, 5), n = c(40, 35))
 #' 
-#' # One-sample: m + p-value + df (t-test)
-#' backcalc_means(m = 2.99, p = 0.045, df = 19, digits = 4)
-#' 
-#' # Paired-sample: m + SE + df (direct calculation)
-#' backcalc_means(m = 0.15, se = 0.05, df = 39, paired = TRUE, digits = 2)
-#' 
-#' # Paired-sample: m + p + n (df inferred)
-#' backcalc_means(m = 1.2, p = 0.03, n = 12, paired = TRUE, digits = 3)
-#' 
-#' # Two-sample: m + SDs + unequal ns (Welch t-test, df inferred)
-#' backcalc_means(m = c(5.0, 2.6), sd = c(5.0, 6.0), n = c(30, 40), digits = 2)
-#' 
-#' # Two-sample: m + p + df (SE inferred)
-#' backcalc_means(m = 0.32, p = 0.005, df = 58, digits = 4)
+#' # Insufficient input example: Mean provided but no SE, p-value, or CI (warns user)
+#' backcalc_means(m = 25)
 #'
 #' @export
 backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
-                           p = NULL, ci = NULL, paired = FALSE, one_sided = FALSE,
-                           digits = 3) {
+                           p = NULL, ci = NULL, statistic = NULL,
+                           paired = FALSE, one_sided = FALSE,
+                           conf.level = 0.95, digits = 3) {
   estimate <- m
   messages <- character(0)
   approx_notes <- character(0)
 
   get_crit <- function(df = NULL) {
-    alpha <- 0.05
+    alpha <- 1 - conf.level
     if (one_sided) {
       if (!is.null(df)) qt(1 - alpha, df) else qnorm(1 - alpha)
     } else {
@@ -104,8 +101,10 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
     }
   }
 
-  if (!two_sample_case && is.null(se) && !is.null(sd) && !is.null(n)) {
-    if (length(sd) != length(n) && length(sd) != 1 && length(n) != 1) {
+  if (!two_sample_case && is.null(se) && !is.null(sd)) {
+    if (is.null(n)) {
+      messages <- c(messages, "Cannot compute SE from SD without sample size (n).")
+    } else if (length(sd) != length(n) && length(sd) != 1 && length(n) != 1) {
       messages <- c(messages, "Length mismatch: sd and n must have equal length or one of them must be length 1.")
     } else {
       se <- sd / sqrt(n)
@@ -126,17 +125,27 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
     }
   }
 
-  if (is.null(estimate) || (is.null(se) && is.null(p) && is.null(ci))) {
-    messages <- c(messages, "Insufficient input: Provide estimate and at least one of SE, p-value, or CI.")
+  if (!is.null(statistic) && !is.null(se) && is.null(estimate)) {
+    estimate <- statistic * se
+    approx_notes <- c(approx_notes, "Estimate approximated from test statistic and SE.")
+  }
+
+  if (!is.null(statistic) && !is.null(estimate) && is.null(se)) {
+    se <- estimate / statistic
+    approx_notes <- c(approx_notes, "SE approximated from test statistic and estimate.")
+  }
+
+  if (is.null(estimate) || (is.null(se) && is.null(p) && is.null(ci) && is.null(statistic))) {
+    messages <- c(messages, "Insufficient input: Provide estimate and at least one of SE, p-value, CI, or test statistic.")
     if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
     return(invisible(NULL))
   }
 
   statistic_type <- if (!is.null(df)) "t" else "z"
 
-  if (!is.null(estimate) && !is.null(se)) {
+  if (is.null(statistic) && !is.null(estimate) && !is.null(se)) {
     statistic <- estimate / se
-  } else if (!is.null(p) && !is.null(estimate)) {
+  } else if (is.null(statistic) && !is.null(p) && !is.null(estimate)) {
     crit_val <- if (one_sided) {
       if (!is.null(df)) qt(1 - p, df) else qnorm(1 - p)
     } else {
@@ -145,11 +154,9 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
     statistic <- sign(estimate) * crit_val
     se <- estimate / statistic
     approx_notes <- c(approx_notes, "Test statistic and SE approximated from p-value and estimate.")
-  } else {
-    statistic <- NA
   }
 
-  if (is.null(p) && !is.na(statistic)) {
+  if (is.null(p) && !is.null(statistic)) {
     if (statistic_type == "t") {
       p <- if (one_sided) 1 - pt(statistic, df) else 2 * (1 - pt(abs(statistic), df))
     } else {

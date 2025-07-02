@@ -1,203 +1,290 @@
-#' Backcalc Missing Inferential Statistics for Proportions and Percentages
+#' Backcalculate Missing Inferential Statistics for Proportions and Percentages
 #'
-#' \code{backcalc_props()} reconstructs inferential statistics for proportions and 
-#' percentages using log-odds scales as appropriate. It supports reconstructing standard errors, 
-#' Wald and exact confidence intervals, p-values, and test statistics from partial or 
-#' varied combinations of summary and inferential statistics.
+#' This function performs inference on proportions by back-calculating missing quantities
+#' such as standard error (SE), test statistic, p-value, or confidence intervals (CIs) 
+#' from the available inputs. It supports both one-sample and two-sample proportion 
+#' comparisons using either z-tests or t-tests, and works with raw counts or precomputed 
+#' proportions.
 #'
-#' @param prop Numeric scalar or vector of length 2. Estimated proportion(s) (between 0 and 1,
-#'   or as percentages 0–100). If two values are provided with corresponding sample sizes, the function
-#'   calculates the log-odds difference.
-#' @param se Numeric scalar or vector of length 1 or 2. Standard error(s) on the logit scale.
-#' @param n Integer scalar or vector of length 2. Sample size(s) corresponding to estimate(s).
-#' @param x Integer scalar or vector of length 1 or 2. Number of successes for exact interval calculation.
-#' @param ci Numeric vector of length 2. Confidence interval bounds for the proportion (between 0 and 1).
-#' @param p Numeric scalar. P-value for the test statistic.
-#' @param one_sided Logical. If \code{TRUE}, calculate one-sided p-value and confidence interval.
-#'   Default is \code{FALSE}.
-#' @param digits Integer. Number of decimal digits to round output to. Default is 3.
-#' @param interval_type Character string specifying type of confidence interval:
-#'   \code{"wald"} (default) for Wald intervals on the logit scale,
-#'   or \code{"exact"} for Clopper-Pearson exact intervals (single sample only).
+#' @param prop Proportion estimate(s). Can be a single proportion or a vector of two for a two-sample test.
+#' @param se Standard error. If not provided, it will be computed when possible.
+#' @param n Sample size(s). Required for SE calculation unless `se` or `ci` is provided. 
+#'           For two-sample comparisons, supply a numeric vector of length 2.
+#' @param x Count(s) of successes. Used with `n` to compute proportion.
+#' @param ci Confidence interval for the proportion (vector of length 2).
+#' @param p P-value (optional). If not provided, will be computed from the test statistic.
+#' @param one_sided Logical; if `TRUE`, computes one-sided p-value. Default is `FALSE` (two-sided).
+#' @param digits Number of decimal places for rounding output. Default is 3.
+#' @param interval_type Method used for inference; currently supports `"wald"` (default).
+#' @param statistic Test statistic value (z or t). If not supplied, will be calculated from estimate and SE.
+#' @param df Degrees of freedom. Required for t-tests. If not provided and `n` has length 2, it will be inferred.
+#' @param conf.level Confidence level used to compute critical value for inference. Default is `0.95`.
 #'
-#' @return Named numeric vector containing reconstructed inferential statistics, including:
-#' \itemize{
-#'   \item{Estimate}{Estimate based on logit_p, proportion, or odds_ratio.}
-#'   \item{SE}{Standard error on logit or log-odds scale.}
-#'   \item{z}{Test statistic value (z-score).}
-#'   \item{p}{two-sided or one-sided p-value.}
-#'   \item{LL, UL}{Confidence interval bounds (on proportion or odds ratio scale).}
+#' @return A named numeric vector with the following elements:
+#' \describe{
+#'   \item{Estimate}{Proportion or difference in proportions}
+#'   \item{SE}{Standard error of the estimate}
+#'   \item{z or t}{The test statistic used for inference}
+#'   \item{df}{Degrees of freedom (NA for z-tests)}
+#'   \item{p-one or p}{The one-sided or two-sided p-value}
+#'   \item{LL}{Lower bound of the confidence interval}
+#'   \item{UL}{Upper bound of the confidence interval}
 #' }
 #'
+#' @details
+#' - When `prop` is a two-element vector and `n` has two values, a two-sample comparison is assumed.  
+#' - If `df` is not provided but `n` has length 2, degrees of freedom are approximated as `n1 + n2 - 2`.
+#' - CI bounds are logit-transformed when `prop` is between 0 and 1 to maintain valid intervals.
+#' - Exact methods are not currently implemented.
+#'
 #' @examples
-#' # Single-sample proportion, basic (Wald interval, default rounding)
-#' backcalc_props(prop = 0.45, n = 100)
-#' 
-#' # Single-sample with exact interval, counts provided, more digits shown
-#' backcalc_props(x = 45, n = 100, interval_type = "exact", digits = 4)
-#' 
-#' # Single-sample with exact interval and one-sided test
-#' backcalc_props(x = 30, n = 80, interval_type = "exact", one_sided = TRUE)
-#' 
-#' # Two-sample proportions with sample sizes, Wald intervals (exact intervals not supported here)
-#' backcalc_props(prop = c(0.55, 0.40), n = c(150, 130))
-#' 
-#' # Two-sample proportions with provided p-value and 4-digit rounding
-#' backcalc_props(prop = c(0.25, 0.35), n = c(100, 110), p = 0.04, digits = 4)
-#' 
-#' # One-sided test for a single proportion with exact interval and 4-digit output
-#' backcalc_props(x = 72, n = 120, one_sided = TRUE, interval_type = "exact", digits = 4)
+#' # One-sample: Provide proportion and sample size only (basic one-sample proportion)
+#' backcalc_props(prop = 0.4, n = 100)
+#'
+#' # Two-sample: Provide two proportions and sample sizes only (difference in proportions)
+#' backcalc_props(prop = c(0.55, 0.4), n = c(150, 130))
+#'
+#' # Insufficient info: No inputs provided (error expected due to missing info)
+#' backcalc_props()
 #'
 #' @export
 backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL,
                            p = NULL, one_sided = FALSE, digits = 3,
                            interval_type = c("wald", "exact"),
-                           test_statistic = c("z", "t")) {
+                           statistic = NULL, df = NULL,
+                           conf.level = 0.95) {
   interval_type <- match.arg(interval_type)
-  test_statistic <- match.arg(test_statistic)
   messages <- character(0)
   approx_notes <- character(0)
-
-  logit <- function(p) log(p / (1 - p))
-  inv_logit <- function(l) exp(l) / (1 + exp(l))
-  get_crit <- function() {
-    alpha <- if (one_sided) 0.10 else 0.05
-    if (test_statistic == "z") {
-      qnorm(1 - alpha / ifelse(one_sided, 1, 2))
-    } else {
-      qt(1 - alpha / ifelse(one_sided, 1, 2), df = 1000)
-    }
+  
+  # --- Input validation: catch insufficient info early ---
+  
+  # Need at least one of prop or (x and n) or se
+  if (is.null(prop) && (is.null(x) || is.null(n)) && is.null(se)) {
+    messages <- c(messages, "Insufficient information: need prop or counts (x and n) or SE.")
   }
-
-  if (is.null(prop) && (is.null(x) || is.null(n))) {
-    messages <- c(messages, "Provide 'prop' or both 'x' and 'n'.")
-    cat(paste(messages, collapse = "\n"), "\n")
+  
+  # If x given but n missing
+  if (!is.null(x) && is.null(n)) {
+    messages <- c(messages, "Sample size 'n' is required when counts 'x' are provided.")
+  }
+  
+  # If prop given but no n or se, cannot estimate SE or CI
+  if (!is.null(prop) && is.null(n) && is.null(se) && interval_type == "exact") {
+    messages <- c(messages, "Exact interval requires counts 'x' and sample size 'n'.")
+  }
+  
+  # If proportion at boundary and Wald interval requested (logit transform not defined)
+  if (!is.null(prop) && any(prop == 0 | prop == 1) && interval_type == "wald") {
+    messages <- c(messages, "Wald interval not defined for proportions exactly 0 or 1.")
+  }
+  
+  if (length(messages) > 0) {
+    cat("Error:", paste(messages, collapse = " "), "\n")
     return(invisible(NULL))
   }
-
+  
+  alpha <- 1 - conf.level
+  crit <- if (!is.null(df)) {
+    qt(1 - alpha / ifelse(one_sided, 1, 2), df)
+  } else {
+    qnorm(1 - alpha / ifelse(one_sided, 1, 2))
+  }
+  
+  logit <- function(p) log(p / (1 - p))
+  inv_logit <- function(l) exp(l) / (1 + exp(l))
+  
+  # Validate and preprocess prop
   estimate <- prop
   if (!is.null(estimate) && any(estimate > 1)) {
     estimate <- estimate / 100
     approx_notes <- c(approx_notes, "Proportions >1 assumed percentages and converted.")
   }
-
+  
   if (is.null(estimate) && !is.null(x) && !is.null(n)) {
     estimate <- x / n
     approx_notes <- c(approx_notes, "Estimate computed as x/n.")
   }
-
-  if (!is.null(estimate) && any(estimate < 0 | estimate > 1)) {
+  
+  if (!is.null(estimate) && (any(estimate < 0) || any(estimate > 1))) {
     messages <- c(messages, "Proportions must be between 0 and 1.")
     cat(paste(messages, collapse = "\n"), "\n")
     return(invisible(NULL))
   }
-
-  is_two_sample <- length(estimate) == 2 && length(n) == 2
-  crit <- get_crit()
-
+  
+  infer_df <- function(n_val) {
+    if (is.null(df)) {
+      if (!is.null(n_val)) {
+        floor(min(n_val) - 1)
+      } else NA
+    } else df
+  }
+  
+  is_two_sample <- !is.null(estimate) && length(estimate) == 2
+  
+  infer_stat_type <- function(stat, df_val) {
+    if (!is.null(stat)) {
+      if (!is.null(df_val) && !is.na(df_val) && df_val < 1000) {
+        "t"
+      } else {
+        "z"
+      }
+    } else {
+      NULL
+    }
+  }
+  
+  stat_type <- infer_stat_type(statistic, df)
+  if (!is.null(statistic) && stat_type == "t" && (is.null(df) || is.na(df))) {
+    df <- infer_df(n)
+  }
+  
+  p_to_stat <- function(pval, df_val, one_sided, stat_type) {
+    if (stat_type == "z") {
+      if (one_sided) qnorm(1 - pval) else qnorm(1 - pval / 2)
+    } else {
+      if (one_sided) qt(1 - pval, df_val) else qt(1 - pval / 2, df_val)
+    }
+  }
+  
+  stat_to_p <- function(stat, df_val, one_sided, stat_type) {
+    if (stat_type == "z") {
+      if (one_sided) 1 - pnorm(stat) else 2 * (1 - pnorm(abs(stat)))
+    } else {
+      if (one_sided) 1 - pt(stat, df_val) else 2 * (1 - pt(abs(stat), df_val))
+    }
+  }
+  
   if (is_two_sample) {
     p1 <- estimate[1]
     p2 <- estimate[2]
-    n1 <- n[1]
-    n2 <- n[2]
-
-    estimate_diff <- p1 - p2
-    se <- sqrt(p1 * (1 - p1) / n1 + p2 * (1 - p2) / n2)
-    statistic <- estimate_diff / se
-    ll <- estimate_diff - crit * se
-    ul <- estimate_diff + crit * se
-    approx_notes <- c(approx_notes, "Two-sample SE calculated using Wald formula for difference in proportions.")
-
-    if (is.null(p)) {
-      p <- if (one_sided) {
-        if (test_statistic == "z") 1 - pnorm(statistic) else 1 - pt(statistic, df = 1000)
-      } else {
-        if (test_statistic == "z") 2 * (1 - pnorm(abs(statistic))) else 2 * (1 - pt(abs(statistic), df = 1000))
-      }
-    }
-
-    out <- c(
-      Estimate = round(estimate_diff, digits),
-      SE = round(se, digits),
-      z = round(statistic, digits),
-      p = round(p, digits),
-      LL = round(ll, digits),
-      UL = round(ul, digits)
-    )
-  } else {
-    if (is.null(se) && !is.null(estimate) && !is.null(n)) {
-      if (any(estimate == 0) || any(estimate == 1)) {
+    
+    n1 <- if (!is.null(n) && length(n) == 2) n[1] else NA
+    n2 <- if (!is.null(n) && length(n) == 2) n[2] else NA
+    
+    est_diff <- p1 - p2
+    
+    df <- infer_df(c(n1, n2))
+    
+    if (is.null(se)) {
+      if (any(c(p1, p2) == 0 | c(p1, p2) == 1)) {
         messages <- c(messages, "Cannot calculate SE for proportions exactly 0 or 1.")
         cat(paste(messages, collapse = "\n"), "\n")
         return(invisible(NULL))
       }
-      se <- sqrt(1 / (n * estimate) + 1 / (n * (1 - estimate)))
-      approx_notes <- c(approx_notes, "SE estimated from prop and n using Wald approximation.")
+      se <- sqrt(p1 * (1 - p1) / n1 + p2 * (1 - p2) / n2)
+      approx_notes <- c(approx_notes, "SE estimated using Wald formula for difference in proportions.")
     }
-
-    if (!is.null(ci) && length(ci) == 2 && all(ci >= 0 & ci <= 1)) {
-      if (any(ci == 0) || any(ci == 1)) {
-        messages <- c(messages, "CI bounds cannot be exactly 0 or 1 for logit transformation.")
+    
+    if (is.null(statistic) && !is.null(p)) {
+      stat_type <- if (!is.null(df) && !is.na(df) && df < 1000) "t" else "z"
+      statistic <- p_to_stat(p, df, one_sided, stat_type)
+      approx_notes <- c(approx_notes, "Test statistic approximated from p-value.")
+    }
+    
+    if (is.null(p) && !is.null(statistic)) {
+      if (is.null(stat_type)) stat_type <- infer_stat_type(statistic, df)
+      p <- stat_to_p(statistic, df, one_sided, stat_type)
+    }
+    
+    if (is.null(df)) df <- NA
+    
+    ll <- est_diff - crit * se
+    ul <- est_diff + crit * se
+    
+    stat_label <- ifelse(is.null(stat_type), "statistic", stat_type)
+    
+    out <- c(
+      Estimate = round(est_diff, digits),
+      SE = round(se, digits),
+      DF = ifelse(is.null(df), NA, df),
+      setNames(round(statistic, digits), stat_label),
+      # Label p differently if one-sided
+      setNames(round(p, digits), ifelse(one_sided, "p-one", "p_one")),
+      LL = round(ll, digits),
+      UL = round(ul, digits)
+    )
+    
+  } else {
+    est <- estimate
+    
+    if (is.null(se)) {
+      if (!is.null(n)) {
+        if (any(est == 0 | est == 1)) {
+          messages <- c(messages, "Cannot calculate SE for proportions exactly 0 or 1.")
+          cat(paste(messages, collapse = "\n"), "\n")
+          return(invisible(NULL))
+        }
+        se <- sqrt(est * (1 - est) / n)
+        approx_notes <- c(approx_notes, "SE estimated using binomial formula.")
+      } else {
+        se <- NA
+      }
+    }
+    
+    if (is.null(statistic) && !is.null(p)) {
+      stat_type <- if (!is.null(df) && !is.na(df) && df < 1000) "t" else "z"
+      statistic <- p_to_stat(p, df, one_sided, stat_type)
+      approx_notes <- c(approx_notes, "Test statistic approximated from p-value.")
+    }
+    
+    if (is.null(p) && !is.null(statistic)) {
+      if (is.null(stat_type)) stat_type <- infer_stat_type(statistic, df)
+      p <- stat_to_p(statistic, df, one_sided, stat_type)
+    }
+    
+    if (stat_type == "t" && (is.null(df) || is.na(df))) {
+      df <- ifelse(!is.null(n), n - 1, NA)
+    } else {
+      df <- NA
+    }
+    
+    if (interval_type == "wald") {
+      if (any(est == 0 | est == 1)) {
+        messages <- c(messages, "Cannot calculate Wald CI for proportions exactly 0 or 1.")
         cat(paste(messages, collapse = "\n"), "\n")
         return(invisible(NULL))
       }
-      ci_logit <- logit(ci)
-      if (is.null(estimate)) {
-        estimate <- mean(ci_logit)
-        approx_notes <- c(approx_notes, "Estimate approximated as midpoint of logit CI.")
-      }
-      if (is.null(se)) {
-        se <- abs(ci_logit[2] - ci_logit[1]) / (2 * crit)
-        approx_notes <- c(approx_notes, "SE approximated from width of logit CI.")
-      }
-    }
-
-    if (is.null(se) && !is.null(p) && !is.null(estimate)) {
-      crit_val <- if (one_sided) {
-        if (test_statistic == "z") qnorm(1 - p) else qt(1 - p, df = 1000)
-      } else {
-        if (test_statistic == "z") qnorm(1 - p / 2) else qt(1 - p / 2, df = 1000)
-      }
-      statistic <- sign(estimate) * crit_val
-      se <- estimate / statistic
-      approx_notes <- c(approx_notes, "SE approximated from estimate and p-value.")
-    }
-
-    if (!is.null(estimate) && !is.null(se)) {
-      statistic <- estimate / se
+      logit_est <- logit(est)
+      se_logit <- se / (est * (1 - est))
+      ll_logit <- logit_est - crit * se_logit
+      ul_logit <- logit_est + crit * se_logit
+      ll <- inv_logit(ll_logit)
+      ul <- inv_logit(ul_logit)
     } else {
-      messages <- c(messages, "Insufficient information: provide 'se', 'n', 'ci', or 'p' with 'estimate'.")
-      cat(paste(messages, collapse = "\n"), "\n")
-      return(invisible(NULL))
-    }
-
-    if (is.null(p)) {
-      p <- if (one_sided) {
-        if (test_statistic == "z") 1 - pnorm(statistic) else 1 - pt(statistic, df = 1000)
-      } else {
-        if (test_statistic == "z") 2 * (1 - pnorm(abs(statistic))) else 2 * (1 - pt(abs(statistic), df = 1000))
+      if (is.null(x) || is.null(n)) {
+        messages <- c(messages, "Exact interval requires counts 'x' and sample size 'n'.")
+        cat(paste(messages, collapse = "\n"), "\n")
+        return(invisible(NULL))
       }
+      if (length(x) > 1 || length(n) > 1) {
+        messages <- c(messages, "Exact interval not supported for multiple samples.")
+        cat(paste(messages, collapse = "\n"), "\n")
+        return(invisible(NULL))
+      }
+      ll <- qbeta(alpha / ifelse(one_sided, 1, 2), x, n - x + 1)
+      ul <- qbeta(1 - alpha / ifelse(one_sided, 1, 2), x + 1, n - x)
     }
-
-    ll <- inv_logit(estimate - crit * se)
-    ul <- inv_logit(estimate + crit * se)
-
+    
+    stat_label <- ifelse(is.null(stat_type), "statistic", stat_type)
+    
     out <- c(
-      Estimate = round(estimate, digits),
+      Estimate = round(est, digits),
       SE = round(se, digits),
-      z = round(statistic, digits),
-      p = round(p, digits),
+      DF = ifelse(is.null(df), NA, df),
+      setNames(round(statistic, digits), stat_label),
+      setNames(round(p, digits), ifelse(one_sided, "p-one", "p_one")),
       LL = round(ll, digits),
       UL = round(ul, digits)
     )
   }
-
-  stat_label <- test_statistic
-  p_label <- if (one_sided) "p_one" else "p"
-  names(out)[3:4] <- c(stat_label, p_label)
-
-  if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
-  if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
-
+  
+  if (length(approx_notes) > 0) {
+    cat("Note:", paste(approx_notes, collapse = " "), "\n")
+  }
+  if (length(messages) > 0) {
+    cat("Warning:", paste(messages, collapse = " "), "\n")
+  }
+  
   return(out)
 }
