@@ -2,7 +2,7 @@
 % Please edit documentation in R/backcalc_means.R
 \name{backcalc_means}
 \alias{backcalc_means}
-\title{Backcalc Missing Inferential Statistics for Means}
+\title{Backcalculate Missing Inferential Statistics for Means}
 \usage{
 backcalc_means(
   m = NULL,
