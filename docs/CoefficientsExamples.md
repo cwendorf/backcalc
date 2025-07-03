@@ -3,146 +3,179 @@
 - [Unstandardized Beta Cases](#unstandardized-beta-cases)
 - [Standardized Beta and Conversion
   Cases](#standardized-beta-and-conversion-cases)
-- [Cases That Do Not Work](#cases-that-do-not-work)
+- [Insufficient Information Cases](#insufficient-information-cases)
 
 ------------------------------------------------------------------------
+
+Each section of examples below progresses from more complete input to
+less complete input, moving from miminal required inference to maximal
+inference on the part of the function. Similarly, the structure
+highlights the flexibility of the function across diverse study designs
+and input constraints.
 
 ### Unstandardized Beta Cases
 
 ``` r
-# 1. Basic z-test with coefficient and SE; default 95% CI and 3 digits
+# 1. Basic: coefficient and SE provided, assume z-test
 backcalc_coeffs(b = 0.5, se = 0.1)
 ```
+
+    Note(s):
+    p-value computed from statistic.
 
     Estimate       SE        z       df        p       LL       UL 
        0.500    0.100    5.000       NA    0.000    0.304    0.696 
 
 ``` r
-# 2. Large sample z-test with coefficient and SE; high precision output
-backcalc_coeffs(b = 0.15, se = 0.02, digits = 5)
-```
-
-    Estimate       SE        z       df        p       LL       UL 
-      0.1500   0.0200   7.5000       NA   0.0000   0.1108   0.1892 
-
-``` r
-# 3. T-test from coefficient and p-value with df; default 95% CI
+# 2. Coefficient and p-value given, with df for t-test; infer SE and t
 backcalc_coeffs(b = 1.2, p = 0.03, df = 28)
 ```
 
     Note(s):
-    Test statistic approximated from p-value and estimate.
+    Sample size inferred from df (n = df + 1).
+    Statistic approximated from p-value and estimate.
     SE approximated from estimate and reconstructed statistic.
 
     Estimate       SE        t       df        p       LL       UL 
        1.200    0.525    2.286   28.000    0.030    0.125    2.275 
 
 ``` r
-# 4. Estimate and confidence interval given; infer SE and t-statistic with df
-backcalc_coeffs(b = 0.8, ci = c(0.2, 1.4), df = 45, digits = 4)
+# 3. Estimate and confidence interval given with df; infer SE and t-statistic
+backcalc_coeffs(b = 0.8, ci = c(0.2, 1.4), df = 45)
 ```
 
     Note(s):
+    Sample size inferred from df (n = df + 1).
     SE approximated from CI width.
+    p-value computed from statistic.
 
     Estimate       SE        t       df        p       LL       UL 
-      0.8000   0.2979   2.6855  45.0000   0.0101   0.2000   1.4000 
+       0.800    0.298    2.685   45.000    0.010    0.200    1.400 
 
 ``` r
-# 5. Use all inputs: b, se, SDs, p-value, df, one-sided test, and custom digits
-backcalc_coeffs(b = 1.1, se = 0.3, sd_x = 2.5, sd_y = 5, p = 0.04, df = 30, one_sided = TRUE, digits = 4)
+# 4. Estimate, SE, and sample size given; infer df and CI
+backcalc_coeffs(b = -0.7, se = 0.2, n = 50)
 ```
 
     Note(s):
-    Standardized beta approximated from unstandardized beta and standard deviations.
-    SE of standardized beta approximated from unstandardized SE and SDs.
-
-    Estimate       SE        t       df    p_one       LL       UL 
-      0.5500   0.1500   3.6667  30.0000   0.0400   0.2954   0.8046 
-
-``` r
-# 6. One-sided t-test with coefficient, p-value, and df; 90% CI specified
-backcalc_coeffs(b = -0.7, p = 0.01, df = 20, one_sided = TRUE, conf.level = 0.90)
-```
-
-    Note(s):
-    Test statistic approximated from p-value and estimate.
-    SE approximated from estimate and reconstructed statistic.
-
-    Estimate       SE        t       df    p_one       LL       UL 
-      -0.700    0.277   -2.528   20.000    0.010   -1.067   -0.333 
-
-``` r
-# 7. Minimal input: coefficient and p-value with df; change CI level and rounding
-backcalc_coeffs(b = 1.5, p = 0.02, df = 25, conf.level = 0.90, digits = 4)
-```
-
-    Note(s):
-    Test statistic approximated from p-value and estimate.
-    SE approximated from estimate and reconstructed statistic.
+    df inferred from sample size (df = n - 1).
+    p-value computed from statistic.
 
     Estimate       SE        t       df        p       LL       UL 
-      1.5000   0.6036   2.4851  25.0000   0.0200   0.4690   2.5310 
+      -0.700    0.200   -3.500   49.000    0.001   -1.102   -0.298 
+
+``` r
+# 5. Estimate and test statistic provided directly with df; infer SE and p
+backcalc_coeffs(b = 0.9, statistic = 2.3, df = 30)
+```
+
+    Note(s):
+    Sample size inferred from df (n = df + 1).
+    SE approximated from estimate and provided statistic.
+    p-value computed from statistic.
+
+    Estimate       SE        t       df        p       LL       UL 
+       0.900    0.391    2.300   30.000    0.029    0.101    1.699 
 
 ### Standardized Beta and Conversion Cases
 
 ``` r
-# 8. Standardized beta and SE only; uses z-test by default
-backcalc_coeffs(std_beta = 0.25, se_std = 0.04, conf.level = 0.99)
+# 6. Standardized beta and SE_std given; z-test assumed
+backcalc_coeffs(std_beta = 0.25, se_std = 0.04)
 ```
 
+    Note(s):
+    p-value computed from statistic.
+
     Estimate       SE        z       df        p       LL       UL 
-       0.250    0.040    6.250       NA    0.000    0.147    0.353 
+       0.250    0.040    6.250       NA    0.000    0.172    0.328 
 
 ``` r
-# 9. Convert unstandardized b and SE to standardized beta using SDs; default CI and digits
-backcalc_coeffs(b = 2.0, se = 0.5, sd_x = 3, sd_y = 6)
+# 7. Unstandardized beta and SDs given; infer standardized beta and SE_std
+backcalc_coeffs(b = 1.1, se = 0.3, sd_x = 2.5, sd_y = 5)
 ```
 
     Note(s):
     Standardized beta approximated from unstandardized beta and standard deviations.
     SE of standardized beta approximated from unstandardized SE and SDs.
+    p-value computed from statistic.
 
     Estimate       SE        z       df        p       LL       UL 
-        1.00     0.25     4.00       NA     0.00     0.51     1.49 
+       0.550    0.150    3.667       NA    0.000    0.256    0.844 
 
 ``` r
-# 10. Standardized beta with confidence interval only; infer SE and stats, use 99% CI
-backcalc_coeffs(std_beta = 0.4, ci = c(0.1, 0.7), conf.level = 0.99)
+# 8. Standardized beta, p-value, and df given; infer SE_std and t-statistic
+backcalc_coeffs(std_beta = 0.3, p = 0.02, df = 25)
 ```
 
     Note(s):
-    SE approximated from CI width.
+    Sample size inferred from df (n = df + 1).
+    Statistic approximated from p-value and estimate.
+    SE approximated from estimate and reconstructed statistic.
 
-    Estimate       SE        z       df        p       LL       UL 
-       0.400    0.116    3.434       NA    0.001    0.100    0.700 
-
-### Cases That Do Not Work
+    Estimate       SE        t       df        p       LL       UL 
+       0.300    0.121    2.485   25.000    0.020    0.051    0.549 
 
 ``` r
-# 11. No coefficient or standardized beta provided
-backcalc_coeffs(se = 0.1)
+# 9. Provide standardized beta, CI, and sample size; infer SE_std and p
+backcalc_coeffs(std_beta = 0.4, ci = c(0.1, 0.7), n = 40)
 ```
 
-    Insufficient information: cannot estimate coefficient or SE, even approximately. 
+    Note(s):
+    df inferred from sample size (df = n - 1).
+    SE approximated from CI width.
+    p-value computed from statistic.
+
+    Estimate       SE        t       df        p       LL       UL 
+       0.400    0.148    2.697   39.000    0.010    0.100    0.700 
 
 ``` r
-# 12. Only p-value provided, no coefficient or SE
+# 10. Standardized beta and statistic given with df; infer SE_std and p
+backcalc_coeffs(std_beta = 0.35, statistic = 2.1, df = 29)
+```
+
+    Note(s):
+    Sample size inferred from df (n = df + 1).
+    SE approximated from estimate and provided statistic.
+    p-value computed from statistic.
+
+    Estimate       SE        t       df        p       LL       UL 
+       0.350    0.167    2.100   29.000    0.045    0.009    0.691 
+
+### Insufficient Information Cases
+
+``` r
+# 11. Only p-value given, no estimate or SE
 backcalc_coeffs(p = 0.05)
 ```
 
-    Insufficient information: cannot estimate coefficient or SE, even approximately. 
+    Insufficient information: cannot estimate coefficient or SE. 
 
 ``` r
-# 13. Only df and se provided — missing estimate (b or std_beta), no CI or p-value
-backcalc_coeffs(se = 0.1, df = 30)
+# 12. Only SE given, no estimate
+backcalc_coeffs(se = 0.15)
 ```
 
-    Insufficient information: cannot estimate coefficient or SE, even approximately. 
+    Insufficient information: cannot estimate coefficient or SE. 
 
 ``` r
-# 14. Standardized beta provided without SE or SDs to infer SE
-backcalc_coeffs(std_beta = 0.4)
+# 13. Only confidence interval lower bound (invalid length)
+backcalc_coeffs(ci = 0.3)
 ```
 
-    Insufficient information: cannot estimate coefficient or SE, even approximately. 
+    CI must be a numeric vector of length 2.
+    Insufficient information: cannot estimate coefficient or SE. 
+
+``` r
+# 14. Only standardized SE given, no standardized beta
+backcalc_coeffs(se_std = 0.05)
+```
+
+    Insufficient information: cannot estimate coefficient or SE. 
+
+``` r
+# 15. Only sample size given, no estimate, SE, or p
+backcalc_coeffs(n = 100)
+```
+
+    Insufficient information: cannot estimate coefficient or SE. 

@@ -31,56 +31,61 @@ revised_toc(thisfile, base_level = 3, toc_depth = 4)
 
 ---
 
+Each section of examples below progresses from more complete input to less complete input, moving from miminal required inference to maximal inference on the part of the function. Similarly, the structure highlights the flexibility of the function across diverse study designs and input constraints.
+
 ### One Sample Cases
 
 ```{r}
-# 1. Basic single-sample (Wald)
-backcalc_props(prop = 0.45, n = 100)
+# 1. Least inference: Provide proportion and sample size only
+backcalc_props(prop = 0.4, n = 100)
 
-# 2. Exact interval with counts, more precision
-backcalc_props(x = 45, n = 100, interval_type = "exact", digits = 4)
+# 2. Provide count and sample size, infer proportion and SE
+backcalc_props(x = 45, n = 120)
 
-# 3. Exact interval, one-sided test
-backcalc_props(x = 30, n = 80, interval_type = "exact", one_sided = TRUE)
+# 3. Provide proportion, sample size, and test statistic (z)
+backcalc_props(prop = 0.5, n = 150, statistic = 2.1)
 
-# 4. Given confidence interval (Wald)
-backcalc_props(ci = c(0.30, 0.50), prop = 0.40, n = 80)
+# 4. Provide proportion, sample size, and p-value, infer SE and statistic
+backcalc_props(prop = 0.35, n = 80, p = 0.04)
 
-# 5. SE and p-value provided (Wald)
-backcalc_props(prop = 0.52, se = 0.05, p = 0.03, n = 90)
-
-# 6. One-sided, exact interval, custom rounding
-backcalc_props(x = 72, n = 120, one_sided = TRUE, interval_type = "exact", digits = 4)
-
-# 7. Exact interval with explicit x
-backcalc_props(x = 20, n = 50, interval_type = "exact", digits = 3)
+# 5. Provide proportion, t-statistic, and degrees of freedom, infer SE and p
+backcalc_props(prop = 0.6, statistic = 2.2, df = 19)
 ```
 
 ### Two Sample Cases
 
 ```{r}
-# 8. Two-sample proportions, Wald intervals
-backcalc_props(prop = c(0.55, 0.40), n = c(150, 130))
+# 6. Least inference: Provide two proportions and sample sizes only
+backcalc_props(prop = c(0.55, 0.4), n = c(150, 130))
 
-# 9. Two-sample proportions, with p-value and rounding
-backcalc_props(prop = c(0.25, 0.35), n = c(100, 110), p = 0.04, digits = 4)
+# 7. Provide two proportions, sample sizes, and test statistic (z)
+backcalc_props(prop = c(0.6, 0.5), n = c(120, 110), statistic = 2.2)
 
-# 10. Two-sample proportions with estimates only
-backcalc_props(prop = c(0.65, 0.58), n = c(140, 135))
+# 8. Provide two proportions, sample sizes, and p-value, infer SE and statistic
+backcalc_props(prop = c(0.3, 0.35), n = c(100, 110), p = 0.05)
+
+# 9. Provide counts and sample sizes for two groups, infer difference and SE
+backcalc_props(x = c(40, 30), n = c(100, 90))
+
+# 10. Provide two proportions, p-value, and degrees of freedom (t-test)
+backcalc_props(prop = c(0.45, 0.5), p = 0.04, df = 50)
 ```
 
-### Cases That Do Not Work
+### Insufficient Information Cases
 
 ```{r}
-# 11. No inputs at all - nothing to compute
+# 11. No prop, no counts, no SE — cannot infer
 backcalc_props()
 
-# 12. Single proportion but missing sample size 'n' (needed for SE estimation)
-backcalc_props(prop = 0.5)
+# 12. Provide statistic and sample size only, no prop or se — infer prop and SE
+backcalc_props(statistic = 2.1, n = 50)
 
-# 13. Two proportions provided but sample sizes missing (needed for two-sample calculation)
-backcalc_props(prop = c(0.3, 0.4))
+# 13. Provide n only, no prop, counts, or se
+backcalc_props(n = 100)
 
-# 14. Exact interval requested without providing counts 'x' and sample size 'n'
-backcalc_props(prop = 0.6, interval_type = "exact")
+# 14. Provide counts but missing sample size
+backcalc_props(x = 30)
+
+# 15. Provide CI but no counts or proportion — cannot compute estimate or SE
+backcalc_props(ci = c(0.2, 0.8))
 ```

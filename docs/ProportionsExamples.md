@@ -2,151 +2,135 @@
 
 - [One Sample Cases](#one-sample-cases)
 - [Two Sample Cases](#two-sample-cases)
-- [Cases That Do Not Work](#cases-that-do-not-work)
+- [Insufficient Information Cases](#insufficient-information-cases)
 
 ------------------------------------------------------------------------
+
+Each section of examples below progresses from more complete input to
+less complete input, moving from miminal required inference to maximal
+inference on the part of the function. Similarly, the structure
+highlights the flexibility of the function across diverse study designs
+and input constraints.
 
 ### One Sample Cases
 
 ``` r
-# 1. Basic single-sample (Wald)
-backcalc_props(prop = 0.45, n = 100)
+# 1. Least inference: Provide proportion and sample size only
+backcalc_props(prop = 0.4, n = 100)
 ```
 
-    Note(s):
-    SE estimated from prop and n using Wald approximation.
-
-    Estimate       SE        z        p       LL       UL 
-       0.450    0.201    2.239    0.025    0.514    0.699 
+    Estimate       SE        z       df        p       LL       UL 
+       0.400    0.049    8.165       NA    0.000    0.304    0.496 
 
 ``` r
-# 2. Exact interval with counts, more precision
-backcalc_props(x = 45, n = 100, interval_type = "exact", digits = 4)
+# 2. Provide count and sample size, infer proportion and SE
+backcalc_props(x = 45, n = 120)
 ```
 
-    Note(s):
-    Estimate computed as x/n.
-    SE estimated from prop and n using Wald approximation.
-
-    Estimate       SE        z        p       LL       UL 
-      0.4500   0.2010   2.2387   0.0252   0.5140   0.6993 
+    Estimate       SE        z       df        p       LL       UL 
+       0.375    0.044    8.485       NA    0.000    0.288    0.462 
 
 ``` r
-# 3. Exact interval, one-sided test
-backcalc_props(x = 30, n = 80, interval_type = "exact", one_sided = TRUE)
+# 3. Provide proportion, sample size, and test statistic (z)
+backcalc_props(prop = 0.5, n = 150, statistic = 2.1)
 ```
 
-    Note(s):
-    Estimate computed as x/n.
-    SE estimated from prop and n using Wald approximation.
-
-    Estimate       SE        z    p_one       LL       UL 
-       0.375    0.231    1.624    0.052    0.520    0.662 
+    Estimate       SE        z       df        p       LL       UL 
+       0.500    0.041    2.100       NA    0.036    0.420    0.580 
 
 ``` r
-# 4. Given confidence interval (Wald)
-backcalc_props(ci = c(0.30, 0.50), prop = 0.40, n = 80)
+# 4. Provide proportion, sample size, and p-value, infer SE and statistic
+backcalc_props(prop = 0.35, n = 80, p = 0.04)
 ```
 
-    Note(s):
-    SE estimated from prop and n using Wald approximation.
-
-    Estimate       SE        z        p       LL       UL 
-       0.400    0.228    1.753    0.080    0.488    0.700 
+    Estimate       SE        z       df        p       LL       UL 
+       0.350    0.053    6.563       NA    0.040    0.245    0.455 
 
 ``` r
-# 5. SE and p-value provided (Wald)
-backcalc_props(prop = 0.52, se = 0.05, p = 0.03, n = 90)
+# 5. Provide proportion, t-statistic, and degrees of freedom, infer SE and p
+backcalc_props(prop = 0.6, statistic = 2.2, df = 19)
 ```
 
-    Estimate       SE        z        p       LL       UL 
-       0.520    0.050   10.400    0.030    0.604    0.650 
+    Inferred n = 116 from prop and statistic 
 
-``` r
-# 6. One-sided, exact interval, custom rounding
-backcalc_props(x = 72, n = 120, one_sided = TRUE, interval_type = "exact", digits = 4)
-```
-
-    Note(s):
-    Estimate computed as x/n.
-    SE estimated from prop and n using Wald approximation.
-
-    Estimate       SE        z    p_one       LL       UL 
-      0.6000   0.1863   3.2199   0.0006   0.5893   0.6982 
-
-``` r
-# 7. Exact interval with explicit x
-backcalc_props(x = 20, n = 50, interval_type = "exact", digits = 3)
-```
-
-    Note(s):
-    Estimate computed as x/n.
-    SE estimated from prop and n using Wald approximation.
-
-    Estimate       SE        z        p       LL       UL 
-       0.400    0.289    1.386    0.166    0.459    0.724 
+    Estimate       SE        z       df        p       LL       UL 
+       0.600    0.045    2.200       NA    0.028    0.511    0.689 
 
 ### Two Sample Cases
 
 ``` r
-# 8. Two-sample proportions, Wald intervals
-backcalc_props(prop = c(0.55, 0.40), n = c(150, 130))
+# 6. Least inference: Provide two proportions and sample sizes only
+backcalc_props(prop = c(0.55, 0.4), n = c(150, 130))
 ```
 
-    Note(s):
-    Two-sample SE calculated using Wald formula for difference in proportions.
-
-    Estimate       SE        z        p       LL       UL 
-       0.150    0.059    2.537    0.011    0.034    0.266 
+    Estimate       SE        z       df        p       LL       UL 
+       0.150    0.059    2.537       NA    0.011    0.034    0.266 
 
 ``` r
-# 9. Two-sample proportions, with p-value and rounding
-backcalc_props(prop = c(0.25, 0.35), n = c(100, 110), p = 0.04, digits = 4)
+# 7. Provide two proportions, sample sizes, and test statistic (z)
+backcalc_props(prop = c(0.6, 0.5), n = c(120, 110), statistic = 2.2)
 ```
 
-    Note(s):
-    Two-sample SE calculated using Wald formula for difference in proportions.
-
-    Estimate       SE        z        p       LL       UL 
-     -0.1000   0.0628  -1.5925   0.0400  -0.2231   0.0231 
+    Estimate       SE        z       df        p       LL       UL 
+       0.100    0.065    2.200       NA    0.028   -0.028    0.228 
 
 ``` r
-# 10. Two-sample proportions with estimates only
-backcalc_props(prop = c(0.65, 0.58), n = c(140, 135))
+# 8. Provide two proportions, sample sizes, and p-value, infer SE and statistic
+backcalc_props(prop = c(0.3, 0.35), n = c(100, 110), p = 0.05)
 ```
 
-    Note(s):
-    Two-sample SE calculated using Wald formula for difference in proportions.
-
-    Estimate       SE        z        p       LL       UL 
-       0.070    0.059    1.195    0.232   -0.045    0.185 
-
-### Cases That Do Not Work
+    Estimate       SE        z       df        p       LL       UL 
+      -0.050    0.065   -0.774       NA    0.050   -0.177    0.077 
 
 ``` r
-# 11. No inputs at all - nothing to compute
+# 9. Provide counts and sample sizes for two groups, infer difference and SE
+backcalc_props(x = c(40, 30), n = c(100, 90))
+```
+
+    Estimate       SE        z       df        p       LL       UL 
+       0.067    0.070    0.955       NA    0.339   -0.070    0.203 
+
+``` r
+# 10. Provide two proportions, p-value, and degrees of freedom (t-test)
+backcalc_props(prop = c(0.45, 0.5), p = 0.04, df = 50)
+```
+
+    Estimate       SE        t       df        p       LL       UL 
+      -0.050    0.024   -2.109   50.000    0.040   -0.098   -0.002 
+
+### Insufficient Information Cases
+
+``` r
+# 11. No prop, no counts, no SE — cannot infer
 backcalc_props()
 ```
 
-    Provide 'prop' or both 'x' and 'n'. 
+    Insufficient input: Provide 'prop' or ('x' and 'n').
 
 ``` r
-# 12. Single proportion but missing sample size 'n' (needed for SE estimation)
-backcalc_props(prop = 0.5)
+# 12. Provide statistic and sample size only, no prop or se — infer prop and SE
+backcalc_props(statistic = 2.1, n = 50)
 ```
 
-    Insufficient information: provide 'se', 'n', 'ci', or 'p' with 'estimate'. 
+    Insufficient input: Provide 'prop' or ('x' and 'n').
 
 ``` r
-# 13. Two proportions provided but sample sizes missing (needed for two-sample calculation)
-backcalc_props(prop = c(0.3, 0.4))
+# 13. Provide n only, no prop, counts, or se
+backcalc_props(n = 100)
 ```
 
-    Insufficient information: provide 'se', 'n', 'ci', or 'p' with 'estimate'. 
+    Insufficient input: Provide 'prop' or ('x' and 'n').
 
 ``` r
-# 14. Exact interval requested without providing counts 'x' and sample size 'n'
-backcalc_props(prop = 0.6, interval_type = "exact")
+# 14. Provide counts but missing sample size
+backcalc_props(x = 30)
 ```
 
-    Insufficient information: provide 'se', 'n', 'ci', or 'p' with 'estimate'. 
+    Insufficient input: Provide 'prop' or ('x' and 'n').
+
+``` r
+# 15. Provide CI but no counts or proportion — cannot compute estimate or SE
+backcalc_props(ci = c(0.2, 0.8))
+```
+
+    Insufficient input: Provide 'prop' or ('x' and 'n').

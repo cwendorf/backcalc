@@ -1,143 +1,161 @@
 ## Means Examples
 
 - [One Sample Cases](#one-sample-cases)
-- [Paired and Two Sample Cases](#paired-and-two-sample-cases)
-- [Cases That Do Not Work](#cases-that-do-not-work)
+- [Two Sample Cases](#two-sample-cases)
+- [Insufficient Information Cases](#insufficient-information-cases)
 
 ------------------------------------------------------------------------
+
+Each section of examples below progresses from more complete input to
+less complete input, moving from miminal required inference to maximal
+inference on the part of the function. Similarly, the structure
+highlights the flexibility of the function across diverse study designs
+and input constraints.
 
 ### One Sample Cases
 
 ``` r
-# 1. Confidence interval only (m & SE inferred)
-backcalc_means(ci = c(2.1, 4.9), digits = 2)
+# 1. Direct estimate with SE and sample size (minimal inference, t-distribution used)
+backcalc_means(m = 25.4, se = 2.1, n = 30)
+```
+
+    Estimate       SE        z       df        p       LL       UL 
+      25.400    2.100   12.095       NA    0.000   21.284   29.516 
+
+``` r
+# 2. Estimate with SD and sample size (SE is inferred, t-distribution used)
+backcalc_means(m = 25.4, sd = 10, n = 30)
+```
+
+    Note(s):
+    SE approximated from sd and n.
+
+    Estimate       SE        z       df        p       LL       UL 
+      25.400    1.826   13.912       NA    0.000   21.822   28.978 
+
+``` r
+# 3. Estimate with confidence interval and sample size (SE is inferred from CI)
+backcalc_means(m = 30, ci = c(25, 35), n = 25)
 ```
 
     Note(s):
     SE approximated from CI width.
 
     Estimate       SE        z       df        p       LL       UL 
-        3.50     0.71     4.90       NA     0.00     2.10     4.90 
+      30.000    2.551   11.760       NA    0.000   25.000   35.000 
 
 ``` r
-# 2. m + SE (z assumed)
-backcalc_means(m = 5.2, se = 1.1, digits = 3)
-```
-
-    Estimate       SE        z       df        p       LL       UL 
-       5.200    1.100    4.727       NA    0.000    3.044    7.356 
-
-``` r
-# 3. m + SE + df (standard t-test)
-backcalc_means(m = 3.5, se = 0.8, df = 28, digits = 3)
-```
-
-    Estimate       SE        t       df        p       LL       UL 
-       3.500    0.800    4.375   28.000    0.000    1.861    5.139 
-
-``` r
-# 4. m + p-value + df (SE inferred from p)
-backcalc_means(m = 2.8, p = 0.023, df = 35, digits = 4)
+# 4. Estimate with p-value and degrees of freedom (SE and test statistic inferred)
+backcalc_means(m = 2.5, p = 0.03, df = 29)
 ```
 
     Note(s):
     Test statistic and SE approximated from p-value and estimate.
 
     Estimate       SE        t       df        p       LL       UL 
-      2.8000   1.1775   2.3780  35.0000   0.0230   0.4096   5.1904 
+       2.500    1.095    2.282   29.000    0.030    0.260    4.740 
 
 ``` r
-# 5. CI + df (m and SE inferred)
-backcalc_means(ci = c(4.5, 7.3), df = 15, digits = 3)
+# 5. Estimate with no SE, but p-value and sample size given (df is inferred, t-statistic and SE inferred)
+backcalc_means(m = 2.1, p = 0.05, n = 16)
+```
+
+    Note(s):
+    Test statistic and SE approximated from p-value and estimate.
+
+    Estimate       SE        z       df        p       LL       UL 
+       2.100    1.071    1.960       NA    0.050    0.000    4.200 
+
+### Two Sample Cases
+
+``` r
+# 6. Means, SDs, and ns provided (calculate difference, SE, df)
+backcalc_means(m = c(15, 12), sd = c(4, 5), n = c(40, 35))
+```
+
+    Note(s):
+    Welch-Satterthwaite approximation used for df.
+
+    Estimate       SE        t       df        p       LL       UL 
+       3.000    1.056    2.842   65.000    0.006    0.892    5.108 
+
+``` r
+# 7. Difference of means and SE provided
+backcalc_means(m = c(15, 12), se = 1.5, n = c(40, 35))
+```
+
+    Estimate       SE        z       df        p       LL       UL 
+       3.000    1.500    2.000       NA    0.046    0.060    5.940 
+
+``` r
+# 8. Means and p-value + df provided (infer SE and statistic)
+backcalc_means(m = c(10, 7), p = 0.04, df = 50)
+```
+
+    Note(s):
+    Test statistic and SE approximated from p-value and estimate.
+
+    Estimate       SE        t       df        p       LL       UL 
+       3.000    1.423    2.109   50.000    0.040    0.142    5.858 
+
+``` r
+# 9. Means and confidence interval provided (infer SE, df)
+backcalc_means(m = c(100, 90), ci = c(2, 18), n = c(50, 45))
 ```
 
     Note(s):
     SE approximated from CI width.
 
-    Estimate       SE        t       df        p       LL       UL 
-       5.900    0.657    8.983   15.000    0.000    4.500    7.300 
-
-### Paired and Two Sample Cases
+    Estimate       SE        z       df        p       LL       UL 
+      10.000    4.082    2.450       NA    0.014    2.000   18.000 
 
 ``` r
-# 6. Paired sample with m, se, and n only (df inferred)
-backcalc_means(m = 1.5, se = 0.5, n = 15, paired = TRUE, digits = 3)
+# 10. Means and SDs provided, but only n for one group (more complex inference)
+backcalc_means(m = c(8, 5), sd = c(3, 4), n = 20)
 ```
 
     Note(s):
-    Degrees of freedom approximated as n - 1 for paired design.
+    SE approximated from sd and n.
 
-    Estimate       SE        t       df        p       LL       UL 
-       1.500    0.500    3.000   14.000    0.010    0.428    2.572 
+      Estimate        SE1        SE2 statistic1 statistic2         df         p1 
+         3.000      0.671      0.894      4.472      3.354         NA      0.000 
+            p2        LL1        LL2        UL1        UL2 
+         0.001      1.685      1.247      4.315      4.753 
 
-``` r
-# 7. Paired sample with m, p, and n (df inferred, one-sided test)
-backcalc_means(m = 1.2, p = 0.03, n = 12, paired = TRUE, one_sided = TRUE, digits = 3)
-```
-
-    Note(s):
-    Degrees of freedom approximated as n - 1 for paired design.
-    Test statistic and SE approximated from p-value and estimate.
-
-    Estimate       SE        t       df    p-one       LL       UL 
-       1.200    0.572    2.096   11.000    0.030    0.172    2.228 
+### Insufficient Information Cases
 
 ``` r
-# 8. m + two-group SDs + equal ns (classic t test)
-backcalc_means(m = 1.2, sd = c(10, 11), n = c(30, 30), digits = 3)
+# 11. No mean, SE, p, or CI provided
+backcalc_means(n = 15)
 ```
 
-    Note(s):
-    Welch-Satterthwaite approximation used for df.
-
-    Estimate       SE        t       df        p       LL       UL 
-       1.200    2.714    0.442   57.000    0.660   -4.234    6.634 
+    Insufficient input: Provide estimate and at least one of SE, p-value, CI, or test statistic. 
 
 ``` r
-# 9. m + two-group SDs + unequal ns (Welch correction auto)
-backcalc_means(m = 2.4, sd = c(5, 6), n = c(30, 40), digits = 2)
+# 12. Mean provided with SD but no n or SE
+backcalc_means(m = 7, sd = 2)
 ```
 
-    Note(s):
-    Welch-Satterthwaite approximation used for df.
-
-    Estimate       SE        t       df        p       LL       UL 
-        2.40     1.32     1.82    67.00     0.07    -0.23     5.03 
+    Cannot compute SE from SD without sample size (n).
+    Insufficient input: Provide estimate and at least one of SE, p-value, CI, or test statistic. 
 
 ``` r
-# 10. m + two-group SDs + df + unequal ns (redundant info, Welch correction)
-backcalc_means(m = 4.1, sd = c(5.5, 6.0), n = c(20, 25), df = 43, digits = 4)
+# 13. Only p-value and df provided (no estimate or SE)
+backcalc_means(p = 0.05, df = 20)
 ```
 
-    Estimate       SE        t       df        p       LL       UL 
-      4.1000   1.7183   2.3861  43.0000   0.0215   0.6348   7.5652 
-
-### Cases That Do Not Work
+    Insufficient input: Provide estimate and at least one of SE, p-value, CI, or test statistic. 
 
 ``` r
-# 11. Only p-value (insufficient to infer m or SE)
-backcalc_means(p = 0.05)
+# 14. Mean and df provided, but no SE, p, or CI
+backcalc_means(m = 5.6, df = 10)
 ```
 
-    Insufficient input: Provide estimate and at least one of SE, p-value, or CI. 
+    Insufficient input: Provide estimate and at least one of SE, p-value, CI, or test statistic. 
 
 ``` r
-# 12. m + n only (no SD or SE provided)
-backcalc_means(m = 1.7, n = 25)
+# 15. Only statistic and df provided (no estimate or SE)
+backcalc_means(statistic = 2.5, df = 18)
 ```
 
-    Insufficient input: Provide estimate and at least one of SE, p-value, or CI. 
-
-``` r
-# 13. m + SD only (sample size missing)
-backcalc_means(m = 2.1, sd = 4.5)
-```
-
-    Insufficient input: Provide estimate and at least one of SE, p-value, or CI. 
-
-``` r
-# 14. Two-group SDs + two sample sizes (no m provided)
-backcalc_means(sd = c(7, 8), n = c(25, 30))
-```
-
-    Insufficient input: Provide estimate and at least one of SE, p-value, or CI. 
+    Insufficient input: Provide estimate and at least one of SE, p-value, CI, or test statistic. 

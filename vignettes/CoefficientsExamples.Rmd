@@ -31,56 +31,61 @@ revised_toc(thisfile, base_level = 3, toc_depth = 4)
 
 ---
 
+Each section of examples below progresses from more complete input to less complete input, moving from miminal required inference to maximal inference on the part of the function. Similarly, the structure highlights the flexibility of the function across diverse study designs and input constraints.
+
 ### Unstandardized Beta Cases
 
 ```{r}
-# 1. Basic z-test with coefficient and SE; default 95% CI and 3 digits
+# 1. Basic: coefficient and SE provided, assume z-test
 backcalc_coeffs(b = 0.5, se = 0.1)
 
-# 2. Large sample z-test with coefficient and SE; high precision output
-backcalc_coeffs(b = 0.15, se = 0.02, digits = 5)
-
-# 3. T-test from coefficient and p-value with df; default 95% CI
+# 2. Coefficient and p-value given, with df for t-test; infer SE and t
 backcalc_coeffs(b = 1.2, p = 0.03, df = 28)
 
-# 4. Estimate and confidence interval given; infer SE and t-statistic with df
-backcalc_coeffs(b = 0.8, ci = c(0.2, 1.4), df = 45, digits = 4)
+# 3. Estimate and confidence interval given with df; infer SE and t-statistic
+backcalc_coeffs(b = 0.8, ci = c(0.2, 1.4), df = 45)
 
-# 5. Use all inputs: b, se, SDs, p-value, df, one-sided test, and custom digits
-backcalc_coeffs(b = 1.1, se = 0.3, sd_x = 2.5, sd_y = 5, p = 0.04, df = 30, one_sided = TRUE, digits = 4)
+# 4. Estimate, SE, and sample size given; infer df and CI
+backcalc_coeffs(b = -0.7, se = 0.2, n = 50)
 
-# 6. One-sided t-test with coefficient, p-value, and df; 90% CI specified
-backcalc_coeffs(b = -0.7, p = 0.01, df = 20, one_sided = TRUE, conf.level = 0.90)
-
-# 7. Minimal input: coefficient and p-value with df; change CI level and rounding
-backcalc_coeffs(b = 1.5, p = 0.02, df = 25, conf.level = 0.90, digits = 4)
+# 5. Estimate and test statistic provided directly with df; infer SE and p
+backcalc_coeffs(b = 0.9, statistic = 2.3, df = 30)
 ```
 
 ### Standardized Beta and Conversion Cases
 
 ```{r}
-# 8. Standardized beta and SE only; uses z-test by default
-backcalc_coeffs(std_beta = 0.25, se_std = 0.04, conf.level = 0.99)
+# 6. Standardized beta and SE_std given; z-test assumed
+backcalc_coeffs(std_beta = 0.25, se_std = 0.04)
 
-# 9. Convert unstandardized b and SE to standardized beta using SDs; default CI and digits
-backcalc_coeffs(b = 2.0, se = 0.5, sd_x = 3, sd_y = 6)
+# 7. Unstandardized beta and SDs given; infer standardized beta and SE_std
+backcalc_coeffs(b = 1.1, se = 0.3, sd_x = 2.5, sd_y = 5)
 
-# 10. Standardized beta with confidence interval only; infer SE and stats, use 99% CI
-backcalc_coeffs(std_beta = 0.4, ci = c(0.1, 0.7), conf.level = 0.99)
+# 8. Standardized beta, p-value, and df given; infer SE_std and t-statistic
+backcalc_coeffs(std_beta = 0.3, p = 0.02, df = 25)
+
+# 9. Provide standardized beta, CI, and sample size; infer SE_std and p
+backcalc_coeffs(std_beta = 0.4, ci = c(0.1, 0.7), n = 40)
+
+# 10. Standardized beta and statistic given with df; infer SE_std and p
+backcalc_coeffs(std_beta = 0.35, statistic = 2.1, df = 29)
 ```
 
-### Cases That Do Not Work
+### Insufficient Information Cases
 
 ```{r}
-# 11. No coefficient or standardized beta provided
-backcalc_coeffs(se = 0.1)
-
-# 12. Only p-value provided, no coefficient or SE
+# 11. Only p-value given, no estimate or SE
 backcalc_coeffs(p = 0.05)
 
-# 13. Only df and se provided — missing estimate (b or std_beta), no CI or p-value
-backcalc_coeffs(se = 0.1, df = 30)
+# 12. Only SE given, no estimate
+backcalc_coeffs(se = 0.15)
 
-# 14. Standardized beta provided without SE or SDs to infer SE
-backcalc_coeffs(std_beta = 0.4)
+# 13. Only confidence interval lower bound (invalid length)
+backcalc_coeffs(ci = 0.3)
+
+# 14. Only standardized SE given, no standardized beta
+backcalc_coeffs(se_std = 0.05)
+
+# 15. Only sample size given, no estimate, SE, or p
+backcalc_coeffs(n = 100)
 ```

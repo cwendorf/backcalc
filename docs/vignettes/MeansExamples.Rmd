@@ -31,56 +31,61 @@ revised_toc(thisfile, base_level = 3, toc_depth = 4)
 
 ---
 
+Each section of examples below progresses from more complete input to less complete input, moving from miminal required inference to maximal inference on the part of the function. Similarly, the structure highlights the flexibility of the function across diverse study designs and input constraints.
+
 ### One Sample Cases
 
 ```{r}
-# 1. Confidence interval only (m & SE inferred)
-backcalc_means(ci = c(2.1, 4.9), digits = 2)
+# 1. Direct estimate with SE and sample size (minimal inference, t-distribution used)
+backcalc_means(m = 25.4, se = 2.1, n = 30)
 
-# 2. m + SE (z assumed)
-backcalc_means(m = 5.2, se = 1.1, digits = 3)
+# 2. Estimate with SD and sample size (SE is inferred, t-distribution used)
+backcalc_means(m = 25.4, sd = 10, n = 30)
 
-# 3. m + SE + df (standard t-test)
-backcalc_means(m = 3.5, se = 0.8, df = 28, digits = 3)
+# 3. Estimate with confidence interval and sample size (SE is inferred from CI)
+backcalc_means(m = 30, ci = c(25, 35), n = 25)
 
-# 4. m + p-value + df (SE inferred from p)
-backcalc_means(m = 2.8, p = 0.023, df = 35, digits = 4)
+# 4. Estimate with p-value and degrees of freedom (SE and test statistic inferred)
+backcalc_means(m = 2.5, p = 0.03, df = 29)
 
-# 5. CI + df (m and SE inferred)
-backcalc_means(ci = c(4.5, 7.3), df = 15, digits = 3)
+# 5. Estimate with no SE, but p-value and sample size given (df is inferred, t-statistic and SE inferred)
+backcalc_means(m = 2.1, p = 0.05, n = 16)
 ```
 
-### Paired and Two Sample Cases
+### Two Sample Cases
 
 ```{r}
-# 6. Paired sample with m, se, and n only (df inferred)
-backcalc_means(m = 1.5, se = 0.5, n = 15, paired = TRUE, digits = 3)
+# 6. Means, SDs, and ns provided (calculate difference, SE, df)
+backcalc_means(m = c(15, 12), sd = c(4, 5), n = c(40, 35))
 
-# 7. Paired sample with m, p, and n (df inferred, one-sided test)
-backcalc_means(m = 1.2, p = 0.03, n = 12, paired = TRUE, one_sided = TRUE, digits = 3)
+# 7. Difference of means and SE provided
+backcalc_means(m = c(15, 12), se = 1.5, n = c(40, 35))
 
-# 8. m + two-group SDs + equal ns (classic t test)
-backcalc_means(m = 1.2, sd = c(10, 11), n = c(30, 30), digits = 3)
+# 8. Means and p-value + df provided (infer SE and statistic)
+backcalc_means(m = c(10, 7), p = 0.04, df = 50)
 
-# 9. m + two-group SDs + unequal ns (Welch correction auto)
-backcalc_means(m = 2.4, sd = c(5, 6), n = c(30, 40), digits = 2)
+# 9. Means and confidence interval provided (infer SE, df)
+backcalc_means(m = c(100, 90), ci = c(2, 18), n = c(50, 45))
 
-# 10. m + two-group SDs + df + unequal ns (redundant info, Welch correction)
-backcalc_means(m = 4.1, sd = c(5.5, 6.0), n = c(20, 25), df = 43, digits = 4)
+# 10. Means and SDs provided, but only n for one group (more complex inference)
+backcalc_means(m = c(8, 5), sd = c(3, 4), n = 20)
 ```
 
-### Cases That Do Not Work
+### Insufficient Information Cases
 
 ```{r}
-# 11. Only p-value (insufficient to infer m or SE)
-backcalc_means(p = 0.05)
+# 11. No mean, SE, p, or CI provided
+backcalc_means(n = 15)
 
-# 12. m + n only (no SD or SE provided)
-backcalc_means(m = 1.7, n = 25)
+# 12. Mean provided with SD but no n or SE
+backcalc_means(m = 7, sd = 2)
 
-# 13. m + SD only (sample size missing)
-backcalc_means(m = 2.1, sd = 4.5)
+# 13. Only p-value and df provided (no estimate or SE)
+backcalc_means(p = 0.05, df = 20)
 
-# 14. Two-group SDs + two sample sizes (no m provided)
-backcalc_means(sd = c(7, 8), n = c(25, 30))
+# 14. Mean and df provided, but no SE, p, or CI
+backcalc_means(m = 5.6, df = 10)
+
+# 15. Only statistic and df provided (no estimate or SE)
+backcalc_means(statistic = 2.5, df = 18)
 ```
