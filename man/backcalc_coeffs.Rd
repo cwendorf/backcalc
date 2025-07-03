@@ -2,7 +2,7 @@
 % Please edit documentation in R/backcalc_coeffs.R
 \name{backcalc_coeffs}
 \alias{backcalc_coeffs}
-\title{Backcalc Missing Inferential Statistics for Regression Coefficients}
+\title{Backcalculate Missing Inferential Statistics for Regression Coefficients}
 \usage{
 backcalc_coeffs(
   b = NULL,
@@ -12,8 +12,10 @@ backcalc_coeffs(
   sd_x = NULL,
   sd_y = NULL,
   df = NULL,
+  n = NULL,
   p = NULL,
   ci = NULL,
+  statistic = NULL,
   one_sided = FALSE,
   conf.level = 0.95,
   digits = 3
@@ -28,50 +30,60 @@ backcalc_coeffs(
 
 \item{se_std}{Numeric. Standard error of the standardized coefficient.}
 
-\item{sd_x, }{sd_y Numeric. Standard deviations of predictor and outcome (used to infer standardized beta).}
+\item{sd_x, sd_y}{Numeric. Standard deviations of the predictor and outcome variables. Used to convert between standardized and unstandardized forms.}
 
-\item{df}{Numeric. Degrees of freedom for t-distribution. If omitted, assumes normal distribution (z-test).}
+\item{df}{Numeric. Degrees of freedom for a t-distribution. If omitted but \code{n} is provided, it is inferred as \code{df = n - 1}.}
 
-\item{p}{Numeric. p-value for the coefficient.}
+\item{n}{Integer. Sample size. If \code{df} is missing, \code{df} is inferred as \code{n - 1}. If \code{df} is provided but \code{n} is missing, \code{n = df + 1}.}
 
-\item{ci}{Numeric vector of length 2. Confidence interval for the coefficient.}
+\item{p}{Numeric. P-value associated with the test statistic.}
 
-\item{one_sided}{Logical. Use one-sided test? Default is FALSE.}
+\item{ci}{Numeric vector of length 2. Confidence interval bounds (lower, upper).}
 
-\item{conf.level}{Numeric between 0 and 1. Confidence level for confidence intervals. Default is 0.95.}
+\item{statistic}{Numeric. Test statistic (t or z value), if already known.}
 
-\item{digits}{Integer. Number of decimal digits to round the output. Default is 3.}
+\item{one_sided}{Logical. Whether the hypothesis test is one-sided. Default is \code{FALSE} (two-sided).}
+
+\item{conf.level}{Numeric between 0 and 1. Confidence level for the confidence interval. Default is \code{0.95}.}
+
+\item{digits}{Integer. Number of decimal digits to round the output. Default is \code{3}.}
 }
 \value{
-Named numeric vector with:
+A named numeric vector containing:
 \describe{
-\item{Estimate}{Coefficient (standardized or unstandardized)}
-\item{SE}{Standard error}
-\item{t / z}{Test statistic (t if \code{df} provided, otherwise z)}
-\item{df}{Degrees of freedom, if provided; otherwise NA}
-\item{p / p_one}{Two-sided or one-sided p-value (named \code{p_one} if \code{one_sided = TRUE})}
-\item{LL, UL}{Confidence interval lower and upper bounds, based on \code{conf.level}}
+\item{Estimate}{Regression coefficient (standardized or unstandardized)}
+\item{SE}{Standard error of the coefficient}
+\item{t or z}{Test statistic used, depending on \code{df} presence}
+\item{df}{Degrees of freedom (if available or inferred), otherwise \code{NA}}
+\item{p or p_one}{P-value (one- or two-sided)}
+\item{LL}{Lower bound of the confidence interval}
+\item{UL}{Upper bound of the confidence interval}
 }
 }
 \description{
 \code{backcalc_coeffs()} reconstructs inferential statistics for a regression coefficient.
-It supports unstandardized or standardized coefficients, inferring standard errors,
-confidence intervals, test statistics, and p-values from partial or
-varied combinations of summary and inferential statistics.
+It allows for partial input of summary or inferential statistics and infers missing values
+such as standard errors, test statistics, confidence intervals, p-values, and degrees of freedom.
+It supports both unstandardized and standardized coefficients.
+}
+\details{
+The function infers as much as possible based on the inputs provided. It supports inputs including
+raw correlations, sample sizes, standard errors, confidence intervals, p-values, test statistics, and degrees of freedom.
+
+The function accepts a flexible combination of inputs. If sufficient information is not provided,
+it attempts to approximate missing values where logically possible. Standardized coefficients can be
+derived from unstandardized ones using the provided standard deviations. Missing SEs or test statistics
+may be inferred from confidence intervals or p-values. If both \code{n} and \code{df} are missing,
+a z-distribution is assumed.
 }
 \examples{
-# Basic z-test with coefficient and SE; default 95\% CI and 3 digits
+# Unstandardized beta example: coefficient and SE, z-test assumed
 backcalc_coeffs(b = 0.5, se = 0.1)
-# t-test from coefficient and p-value with df; default 95\% CI
-backcalc_coeffs(b = 1.2, p = 0.03, df = 28)
-# Estimate and confidence interval given; infer SE and t-statistic with df and 4 digits rounding
-backcalc_coeffs(b = 0.8, ci = c(0.2, 1.4), df = 45, digits = 4)
-# Standardized beta and SE only; uses z-test by default with 99\% CI
-backcalc_coeffs(std_beta = 0.25, se_std = 0.04, conf.level = 0.99)
-# Use all inputs including one-sided test and custom rounding digits
-backcalc_coeffs(b = 1.1, se = 0.3, sd_x = 2.5, sd_y = 5,
-                     p = 0.04, df = 30, one_sided = TRUE, digits = 4)
-# One-sided t-test with coefficient, p-value, df, and 90\% CI
-backcalc_coeffs(b = -0.7, p = 0.01, df = 20, one_sided = TRUE, conf.level = 0.90)
+
+# Standardized beta and conversion example: unstandardized beta and SE with SDs to infer standardized beta
+backcalc_coeffs(b = 1.1, se = 0.3, sd_x = 2.5, sd_y = 5)
+
+# Insufficient information example: only p-value provided, no estimate or SE (function returns NULL with warning)
+backcalc_coeffs(p = 0.05)
 
 }

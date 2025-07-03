@@ -12,70 +12,70 @@ backcalc_means(
   df = NULL,
   p = NULL,
   ci = NULL,
+  statistic = NULL,
   paired = FALSE,
   one_sided = FALSE,
+  conf.level = 0.95,
   digits = 3
 )
 }
 \arguments{
-\item{m}{Numeric or length-2 numeric vector. The point m(s) (e.g., mean for one group,
+\item{m}{Numeric or length-2 numeric vector. Point estimate(s) (e.g., mean for one group,
 or two values for two groups where difference = m\link{1} - m\link{2}).}
 
 \item{se}{Numeric. Standard error of the estimate.}
 
-\item{sd}{Numeric or length-2 vector. Standard deviation(s) for one or two groups.}
+\item{sd}{Numeric or length-2 numeric vector. Standard deviation(s) for one or two groups.}
 
-\item{n}{Numeric or length-2 vector. Sample size(s) for one or two groups.}
+\item{n}{Numeric or length-2 numeric vector. Sample size(s) for one or two groups.}
 
 \item{df}{Numeric. Degrees of freedom.}
 
-\item{p}{Numeric. p-value.}
+\item{p}{Numeric. P-value.}
 
 \item{ci}{Numeric vector of length 2. Confidence interval as c(lower, upper).}
 
-\item{paired}{Logical. Whether the data are from a paired/matched design.}
+\item{statistic}{Numeric. Test statistic value (t or z).}
 
-\item{one_sided}{Logical. Whether the test is one-sided (default is two-sided).}
+\item{paired}{Logical. Whether data come from a paired/matched design (default FALSE).}
 
-\item{digits}{Integer. Number of decimal digits to round results to (default = 3).}
+\item{one_sided}{Logical. Whether the test is one-sided (default FALSE).}
+
+\item{conf.level}{Numeric. Confidence level for intervals (default 0.95).}
+
+\item{digits}{Integer. Number of decimal digits to round the results (default 3).}
 }
 \value{
-Named numeric vector with:
+Named numeric vector containing:
 \describe{
 \item{Estimate}{Point estimate (difference if two values provided)}
-\item{SE}{Standard error
-\item{t / z}{Test statistic}
+\item{SE}{Standard error of estimate}
+\item{t / z}{Test statistic (t if df provided, otherwise z)}
 \item{df}{Degrees of freedom (if available)}
-\item{p / p-one}{Two- or one-sided p-value}
+\item{p / p-one}{Two-sided or one-sided p-value}
 \item{LL}{Lower bound of the confidence interval}
 \item{UL}{Upper bound of the confidence interval}
 }
 }
 \description{
-\code{backcalc_means()} reconstructs inferential statistics for means. It supports
-recovering standard errors, confidence intervals, p-values, and test statistics
-from partial or varied combinations of summary and inferential statistics.
+\code{backcalc_means()} reconstructs inferential statistics related to means from partial information.
+It can estimate standard errors, confidence intervals, p-values, test statistics (t or z), degrees of freedom,
+and point estimates when some components are missing, supporting one-sample, paired, and two-sample cases.
+}
+\details{
+The function infers missing statistics using provided inputs. For two-sample tests,
+it calculates standard error and degrees of freedom using pooled or Welch's approximation as appropriate.
+When sample sizes are provided, it defaults to using the t-distribution for inference rather than normal approximation.
+The confidence interval is computed based on the specified \code{conf.level}.
 }
 \examples{
-# One-sample: m + SE only (z-test)
-backcalc_means(m = 40.8, se = 1.19, digits = 3)
+# One-sample example: Mean, SE, and sample size given (uses t-distribution)
+backcalc_means(m = 25.4, se = 2.1, n = 30)
 
-# Two-sample: Provide two ms, function calculates difference
-backcalc_means(m = c(10.5, 7.3), sd = c(5.0, 6.0), n = c(30, 40), digits = 3)
+# Two-sample example: Means, SDs, and sample sizes given (Welch t-test inference)
+backcalc_means(m = c(15, 12), sd = c(4, 5), n = c(40, 35))
 
-# One-sample: m + p-value + df (t-test)
-backcalc_means(m = 2.99, p = 0.045, df = 19, digits = 4)
-
-# Paired-sample: m + SE + df (direct calculation)
-backcalc_means(m = 0.15, se = 0.05, df = 39, paired = TRUE, digits = 2)
-
-# Paired-sample: m + p + n (df inferred)
-backcalc_means(m = 1.2, p = 0.03, n = 12, paired = TRUE, digits = 3)
-
-# Two-sample: m + SDs + unequal ns (Welch t-test, df inferred)
-backcalc_means(m = c(5.0, 2.6), sd = c(5.0, 6.0), n = c(30, 40), digits = 2)
-
-# Two-sample: m + p + df (SE inferred)
-backcalc_means(m = 0.32, p = 0.005, df = 58, digits = 4)
+# Insufficient input example: Mean provided but no SE, p-value, or CI (warns user)
+backcalc_means(m = 25)
 
 }

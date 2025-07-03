@@ -2,7 +2,7 @@
 % Please edit documentation in R/backcalc_ratios.R
 \name{backcalc_ratios}
 \alias{backcalc_ratios}
-\title{Backcalc Missing Inferential Statistics for Ratios}
+\title{Backcalculate Inferential Statistics for Ratio Measures}
 \usage{
 backcalc_ratios(
   ratio = NULL,
@@ -11,60 +11,68 @@ backcalc_ratios(
   df = NULL,
   p = NULL,
   ci = NULL,
+  statistic = NULL,
   one_sided = FALSE,
   digits = 3,
   conf.level = 0.95
 )
 }
 \arguments{
-\item{ratio}{Numeric scalar (one-sample) or length-2 vector (two-sample comparison).
-If a vector of two values is given, inference is based on the difference in their log-transformed values.}
+\item{ratio}{Numeric scalar (for one group) or numeric vector of length 2 (for comparison).
+When a vector of two ratios is supplied, the function compares them via their log difference.}
 
-\item{se}{Numeric. Standard error on the log scale.}
+\item{se}{Numeric. Standard error on the log scale. Can be a scalar or length 2 (for two-group case).}
 
-\item{n}{Integer. Sample size (used to infer df if not provided).}
+\item{n}{Integer. Sample size (used to infer degrees of freedom if \code{df} not given).}
 
-\item{df}{Numeric. Degrees of freedom. Can be a scalar or a vector of length 2 (Welch's approximation).}
+\item{df}{Numeric. Degrees of freedom. Scalar (for t-test) or length 2 (for Welch’s approximation).}
 
-\item{p}{Numeric. p-value.}
+\item{p}{Numeric. p-value (one-sided or two-sided). Used only for display if provided.}
 
-\item{ci}{Numeric vector of length 2. Confidence interval on ratio scale.}
+\item{ci}{Numeric vector of length 2. Confidence interval (on the ratio scale). Used to infer SE if SE not provided.}
 
-\item{one_sided}{Logical. Whether the test is one-sided (default is FALSE).}
+\item{statistic}{Numeric. t or z test statistic. Used to infer SE if not supplied.}
 
-\item{digits}{Integer. Number of digits to round results to (default = 3).}
+\item{one_sided}{Logical. Whether the hypothesis test is one-sided. Default is \code{FALSE}.}
 
-\item{conf.level}{Numeric. Confidence level for interval (default = 0.95).}
+\item{digits}{Integer. Number of digits to round outputs to. Default is \code{3}.}
+
+\item{conf.level}{Numeric. Confidence level used to compute interval. Default is \code{0.95}.}
 }
 \value{
-A named numeric vector with the following components:
+A named numeric vector with the following components, in this order:
 \describe{
-\item{Estimate}{Exponentiated estimate (i.e., the ratio on original scale).}
+\item{Estimate}{Exponentiated point estimate (on the original ratio scale).}
 \item{SE}{Standard error of the log-transformed estimate.}
-\item{z or t}{Test statistic (either z or t, depending on whether \code{df} is provided).}
-\item{df}{Degrees of freedom used for test statistic (if applicable; otherwise \code{NA}).}
-\item{p or p-one}{Two-sided or one-sided p-value (depending on \code{one_sided}).}
-\item{LL}{Lower limit of the confidence interval on the ratio scale.}
-\item{UL}{Upper limit of the confidence interval on the ratio scale.}
+\item{z or t}{Test statistic (label depends on \code{df}).}
+\item{df}{Degrees of freedom used (if applicable).}
+\item{p or p-one}{p-value (two-sided or one-sided, depending on \code{one_sided}).}
+\item{LL}{Lower limit of the confidence interval (on ratio scale).}
+\item{UL}{Upper limit of the confidence interval (on ratio scale).}
 }
 }
 \description{
-\code{backcalc_ratios()} reconstructs inferential statistics for ratio measures
-(e.g., odds ratios, risk ratios) using log-transformation internally. It supports
-reconstructing standard errors, confidence intervals, p-values, and test statistics
-from partial or varied combinations of summary and inferential statistics.
+\code{backcalc_ratios()} reconstructs inferential statistics (e.g., SE, test statistic,
+p-value, confidence interval) for ratio-type measures (such as odds ratios or risk ratios)
+using the log transformation internally. The function allows flexible input and determines
+the appropriate test type (z or t) based on the presence of degrees of freedom.
+}
+\details{
+This function works on the log-transformed scale of ratios. It supports partial information
+input and will infer missing values when possible. In the two-sample case, if both SEs and
+dfs are provided, a Welch–Satterthwaite approximation is used to compute the test df.
+
+If insufficient information is provided (e.g., no SE, CI, or statistic), the function will halt.
+When possible, missing pieces are backcalculated using available data.
 }
 \examples{
-# One-sample odds ratio with SE
+# One-sample example: Ratio and SE provided (no inference needed)
 backcalc_ratios(ratio = 2.5, se = 0.2)
 
-# Two-sample ratio with SEs and Welch-Satterthwaite df
-backcalc_ratios(ratio = c(2.5, 1.5), se = c(0.2, 0.15), df = c(50, 40))
+# Two-sample example: Ratios, SEs, and dfs provided (Welch-Satterthwaite df calculation)
+backcalc_ratios(ratio = c(3.2, 1.9), se = c(0.25, 0.15), df = c(25, 30))
 
-# Infer SE from CI
-backcalc_ratios(ratio = 2.5, ci = c(1.8, 3.2))
-
-# Using one-sided p-value and 4-digit rounding
-backcalc_ratios(ratio = 1.9, se = 0.3, one_sided = TRUE, digits = 4)
+# Insufficient information example: Ratio provided but no SE, statistic, or CI
+backcalc_ratios(ratio = 2.3)
 
 }
