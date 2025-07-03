@@ -3,5 +3,6 @@
 export(backcalc_coeffs)
 export(backcalc_corrs)
 export(backcalc_means)
+export(backcalc_medians)
 export(backcalc_props)
 export(backcalc_ratios)
