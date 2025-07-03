@@ -2,7 +2,7 @@
 % Please edit documentation in R/backcalc_props.R
 \name{backcalc_props}
 \alias{backcalc_props}
-\title{Backcalculate Missing Inferential Statistics for Proportions and Percentages}
+\title{Backcalculate Missing Inferential Statistics for Proportions}
 \usage{
 backcalc_props(
   prop = NULL,
@@ -13,64 +13,63 @@ backcalc_props(
   p = NULL,
   one_sided = FALSE,
   digits = 3,
-  interval_type = c("wald", "exact"),
+  interval_type = "wald",
   statistic = NULL,
   df = NULL,
-  conf.level = 0.95
+  conf.level = 0.95,
+  method = "wald",
+  continuity = FALSE
 )
 }
 \arguments{
-\item{prop}{Proportion estimate(s). Can be a single proportion or a vector of two for a two-sample test.}
+\item{prop}{Numeric vector of proportion(s). For one-sample, a single value; for two-sample, a vector of length 2.}
 
-\item{se}{Standard error. If not provided, it will be computed when possible.}
+\item{se}{Standard error of the estimate, if known.}
 
-\item{n}{Sample size(s). Required for SE calculation unless \code{se} or \code{ci} is provided.
-For two-sample comparisons, supply a numeric vector of length 2.}
+\item{n}{Sample size(s). A single value for one-sample tests, or a vector of length 2 for two-sample tests.}
 
-\item{x}{Count(s) of successes. Used with \code{n} to compute proportion.}
+\item{x}{Count(s) of "successes" (used to compute proportions). A single value or vector of length 2.}
 
-\item{ci}{Confidence interval for the proportion (vector of length 2).}
+\item{ci}{Confidence interval (numeric vector of length 2: lower and upper limits), if already known.}
 
-\item{p}{P-value (optional). If not provided, will be computed from the test statistic.}
+\item{p}{P-value for the test statistic. If not provided, it will be computed when possible.}
 
-\item{one_sided}{Logical; if \code{TRUE}, computes one-sided p-value. Default is \code{FALSE} (two-sided).}
+\item{one_sided}{Logical. Is the test one-sided? Defaults to \code{FALSE} (i.e., two-sided).}
 
-\item{digits}{Number of decimal places for rounding output. Default is 3.}
+\item{digits}{Number of decimal places to round results. Default is 3.}
 
-\item{interval_type}{Method used for inference; currently supports \code{"wald"} (default).}
+\item{interval_type}{Type of confidence interval. Currently unused (placeholder).}
 
-\item{statistic}{Test statistic value (z or t). If not supplied, will be calculated from estimate and SE.}
+\item{statistic}{Observed test statistic (z or t), if known.}
 
-\item{df}{Degrees of freedom. Required for t-tests. If not provided and \code{n} has length 2, it will be inferred.}
+\item{df}{Degrees of freedom, required if using a t-statistic.}
 
-\item{conf.level}{Confidence level used to compute critical value for inference. Default is \code{0.95}.}
+\item{conf.level}{Confidence level for the confidence interval. Default is 0.95.}
+
+\item{method}{Character. Either \code{"wald"} (default) for normal approximations or \code{"exact"} for exact binomial CI (one-sample only).}
+
+\item{continuity}{Logical. Whether to apply continuity correction in two-sample Wald test. Default is \code{FALSE}.}
 }
 \value{
-A named numeric vector with the following elements:
+A named numeric vector with:
 \describe{
-\item{Estimate}{Proportion or difference in proportions}
+\item{Estimate}{Point estimate (difference in proportions, or single proportion)}
 \item{SE}{Standard error of the estimate}
-\item{z or t}{The test statistic used for inference}
+\item{z or t}{Test statistic (depending on whether z or t is used)}
 \item{df}{Degrees of freedom (NA for z-tests)}
-\item{p-one or p}{The one-sided or two-sided p-value}
-\item{LL}{Lower bound of the confidence interval}
-\item{UL}{Upper bound of the confidence interval}
+\item{p or p-one}{P-value (two-sided or one-sided)}
+\item{LL}{Lower limit of the confidence interval}
+\item{UL}{Upper limit of the confidence interval}
 }
 }
 \description{
-This function performs inference on proportions by back-calculating missing quantities
-such as standard error (SE), test statistic, p-value, or confidence intervals (CIs)
-from the available inputs. It supports both one-sample and two-sample proportion
-comparisons using either z-tests or t-tests, and works with raw counts or precomputed
-proportions.
+\code{backcalc_props()} reconstructs inferential statistics related to proportions from partial information.
+It can estimate standard errors, confidence intervals, p-values, test statistics (t or z), degrees of freedom,
+and point estimates when some components are missing, supporting one-sample, paired, and two-sample cases.
 }
 \details{
-\itemize{
-\item When \code{prop} is a two-element vector and \code{n} has two values, a two-sample comparison is assumed.
-\item If \code{df} is not provided but \code{n} has length 2, degrees of freedom are approximated as \code{n1 + n2 - 2}.
-\item CI bounds are logit-transformed when \code{prop} is between 0 and 1 to maintain valid intervals.
-\item Exact methods are not currently implemented.
-}
+This function is designed to handle partial or minimal inputs by inferring missing values when possible.
+For instance, if only a proportion and p-value are provided, it can back-calculate the sample size or test statistic.
 }
 \examples{
 # One-sample: Provide proportion and sample size only (basic one-sample proportion)
@@ -79,7 +78,7 @@ backcalc_props(prop = 0.4, n = 100)
 # Two-sample: Provide two proportions and sample sizes only (difference in proportions)
 backcalc_props(prop = c(0.55, 0.4), n = c(150, 130))
 
-# Insufficient info: No inputs provided (error expected due to missing info)
-backcalc_props()
+# Insufficient info: Provide n only, no prop, counts, or se
+backcalc_props(n = 100)
 
 }

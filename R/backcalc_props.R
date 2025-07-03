@@ -1,45 +1,39 @@
 #' Backcalculate Missing Inferential Statistics for Proportions
 #'
-#' \code{backcalc_means()} reconstructs inferential statistics related to proportions from partial information.
+#' \code{backcalc_props()} reconstructs inferential statistics related to proportions from partial information.
 #' It can estimate standard errors, confidence intervals, p-values, test statistics (t or z), degrees of freedom,
 #' and point estimates when some components are missing, supporting one-sample, paired, and two-sample cases.
 #'
-#' @param prop Numeric vector of proportions. Can be length 1 or 2 for one- or two-sample cases.
-#' @param se Numeric standard error (not used directly here but for future extensions).
-#' @param n Numeric vector of sample sizes. Length 1 or 2 matching the number of groups.
-#' @param x Numeric vector of counts of successes/events. Length 1 or 2 for one- or two-sample.
-#' @param ci Logical or numeric, confidence interval level (default 0.95).
-#' @param p Numeric p-value associated with the test statistic (optional).
-#' @param one_sided Logical, whether to use one-sided test and confidence interval (default FALSE).
-#' @param digits Integer, number of decimal places to round results (default 3).
-#' @param interval_type Character string indicating the type of interval (currently only "wald" supported).
-#' @param statistic Numeric test statistic value (optional).
-#' @param df Numeric degrees of freedom for t-distribution (optional).
-#' @param conf.level Numeric confidence level (default 0.95).
-#' @param method Character string specifying the method: "wald", "exact", "rr", or "or".
-#' @param continuity Logical, whether to apply continuity correction in Wald method (default FALSE).
+#' @param prop Numeric vector of proportion(s). For one-sample, a single value; for two-sample, a vector of length 2.
+#' @param se Standard error of the estimate, if known.
+#' @param n Sample size(s). A single value for one-sample tests, or a vector of length 2 for two-sample tests.
+#' @param x Count(s) of "successes" (used to compute proportions). A single value or vector of length 2.
+#' @param ci Confidence interval (numeric vector of length 2: lower and upper limits), if already known.
+#' @param p P-value for the test statistic. If not provided, it will be computed when possible.
+#' @param one_sided Logical. Is the test one-sided? Defaults to \code{FALSE} (i.e., two-sided).
+#' @param digits Number of decimal places to round results. Default is 3.
+#' @param interval_type Type of confidence interval. Currently unused (placeholder).
+#' @param statistic Observed test statistic (z or t), if known.
+#' @param df Degrees of freedom, required if using a t-statistic.
+#' @param conf.level Confidence level for the confidence interval. Default is 0.95.
+#' @param method Character. Either \code{"wald"} (default) for normal approximations or \code{"exact"} for exact binomial CI (one-sample only).
+#' @param continuity Logical. Whether to apply continuity correction in two-sample Wald test. Default is \code{FALSE}.
+#'
+#' @return A named numeric vector with:
+#' \describe{
+#'   \item{Estimate}{Point estimate (difference in proportions, or single proportion)}
+#'   \item{SE}{Standard error of the estimate}
+#'   \item{z or t}{Test statistic (depending on whether z or t is used)}
+#'   \item{df}{Degrees of freedom (NA for z-tests)}
+#'   \item{p or p-one}{P-value (two-sided or one-sided)}
+#'   \item{LL}{Lower limit of the confidence interval}
+#'   \item{UL}{Upper limit of the confidence interval}
+#' }
 #'
 #' @details
-#' The function supports:
-#' \itemize{
-#'   \item One- and two-sample proportion comparisons via Wald method.
-#'   \item Exact binomial confidence intervals for single proportions.
-#'   \item Risk ratios ("rr") and odds ratios ("or") for two groups with counts.
-#' }
-#' When insufficient inputs are provided, a warning is issued and the function returns invisibly NULL.
-#'
-#' @return
-#' A named numeric vector with the following elements:
-#' \describe{
-#'   \item{Estimate}{Estimate of the proportion, difference, log risk ratio, or log odds ratio.}
-#'   \item{SE}{Standard error of the estimate.}
-#'   \item{z or t}{Test statistic (z or t) depending on method and inputs.}
-#'   \item{df}{Degrees of freedom (if applicable, otherwise NA).}
-#'   \item{p or p-one}{P-value, adjusted for one-sided test if requested.}
-#'   \item{LL}{Lower confidence limit.}
-#'   \item{UL}{Upper confidence limit.}
-#' }
-#'
+#' This function is designed to handle partial or minimal inputs by inferring missing values when possible.
+#' For instance, if only a proportion and p-value are provided, it can back-calculate the sample size or test statistic.
+#' 
 #' @examples
 #' # One-sample: Provide proportion and sample size only (basic one-sample proportion)
 #' backcalc_props(prop = 0.4, n = 100)
@@ -55,8 +49,8 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
                            p = NULL, one_sided = FALSE, digits = 3,
                            interval_type = "wald", statistic = NULL, df = NULL,
                            conf.level = 0.95, method = "wald", continuity = FALSE) {
-  if (!method %in% c("wald", "exact", "rr", "or")) {
-    cat("Invalid method. Choose one of 'wald', 'exact', 'rr', or 'or'.\n")
+  if (!method %in% c("wald", "exact")) {
+    cat("Invalid method. Choose 'wald' or 'exact'.\n")
     return(invisible(NULL))
   }
 
@@ -81,14 +75,6 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
 
   # Handle one or two samples
   two_sample <- !is.null(prop_calc) && length(prop_calc) == 2 && !is.null(n) && length(n) == 2
-
-  # Validate counts for rr/or
-  if (method %in% c("rr", "or")) {
-    if (is.null(x) || is.null(n) || length(x) != 2 || length(n) != 2) {
-      cat("For method 'rr' and 'or', x and n must be numeric vectors of length 2.\n")
-      return(invisible(NULL))
-    }
-  }
 
   # One-sample exact binomial
   if (method == "exact") {
@@ -117,7 +103,7 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
     names(result)[names(result) == "p"] <- ifelse(one_sided, "p-one", "p")
 
     if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
-    if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
+    if (length(approx_notes)) cat("Notes:\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
 
     return(result)
   }
@@ -142,6 +128,8 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
       ci_lower <- est - crit * se_calc
       ci_upper <- est + crit * se_calc
 
+      approx_notes <- c(approx_notes, "Standard error and confidence interval estimated from test statistic and p-value.")
+
       result <- c(
         Estimate = round(est, digits),
         SE = round(se_calc, digits),
@@ -156,7 +144,7 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
       names(result)[names(result) == "p"] <- ifelse(one_sided, "p-one", "p")
 
       if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
-      if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
+      if (length(approx_notes)) cat("Notes:\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
 
       return(result)
     }
@@ -178,6 +166,7 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
 
       if (continuity) {
         se_calc <- sqrt(se_calc^2 + cc)
+        approx_notes <- c(approx_notes, "Continuity correction applied to standard error.")
       }
 
       if (is.null(statistic)) statistic <- est / se_calc
@@ -187,6 +176,7 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
         } else {
           p <- 2 * (1 - pnorm(abs(statistic)))
         }
+        approx_notes <- c(approx_notes, "P-value computed from estimated test statistic.")
       }
 
       stat_type <- "z"
@@ -210,7 +200,7 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
       names(result)[names(result) == "p"] <- ifelse(one_sided, "p-one", "p")
 
       if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
-      if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
+      if (length(approx_notes)) cat("Notes:\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
 
       return(result)
     } else {
@@ -219,22 +209,22 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
         prop_calc <- x / n
       }
 
-      # --- NEW: infer n if missing and possible ---
       if (!is.null(prop_calc) && (is.null(n) || n <= 0)) {
-        p0 <- 0.5  # Null hypothesis proportion; you could make this a param
+        p0 <- 0.5  # Null hypothesis proportion
         if (!is.null(statistic)) {
           n <- prop_calc * (1 - prop_calc) / ((prop_calc - p0) / statistic)^2
           n <- round(n)
           messages <- c(messages, paste0("Inferred n = ", n, " from prop and statistic"))
+          approx_notes <- c(approx_notes, "Sample size inferred from statistic assuming null proportion = 0.5.")
         } else if (!is.null(p)) {
           stat_val <- ifelse(one_sided, qnorm(1 - p), qnorm(1 - p / 2))
           stat_val <- sign(prop_calc - p0) * abs(stat_val)
           n <- prop_calc * (1 - prop_calc) / ((prop_calc - p0) / stat_val)^2
           n <- round(n)
           messages <- c(messages, paste0("Inferred n = ", n, " from prop and p-value"))
+          approx_notes <- c(approx_notes, "Sample size inferred from p-value assuming null proportion = 0.5.")
         }
       }
-      # ------------------------
 
       if (is.null(prop_calc) || is.null(n)) {
         cat("Insufficient input: Provide 'prop' or ('x' and 'n').\n")
@@ -251,6 +241,7 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
         } else {
           p <- 2 * (1 - pnorm(abs(statistic)))
         }
+        approx_notes <- c(approx_notes, "P-value computed from estimated test statistic.")
       }
 
       stat_type <- "z"
@@ -274,94 +265,10 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
       names(result)[names(result) == "p"] <- ifelse(one_sided, "p-one", "p")
 
       if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
-      if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
+      if (length(approx_notes)) cat("Notes:\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
 
       return(result)
     }
-  }
-
-  # Risk ratio (log scale)
-  if (method == "rr") {
-    p1 <- x[1] / n[1]
-    p2 <- x[2] / n[2]
-    est <- log(p1 / p2)
-    se_calc <- sqrt((1 - p1) / x[1] + (1 - p2) / x[2])
-    if (is.null(statistic)) statistic <- est / se_calc
-    if (is.null(p)) {
-      if (one_sided) {
-        p <- 1 - pnorm(statistic)
-      } else {
-        p <- 2 * (1 - pnorm(abs(statistic)))
-      }
-    }
-
-    stat_type <- "z"
-    df_out <- NA
-
-    crit <- crit_val(NULL)
-    ci_lower <- est - crit * se_calc
-    ci_upper <- est + crit * se_calc
-
-    result <- c(
-      Estimate = round(est, digits),
-      SE = round(se_calc, digits),
-      statistic = round(statistic, digits),
-      df = df_out,
-      p = round(p, digits),
-      LL = round(ci_lower, digits),
-      UL = round(ci_upper, digits)
-    )
-
-    names(result)[names(result) == "statistic"] <- stat_type
-    names(result)[names(result) == "p"] <- ifelse(one_sided, "p-one", "p")
-
-    if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
-    if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
-
-    return(result)
-  }
-
-  # Odds ratio (log scale)
-  if (method == "or") {
-    a <- x[1]
-    b <- n[1] - x[1]
-    c <- x[2]
-    d <- n[2] - x[2]
-    est <- log((a * d) / (b * c))
-    se_calc <- sqrt(1 / a + 1 / b + 1 / c + 1 / d)
-    if (is.null(statistic)) statistic <- est / se_calc
-    if (is.null(p)) {
-      if (one_sided) {
-        p <- 1 - pnorm(statistic)
-      } else {
-        p <- 2 * (1 - pnorm(abs(statistic)))
-      }
-    }
-
-    stat_type <- "z"
-    df_out <- NA
-
-    crit <- crit_val(NULL)
-    ci_lower <- est - crit * se_calc
-    ci_upper <- est + crit * se_calc
-
-    result <- c(
-      Estimate = round(est, digits),
-      SE = round(se_calc, digits),
-      statistic = round(statistic, digits),
-      df = df_out,
-      p = round(p, digits),
-      LL = round(ci_lower, digits),
-      UL = round(ci_upper, digits)
-    )
-
-    names(result)[names(result) == "statistic"] <- stat_type
-    names(result)[names(result) == "p"] <- ifelse(one_sided, "p-one", "p")
-
-    if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
-    if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
-
-    return(result)
   }
 
   cat("Unsupported combination of inputs or method.\n")
