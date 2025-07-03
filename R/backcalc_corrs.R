@@ -52,20 +52,32 @@ backcalc_corrs <- function(r = NULL, se = NULL, n = NULL, df = NULL,
   
   approx_notes <- character(0)
   messages <- character(0)
-  
-  # Validate r
-  if (is.null(r)) {
-    stop("Insufficient information: Correlation coefficient (r) must be provided.")
-  }
-  if (any(abs(r) > 1, na.rm = TRUE)) {
-    stop("Invalid input: Correlation coefficients must be between -1 and 1.")
-  }
-  
+
   # Validate conf.level
   if (!is.numeric(conf.level) || length(conf.level) != 1 || conf.level <= 0 || conf.level >= 1) {
-    stop("conf.level must be a single numeric value between 0 and 1 (exclusive).")
+    messages <- c(messages, "Invalid input: conf.level must be a single number between 0 and 1.")
   }
-  
+
+  # Check for missing or invalid r
+  if (is.null(r)) {
+    messages <- c(messages, "Insufficient information: Correlation coefficient (r) must be provided.")
+  } else if (any(abs(r) > 1, na.rm = TRUE)) {
+    messages <- c(messages, "Invalid input: Correlation coefficients must be between -1 and 1.")
+  }
+
+  # Check CI validity if provided
+  if (!is.null(ci)) {
+    if (!is.numeric(ci) || length(ci) != 2 || any(abs(ci) >= 1)) {
+      messages <- c(messages, "Invalid input: CI must be a numeric vector of length 2 with values between -1 and 1.")
+    }
+  }
+
+  # If messages already present (i.e. input error), return only messages
+  if (length(messages)) {
+    cat(paste(messages, collapse = "\n"), "\n")
+    return(invisible(NULL))
+  }
+
   # Infer df from n if missing
   if (is.null(df) && !is.null(n)) {
     if (length(n) == 1) {
@@ -76,65 +88,43 @@ backcalc_corrs <- function(r = NULL, se = NULL, n = NULL, df = NULL,
       approx_notes <- c(approx_notes, "df approximated as min(n) - 3 for two-sample case.")
     }
   }
-  
-  # Check CI validity if provided
-  if (!is.null(ci)) {
-    if (!is.numeric(ci) || length(ci) != 2 || any(abs(ci) >= 1)) {
-      stop("Invalid input: CI must be a numeric vector of length 2 with values between -1 and 1.")
-    }
-  }
-  
-  # Convert correlation(s) to Fisher z if two-sample or single
+
   estimate <- r
-  
+
   # Two-sample case
   if (length(estimate) == 2) {
     if (is.null(n) || length(n) != 2) {
-      stop("Insufficient information: Two correlations provided but sample sizes (n) missing or incomplete.")
-    }
-    
-    z1 <- atanh(estimate[1])
-    z2 <- atanh(estimate[2])
-    estimate <- z1 - z2
-    
-    # SE from difference formula, unless se provided
-    if (is.null(se)) {
-      se <- sqrt(1 / (n[1] - 3) + 1 / (n[2] - 3))
-      approx_notes <- c(approx_notes,
-                        "SE derived from Fisher z difference formula.")
-    }
-    
-    # df already inferred above or user-provided
-    
-    # If statistic provided, override calculation of stat below
-    if (!is.null(statistic)) {
-      stat <- statistic
+      messages <- c(messages, "Insufficient information: Two correlations provided but sample sizes (n) missing or incomplete.")
     } else {
-      stat <- estimate / se
+      z1 <- atanh(estimate[1])
+      z2 <- atanh(estimate[2])
+      estimate <- z1 - z2
+
+      if (is.null(se)) {
+        se <- sqrt(1 / (n[1] - 3) + 1 / (n[2] - 3))
+        approx_notes <- c(approx_notes, "SE derived from Fisher z difference formula.")
+      }
+
+      if (!is.null(statistic)) {
+        stat <- statistic
+      } else {
+        stat <- estimate / se
+      }
     }
-    
   } else {
     # One-sample case
     estimate <- atanh(r)
-    
-    # Infer or validate SE
+
     if (is.null(se)) {
-      # From n
       if (!is.null(n)) {
         se <- 1 / sqrt(n - 3)
         approx_notes <- c(approx_notes, "SE approximated using 1 / sqrt(n - 3).")
       } else if (!is.null(ci)) {
-        # From CI in Fisher z scale
         z_ci <- atanh(ci)
-        crit <- if (!is.null(df)) {
-          qt(1 - (1 - conf.level)/2, df)
-        } else {
-          qnorm(1 - (1 - conf.level)/2)
-        }
+        crit <- if (!is.null(df)) qt(1 - (1 - conf.level)/2, df) else qnorm(1 - (1 - conf.level)/2)
         se <- diff(range(z_ci)) / (2 * crit)
         approx_notes <- c(approx_notes, "SE approximated from CI in Fisher z scale.")
       } else if (!is.null(p) && !is.null(df)) {
-        # From p-value and df using t quantile
         stat_val <- if (one_sided) qt(1 - p, df) else qt(1 - p/2, df)
         se <- estimate / stat_val
         approx_notes <- c(approx_notes, "SE approximated from p-value and df.")
@@ -142,22 +132,28 @@ backcalc_corrs <- function(r = NULL, se = NULL, n = NULL, df = NULL,
         se <- estimate / statistic
         approx_notes <- c(approx_notes, "SE approximated from test statistic and df.")
       } else {
-        stop("Insufficient information: Provide se, n, ci, or p with df, or statistic with df to infer missing statistics.")
+        messages <- c(messages, "Insufficient information: Provide se, n, ci, or p with df, or statistic with df to infer missing statistics.")
       }
     }
-    
-    # Calculate test statistic if not provided
-    if (is.null(statistic)) {
-      stat <- estimate / se
-    } else {
-      stat <- statistic
+
+    if (!is.null(se)) {
+      if (is.null(statistic)) {
+        stat <- estimate / se
+      } else {
+        stat <- statistic
+      }
     }
   }
-  
-  # Determine test type: t if df available, else z
+
+  # If messages created during process, return now
+  if (length(messages)) {
+    cat(paste(messages, collapse = "\n"), "\n")
+    return(invisible(NULL))
+  }
+
   stat_type <- if (!is.null(df)) "t" else "z"
-  
-  # Calculate p-value if missing
+
+  # Compute p-value if not given
   if (is.null(p)) {
     if (stat_type == "t") {
       p <- if (one_sided) 1 - pt(stat, df) else 2 * (1 - pt(abs(stat), df))
@@ -165,22 +161,16 @@ backcalc_corrs <- function(r = NULL, se = NULL, n = NULL, df = NULL,
       p <- if (one_sided) 1 - pnorm(stat) else 2 * (1 - pnorm(abs(stat)))
     }
   }
-  
-  # Calculate critical value for CI
-  crit <- if (!is.null(df)) {
-    qt(1 - (1 - conf.level)/2, df)
-  } else {
-    qnorm(1 - (1 - conf.level)/2)
-  }
-  
-  # Confidence interval on Fisher z scale
+
+  # Compute CI on Fisher z scale, then transform back
+  crit <- if (!is.null(df)) qt(1 - (1 - conf.level)/2, df) else qnorm(1 - (1 - conf.level)/2)
   ci_z <- estimate + c(-1, 1) * crit * se
   ci_r <- tanh(ci_z)
-  
-  # Final r to report (for two-sample, back-transform difference to r difference)
+
+  # Final correlation to report (difference if two-sample)
   final_r <- if (length(r) == 2) tanh(estimate) else r
-  
-  # Assemble result
+
+  # Prepare output
   result <- c(
     Estimate = round(final_r, digits),
     SE = round(se, digits),
@@ -190,13 +180,13 @@ backcalc_corrs <- function(r = NULL, se = NULL, n = NULL, df = NULL,
     LL = round(ci_r[1], digits),
     UL = round(ci_r[2], digits)
   )
-  
+
   names(result)[names(result) == "statistic"] <- stat_type
   names(result)[names(result) == "p_value"] <- if (one_sided) "p-one" else "p"
-  
-  # Print messages and approximation notes separately
+
+  # Display user messages and notes
   if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
   if (length(approx_notes)) cat("\nNote(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
-  
+
   return(result)
 }

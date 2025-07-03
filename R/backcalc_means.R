@@ -1,4 +1,4 @@
-#' Backcalc Missing Inferential Statistics for Means
+#' Backcalculate Missing Inferential Statistics for Means
 #'
 #' \code{backcalc_means()} reconstructs inferential statistics related to means from partial information.
 #' It can estimate standard errors, confidence intervals, p-values, test statistics (t or z), degrees of freedom,
