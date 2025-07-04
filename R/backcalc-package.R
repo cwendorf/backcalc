@@ -9,8 +9,8 @@
 #' such as standard errors, confidence intervals, test statistics, and p-values —- 
 #' from partial or incomplete summary data commonly found in scientific literature. 
 #' Supporting various data types and designs, including single- and two-sample (independent or paired) tests 
-#' with z or t distributions, it offers tailored functions for 
-#' means, correlations, regression coefficients, proportions, and ratio measures. 
+#' with z or t distributions, it offers tailored functions for means, medians, 
+#' correlations, regression coefficients, proportions, and ratio measures.
 #'
 #' @author
 #' **Maintainer**: Craig Wendorf 
