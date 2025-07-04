@@ -13,6 +13,9 @@ backcalc_medians(
   p = NULL,
   ci = NULL,
   statistic = NULL,
+  iqr = NULL,
+  mad = NULL,
+  range = NULL,
   paired = FALSE,
   one_sided = FALSE,
   conf.level = 0.95,
@@ -20,69 +23,68 @@ backcalc_medians(
 )
 }
 \arguments{
-\item{m}{Numeric or length-2 numeric vector. Point estimate(s) (e.g., median for one group,
-or two values for two groups where difference = m\link{1} - m\link{2}).}
+\item{m}{Numeric scalar or vector. Median(s) of the group(s). For two-sample comparisons, provide a length-2 vector.}
 
-\item{se}{Numeric. Standard error of the estimate.}
+\item{se}{Numeric scalar or vector. Standard error(s) of the estimate(s).}
 
-\item{sd}{Numeric or length-2 numeric vector. Standard deviation(s) for one or two groups.}
+\item{sd}{Numeric scalar or vector. Standard deviation(s) of the group(s).}
 
-\item{n}{Numeric or length-2 numeric vector. Sample size(s) for one or two groups.}
+\item{n}{Numeric scalar or vector. Sample size(s).}
 
-\item{df}{Numeric. Degrees of freedom.}
+\item{df}{Numeric scalar. Degrees of freedom for t-distribution inference.}
 
-\item{p}{Numeric. P-value.}
+\item{p}{Numeric scalar. p-value for the test statistic.}
 
-\item{ci}{Numeric vector of length 2. Confidence interval as c(lower, upper).}
+\item{ci}{Numeric vector of length 2. Confidence interval bounds (lower, upper).}
 
-\item{statistic}{Numeric. Test statistic value (t or z).}
+\item{statistic}{Numeric scalar. Test statistic (z or t).}
 
-\item{paired}{Logical. Whether data come from a paired/matched design (default FALSE).}
+\item{iqr}{Numeric scalar or vector. Interquartile range(s).}
+
+\item{mad}{Numeric scalar or vector. Median absolute deviation(s).}
+
+\item{range}{Numeric scalar or vector. Range(s) of the data.}
+
+\item{paired}{Logical. Whether the data are paired (default FALSE).}
 
 \item{one_sided}{Logical. Whether the test is one-sided (default FALSE).}
 
-\item{conf.level}{Numeric. Confidence level for intervals (default 0.95).}
+\item{conf.level}{Numeric scalar. Confidence level for intervals (default 0.95).}
 
-\item{digits}{Integer. Number of decimal digits to round the results (default 3).}
+\item{digits}{Integer. Number of decimal places to round results (default 3).}
 }
 \value{
-Named numeric vector containing:
+A named numeric vector with components:
 \describe{
-\item{Estimate}{Point estimate (difference if two values provided)}
-\item{SE}{Standard error of estimate}
-\item{t / z}{Test statistic (t if df provided, otherwise z)}
-\item{df}{Degrees of freedom (if available)}
-\item{p / p-one}{Two-sided or one-sided p-value}
-\item{LL}{Lower bound of the confidence interval}
-\item{UL}{Upper bound of the confidence interval}
+\item{Estimate}{Back-calculated estimate (median difference or median).}
+\item{SE}{Standard error of the estimate.}
+\item{z or t}{Test statistic, z for robust inference, t for parametric inference with df.}
+\item{df}{Degrees of freedom (if applicable; NA otherwise).}
+\item{p or p-one}{Two-sided or one-sided p-value.}
+\item{LL}{Lower confidence limit.}
+\item{UL}{Upper confidence limit.}
 }
 }
 \description{
-\code{backcalc_medians()} reconstructs inferential statistics related to medians from partial information.
-It can estimate standard errors, confidence intervals, p-values, test statistics (t or z), degrees of freedom,
-and point estimates when some components are missing, supporting one-sample, paired, and two-sample cases.
+This function estimates standard errors, test statistics, p-values, confidence intervals,
+and degrees of freedom for median-based statistics using summary-level data.
+It supports robust measures of spread such as interquartile range (IQR), median absolute deviation (MAD),
+and range, applying normal approximation for inference without relying on parametric assumptions.
+When parametric inputs (e.g., standard deviations) are provided, t-distribution based inference is used.
 }
 \details{
-This function infers missing inferential statistics based on partial input, prioritizing logical reconstruction
-of standard errors, confidence intervals, test statistics, p-values, and degrees of freedom. In two-sample tests,
-it computes the standard error using either pooled variance (when variances and sample sizes are equal) or
-Welch–Satterthwaite approximation (when they differ). For paired designs, degrees of freedom are approximated
-as \code{n - 1} when missing. If confidence intervals are provided, standard error is derived from their width.
-The test statistic is assumed to be t-distributed when degrees of freedom are known, otherwise a normal (z)
-distribution is used. Confidence intervals are calculated using the specified \code{conf.level}, and one-sided
-inference is supported via the \code{one_sided} argument.
-
-#' @examples
+The function supports inference for medians using IQR, MAD, or range to approximate SE
+with normal-based confidence intervals and z-tests. When parametric inputs like SD and sample size
+are given without robust measures, Welch's t-test approximation is used.
 }
-\section{One-sample case: Median with confidence interval and sample size}{
-backcalc_medians(m = 30, ci = c(25, 35), n = 25)
-}
+\examples{
+# One-sample: Median, IQR, and sample size
+backcalc_medians(m = 50, iqr = 20, n = 30)
 
-\section{Two-sample case: Group medians, IQRs (as SDs), and sample sizes provided}{
-backcalc_medians(m = c(15, 12), sd = c(4, 5), n = c(40, 35))
-}
+# Two-sample: Group medians, MAD, and sample size
+backcalc_medians(m = c(75, 68), mad = 9, n = 40)
 
-\section{Insufficient information: Missing median, SE, p-value, and CI}{
-backcalc_medians(n = 15)
-}
+# Insufficient info: Only median and sample size, no dispersion
+backcalc_medians(m = c(52, 49), n = 30)
 
+}
