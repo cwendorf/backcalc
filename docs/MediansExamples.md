@@ -15,145 +15,150 @@ and input constraints.
 ### One Sample Cases
 
 ``` r
-# 1. Direct median with SE and sample size (assumes t-distribution)
-backcalc_medians(m = 25.4, se = 2.1, n = 30)
-```
-
-    Estimate       SE        z       df        p       LL       UL 
-      25.400    2.100   12.095       NA    0.000   21.284   29.516 
-
-``` r
-# 2. Median with IQR and sample size (SE approximated from IQR, assumes normality)
-backcalc_medians(m = 25.4, sd = 10, n = 30)
+# 1.  Median, IQR, and sample size
+backcalc_medians(m = 50, iqr = 20, n = 30)
 ```
 
     Note(s):
-    SE approximated from sd and n.
+    SE approximated from IQR and sample size using normal approximation.
 
     Estimate       SE        z       df        p       LL       UL 
-      25.400    1.826   13.912       NA    0.000   21.822   28.978 
+      50.000    2.707   18.472       NA    0.000   44.695   55.305 
 
 ``` r
-# 3. Median with confidence interval and sample size (SE inferred from CI)
-backcalc_medians(m = 30, ci = c(25, 35), n = 25)
+# 2.  Median, MAD, and sample size
+backcalc_medians(m = 48, mad = 12, n = 25)
 ```
 
     Note(s):
-    SE approximated from CI width.
+    SE approximated from MAD and sample size using normal approximation.
 
     Estimate       SE        z       df        p       LL       UL 
-      30.000    2.551   11.760       NA    0.000   25.000   35.000 
+      48.000    3.558   13.490       NA    0.000   41.026   54.974 
 
 ``` r
-# 4. Median with p-value and degrees of freedom (statistic and SE inferred)
-backcalc_medians(m = 2.5, p = 0.03, df = 29)
+# 3.  Median, IQR, paired design
+backcalc_medians(m = 42, iqr = 15, n = 20, paired = TRUE)
 ```
 
     Note(s):
-    Test statistic and SE approximated from p-value and estimate.
+    SE approximated from IQR and sample size using normal approximation.
 
-    Estimate       SE        t       df        p       LL       UL 
-       2.500    1.095    2.282   29.000    0.030    0.260    4.740 
+    Estimate       SE        z       df        p       LL       UL 
+      42.000    2.486   16.892       NA    0.000   37.127   46.873 
 
 ``` r
-# 5. Median with p-value and sample size (df inferred, SE and statistic approximated)
-backcalc_medians(m = 2.1, p = 0.05, n = 16)
+# 4.  Median, MAD, one-sided test
+backcalc_medians(m = 55, mad = 10, n = 40, one_sided = TRUE)
 ```
 
     Note(s):
-    Test statistic and SE approximated from p-value and estimate.
+    SE approximated from MAD and sample size using normal approximation.
+
+    Estimate       SE        z       df    p-one       LL       UL 
+      55.000    2.344   23.463       NA    0.000   51.144   58.856 
+
+``` r
+# 5. median + MAD + n, no paired, no one-sided
+backcalc_medians(m = 55, range = 30, n = 20)
+```
+
+    Note(s):
+    SE approximated from range and sample size using rough normal approximation.
 
     Estimate       SE        z       df        p       LL       UL 
-       2.100    1.071    1.960       NA    0.050    0.000    4.200 
+      55.000    1.677   32.796       NA    0.000   51.713   58.287 
 
 ### Two Sample Cases
 
 ``` r
-# 6. Two group medians, IQRs, and ns provided (difference computed, SE and df inferred)
-backcalc_medians(m = c(15, 12), sd = c(4, 5), n = c(40, 35))
+# 6.  Group medians, IQR, and sample size
+backcalc_medians(m = c(60, 50), iqr = 20, n = 30)
 ```
 
     Note(s):
-    Welch-Satterthwaite approximation used for df.
-
-    Estimate       SE        t       df        p       LL       UL 
-       3.000    1.056    2.842   65.000    0.006    0.892    5.108 
-
-``` r
-# 7. Median difference and SE provided (CI and p-value inferred)
-backcalc_medians(m = c(15, 12), se = 1.5, n = c(40, 35))
-```
+    SE approximated from IQR and sample size using normal approximation.
 
     Estimate       SE        z       df        p       LL       UL 
-       3.000    1.500    2.000       NA    0.046    0.060    5.940 
+      10.000    2.707    3.694       NA    0.000    4.695   15.305 
 
 ``` r
-# 8. Medians and p-value + df provided (infer SE and statistic)
-backcalc_medians(m = c(10, 7), p = 0.04, df = 50)
+# 7.  Group medians, MAD, and sample size
+backcalc_medians(m = c(75, 68), mad = 9, n = 40)
 ```
 
     Note(s):
-    Test statistic and SE approximated from p-value and estimate.
-
-    Estimate       SE        t       df        p       LL       UL 
-       3.000    1.423    2.109   50.000    0.040    0.142    5.858 
-
-``` r
-# 9. Medians and confidence interval provided (infer SE)
-backcalc_medians(m = c(100, 90), ci = c(2, 18), n = c(50, 45))
-```
-
-    Note(s):
-    SE approximated from CI width.
+    SE approximated from MAD and sample size using normal approximation.
 
     Estimate       SE        z       df        p       LL       UL 
-      10.000    4.082    2.450       NA    0.014    2.000   18.000 
+       7.000    2.110    3.318       NA    0.001    2.865   11.135 
 
 ``` r
-# 10. Medians and IQRs provided, but only n for one group (partial inference possible)
-backcalc_medians(m = c(8, 5), sd = c(3, 4), n = 20)
+# 8.  Paired medians, IQR, and n
+backcalc_medians(m = c(45, 40), iqr = 10, n = 20, paired = TRUE)
 ```
 
     Note(s):
-    Welch-Satterthwaite approximation used for df.
+    SE approximated from IQR and sample size using normal approximation.
 
-    Estimate       SE        t       df        p       LL       UL 
-       3.000    1.118    2.683   35.000    0.011    0.731    5.269 
+    Estimate       SE        z       df        p       LL       UL 
+       5.000    1.658    3.016       NA    0.003    1.751    8.249 
+
+``` r
+# 9.  Group medians, IQR, n, one-sided
+backcalc_medians(m = c(82, 78), iqr = 12, n = 35, one_sided = TRUE)
+```
+
+    Note(s):
+    SE approximated from IQR and sample size using normal approximation.
+
+    Estimate       SE        z       df    p-one       LL       UL 
+       4.000    1.504    2.660       NA    0.004    1.527    6.473 
+
+``` r
+# 10. two medians, two MADs, two sample sizes (no IQR used here)
+backcalc_medians(m = c(92, 85), mad = c(7, 10), n = c(25, 28))
+```
+
+    Note(s):
+    SE approximated from MAD and sample size using normal approximation.
+
+    Estimate       SE        z       df        p       LL       UL 
+       7.000    3.487    2.008       NA    0.045    0.166   13.834 
 
 ### Insufficient Information Cases
 
 ``` r
-# 11. No median, SE, p, or CI provided (should warn)
-backcalc_medians(n = 15)
+# 11. Only IQR provided
+backcalc_medians(iqr = 10)
 ```
 
-    Insufficient input: Provide estimate and at least one of SE, p-value, CI, or test statistic. 
+    Insufficient information: Provide estimate and at least one of SE, p-value, CI, or test statistic.
 
 ``` r
-# 12. Median and IQR provided, but no n (cannot infer SE)
-backcalc_medians(m = 7, sd = 2)
+# 12. Only MAD provided
+backcalc_medians(mad = 5)
 ```
 
-    Cannot compute SE from SD without sample size (n).
-    Insufficient input: Provide estimate and at least one of SE, p-value, CI, or test statistic. 
+    Insufficient information: Provide estimate and at least one of SE, p-value, CI, or test statistic.
 
 ``` r
-# 13. Only p-value and df provided (no median or SE; insufficient)
-backcalc_medians(p = 0.05, df = 20)
+# 13. Only sample size provided
+backcalc_medians(n = 30)
 ```
 
-    Insufficient input: Provide estimate and at least one of SE, p-value, CI, or test statistic. 
+    Insufficient information: Provide estimate and at least one of SE, p-value, CI, or test statistic.
 
 ``` r
-# 14. Median and df provided, but no SE, p, or CI
-backcalc_medians(m = 5.6, df = 10)
+# 14. Median provided, no n or spread
+backcalc_medians(m = 50)
 ```
 
-    Insufficient input: Provide estimate and at least one of SE, p-value, CI, or test statistic. 
+    Insufficient information: Provide estimate and at least one of SE, p-value, CI, or test statistic.
 
 ``` r
-# 15. Only test statistic and df provided (no median or SE; insufficient)
-backcalc_medians(statistic = 2.5, df = 18)
+# 15. Medians and sample size, but no dispersion
+backcalc_medians(m = c(52, 49), n = 30)
 ```
 
-    Insufficient input: Provide estimate and at least one of SE, p-value, CI, or test statistic. 
+    Insufficient information: Provide estimate and at least one of SE, p-value, CI, or test statistic.
