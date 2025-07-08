@@ -39,7 +39,7 @@ This package contains a set of examples to demonstrate its use:
 
 ### Contact Me
 
-- GitHub Issues: [https://github.com/cwendorf/backcalc/issues](https://github.com/cwendorf/CALM/backcalc) 
+- GitHub Issues: [https://github.com/cwendorf/backcalc/issues](https://github.com/cwendorf/backcalc/issues) 
 - Author Email: [cwendorf@uwsp.edu](mailto:cwendorf@uwsp.edu)
 - Author Homepage: [https://github.com/cwendorf](https://github.com/cwendorf)
 
