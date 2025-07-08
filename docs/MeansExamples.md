@@ -19,8 +19,11 @@ and input constraints.
 backcalc_means(m = 25.4, se = 2.1, n = 30)
 ```
 
-    Estimate       SE        z       df        p       LL       UL 
-      25.400    2.100   12.095       NA    0.000   21.284   29.516 
+    Note(s):
+    Degrees of freedom approximated as n - 1.
+
+    Estimate       SE        t       df        p       LL       UL 
+      25.400    2.100   12.095   29.000    0.000   21.105   29.695 
 
 ``` r
 # 2. Estimate with SD and sample size (SE is inferred, t-distribution used)
@@ -29,9 +32,10 @@ backcalc_means(m = 25.4, sd = 10, n = 30)
 
     Note(s):
     SE approximated from sd and n.
+    Degrees of freedom approximated as n - 1.
 
-    Estimate       SE        z       df        p       LL       UL 
-      25.400    1.826   13.912       NA    0.000   21.822   28.978 
+    Estimate       SE        t       df        p       LL       UL 
+      25.400    1.826   13.912   29.000    0.000   21.666   29.134 
 
 ``` r
 # 3. Estimate with confidence interval and sample size (SE is inferred from CI)
@@ -39,10 +43,11 @@ backcalc_means(m = 30, ci = c(25, 35), n = 25)
 ```
 
     Note(s):
+    Degrees of freedom approximated as n - 1.
     SE approximated from CI width.
 
-    Estimate       SE        z       df        p       LL       UL 
-      30.000    2.551   11.760       NA    0.000   25.000   35.000 
+    Estimate       SE        t       df        p       LL       UL 
+      30.000    2.423   12.383   24.000    0.000   25.000   35.000 
 
 ``` r
 # 4. Estimate with p-value and degrees of freedom (SE and test statistic inferred)
@@ -61,10 +66,11 @@ backcalc_means(m = 2.1, p = 0.05, n = 16)
 ```
 
     Note(s):
+    Degrees of freedom approximated as n - 1.
     Test statistic and SE approximated from p-value and estimate.
 
-    Estimate       SE        z       df        p       LL       UL 
-       2.100    1.071    1.960       NA    0.050    0.000    4.200 
+    Estimate       SE        t       df        p       LL       UL 
+       2.100    0.985    2.131   15.000    0.050    0.000    4.200 
 
 ### Two Sample Cases
 
@@ -84,8 +90,11 @@ backcalc_means(m = c(15, 12), sd = c(4, 5), n = c(40, 35))
 backcalc_means(m = c(15, 12), se = 1.5, n = c(40, 35))
 ```
 
-    Estimate       SE        z       df        p       LL       UL 
-       3.000    1.500    2.000       NA    0.046    0.060    5.940 
+    Note(s):
+    Degrees of freedom approximated as n1 + n2 - 2.
+
+    Estimate       SE        t       df        p       LL       UL 
+       3.000    1.500    2.000   73.000    0.049    0.011    5.989 
 
 ``` r
 # 8. Means and p-value + df provided (infer SE and statistic)
@@ -104,10 +113,11 @@ backcalc_means(m = c(100, 90), ci = c(2, 18), n = c(50, 45))
 ```
 
     Note(s):
+    Degrees of freedom approximated as n1 + n2 - 2.
     SE approximated from CI width.
 
-    Estimate       SE        z       df        p       LL       UL 
-      10.000    4.082    2.450       NA    0.014    2.000   18.000 
+    Estimate       SE        t       df        p       LL       UL 
+      10.000    4.029    2.482   93.000    0.015    2.000   18.000 
 
 ``` r
 # 10. Means and SDs provided, but only n for one group (more complex inference)
@@ -115,12 +125,11 @@ backcalc_means(m = c(8, 5), sd = c(3, 4), n = 20)
 ```
 
     Note(s):
-    SE approximated from sd and n.
+    Assumed equal sample sizes for both groups.
+    Welch-Satterthwaite approximation used for df.
 
-      Estimate        SE1        SE2 statistic1 statistic2         df         p1 
-         3.000      0.671      0.894      4.472      3.354         NA      0.000 
-            p2        LL1        LL2        UL1        UL2 
-         0.001      1.685      1.247      4.315      4.753 
+    Estimate       SE        t       df        p       LL       UL 
+       3.000    1.118    2.683   35.000    0.011    0.731    5.269 
 
 ### Insufficient Information Cases
 
