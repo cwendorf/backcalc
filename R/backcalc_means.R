@@ -70,6 +70,15 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
   len_sd <- ifelse(is.null(sd), 0, length(sd))
   len_n <- ifelse(is.null(n), 0, length(n))
 
+  # Handle special case: two means + two SDs + single n => assume equal sample sizes
+  two_sample_case <- (len_sd == 2 && len_n == 2 && !paired)
+  if (!two_sample_case && len_sd == 2 && len_n == 1 && !paired && !is.null(m) && length(m) == 2) {
+    n <- rep(n, 2)
+    len_n <- 2
+    approx_notes <- c(approx_notes, "Assumed equal sample sizes for both groups.")
+    two_sample_case <- TRUE
+  }
+
   if (paired) {
     if (is.null(df) && !is.null(n)) {
       df <- n - 1
@@ -80,7 +89,6 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
     }
   }
 
-  two_sample_case <- (len_sd == 2 && len_n == 2 && !paired)
   if (two_sample_case) {
     var1 <- sd[1]^2
     var2 <- sd[2]^2
@@ -109,6 +117,17 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
     } else {
       se <- sd / sqrt(n)
       approx_notes <- c(approx_notes, "SE approximated from sd and n.")
+    }
+  }
+
+  # FIX: Infer df if SE has been computed and df still missing
+  if (is.null(df) && !is.null(n)) {
+    if (length(n) == 1) {
+      df <- n - 1
+      approx_notes <- c(approx_notes, "Degrees of freedom approximated as n - 1.")
+    } else if (length(n) == 2) {
+      df <- n[1] + n[2] - 2
+      approx_notes <- c(approx_notes, "Degrees of freedom approximated as n1 + n2 - 2.")
     }
   }
 
