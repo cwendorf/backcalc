@@ -1,6 +1,6 @@
 #' Backcalculate Missing Inferential Statistics for Correlations
 #'
-#' \code{backcalc_corrs()} reconstructs missing inferential statistics for correlation coefficients
+#' This function reconstructs missing inferential statistics for correlation coefficients
 #' using Fisher's z-transformation. It supports both one-sample and two-sample correlation comparisons
 #' and allows flexible combinations of inputs to infer standard errors, test statistics, p-values, 
 #' confidence intervals, and degrees of freedom.
@@ -15,17 +15,13 @@
 #' @param one_sided Logical. Whether the test is one-sided (default is \code{FALSE}). Affects p-value and confidence interval calculation.
 #' @param conf.level Numeric between 0 and 1. Confidence level for the confidence interval (default is \code{0.95}).
 #' @param digits Integer. Number of significant digits for rounding results (default = \code{3}).
+#' @param attr Logical; if TRUE, attaches approximation messages as attributes (default TRUE).
 #'
-#' @return A named numeric vector containing:
-#' \describe{
-#'   \item{Estimate}{Estimated correlation (or Fisher z-difference if comparing two correlations).}
-#'   \item{SE}{Standard error of the Fisher z-transformed correlation.}
-#'   \item{t or z}{Test statistic (type depends on whether \code{df} is available).}
-#'   \item{df}{Degrees of freedom (if available or inferred).}
-#'   \item{p or p-one}{Two-sided or one-sided p-value.}
-#'   \item{LL}{Lower bound of the confidence interval (on correlation scale).}
-#'   \item{UL}{Upper bound of the confidence interval (on correlation scale).}
-#' }
+#' @return
+#' A \code{data.frame} with the back-calculated statistics including Estimate, SE,
+#' test statistic (t or z), degrees of freedom (df), p-value, and confidence interval bounds.
+#' The output has class \code{"backcalc"} and contains attribute
+#' \code{"Approximations"} if \code{attr = TRUE}.
 #'
 #' @details
 #' The function uses Fisher's r-to-z transformation (\code{atanh()}) for inferential computations and back-transforms using \code{tanh()}.
@@ -48,33 +44,34 @@
 #' @export
 backcalc_corrs <- function(r = NULL, se = NULL, n = NULL, df = NULL,
                            p = NULL, ci = NULL, one_sided = FALSE, 
-                           digits = 3, statistic = NULL, conf.level = 0.95) {
+                           digits = 3, statistic = NULL, conf.level = 0.95, attr = TRUE) {
   
   approx_notes <- character(0)
   messages <- character(0)
 
   # Validate conf.level
   if (!is.numeric(conf.level) || length(conf.level) != 1 || conf.level <= 0 || conf.level >= 1) {
-    messages <- c(messages, "Invalid input: conf.level must be a single number between 0 and 1.")
+    messages <- c(messages, "conf.level must be a single number between 0 and 1.")
   }
 
   # Check for missing or invalid r
   if (is.null(r)) {
-    messages <- c(messages, "Insufficient information: Correlation coefficient (r) must be provided.")
+    messages <- c(messages, "Correlation coefficient (r) must be provided.")
   } else if (any(abs(r) > 1, na.rm = TRUE)) {
-    messages <- c(messages, "Invalid input: Correlation coefficients must be between -1 and 1.")
+    messages <- c(messages, "Correlation coefficients must be between -1 and 1.")
   }
 
   # Check CI validity if provided
   if (!is.null(ci)) {
     if (!is.numeric(ci) || length(ci) != 2 || any(abs(ci) >= 1)) {
-      messages <- c(messages, "Invalid input: CI must be a numeric vector of length 2 with values between -1 and 1.")
+      messages <- c(messages, "CI must be a numeric vector of length 2 with values between -1 and 1.")
     }
   }
 
   # If messages already present (i.e. input error), return only messages
   if (length(messages)) {
-    cat(paste(messages, collapse = "\n"), "\n")
+    cat(paste0("\nInsufficient Input:"), sep = "\n")
+    cat(paste0(paste(messages, collapse = "\n"), "\n\n"))
     return(invisible(NULL))
   }
 
@@ -94,7 +91,7 @@ backcalc_corrs <- function(r = NULL, se = NULL, n = NULL, df = NULL,
   # Two-sample case
   if (length(estimate) == 2) {
     if (is.null(n) || length(n) != 2) {
-      messages <- c(messages, "Insufficient information: Two correlations provided but sample sizes (n) missing or incomplete.")
+      messages <- c(messages, "Two correlations provided but sample sizes (n) missing or incomplete.")
     } else {
       z1 <- atanh(estimate[1])
       z2 <- atanh(estimate[2])
@@ -132,7 +129,7 @@ backcalc_corrs <- function(r = NULL, se = NULL, n = NULL, df = NULL,
         se <- estimate / statistic
         approx_notes <- c(approx_notes, "SE approximated from test statistic and df.")
       } else {
-        messages <- c(messages, "Insufficient information: Provide se, n, ci, or p with df, or statistic with df to infer missing statistics.")
+        messages <- c(messages, "Provide se, n, ci, or p with df, or statistic with df to infer missing statistics.")
       }
     }
 
@@ -147,7 +144,8 @@ backcalc_corrs <- function(r = NULL, se = NULL, n = NULL, df = NULL,
 
   # If messages created during process, return now
   if (length(messages)) {
-    cat(paste(messages, collapse = "\n"), "\n")
+    cat(paste0("\nInsufficient Input:"), sep = "\n")
+    cat(paste0(paste(messages, collapse = "\n"), "\n\n"))
     return(invisible(NULL))
   }
 
@@ -171,7 +169,7 @@ backcalc_corrs <- function(r = NULL, se = NULL, n = NULL, df = NULL,
   final_r <- if (length(r) == 2) tanh(estimate) else r
 
   # Prepare output
-  result <- c(
+  result <- data.frame(
     Estimate = round(final_r, digits),
     SE = round(se, digits),
     statistic = round(stat, digits),
@@ -183,10 +181,11 @@ backcalc_corrs <- function(r = NULL, se = NULL, n = NULL, df = NULL,
 
   names(result)[names(result) == "statistic"] <- stat_type
   names(result)[names(result) == "p_value"] <- if (one_sided) "p-one" else "p"
+  rownames(result) <- "Outcome"
 
-  # Display user messages and notes
-  if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
-  if (length(approx_notes)) cat("\nNote(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
+  class(result) <- c("backcalc", class(result))
+  attr(result, "Approximations") <- approx_notes
+  attr(result, "attr") <- attr
 
   return(result)
 }

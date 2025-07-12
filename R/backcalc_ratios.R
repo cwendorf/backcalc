@@ -1,6 +1,6 @@
 #' Backcalculate Inferential Statistics for Ratio Measures
 #'
-#' \code{backcalc_ratios()} reconstructs inferential statistics (e.g., SE, test statistic,
+#' This function reconstructs inferential statistics (e.g., SE, test statistic,
 #' p-value, confidence interval) for ratio-type measures (such as odds ratios or risk ratios)
 #' using the log transformation internally. The function allows flexible input and determines
 #' the appropriate test type (z or t) based on the presence of degrees of freedom.
@@ -16,17 +16,13 @@
 #' @param one_sided Logical. Whether the hypothesis test is one-sided. Default is \code{FALSE}.
 #' @param digits Integer. Number of digits to round outputs to. Default is \code{3}.
 #' @param conf.level Numeric. Confidence level used to compute interval. Default is \code{0.95}.
+#' @param attr Logical; if TRUE, attaches approximation messages as attributes (default TRUE).
 #'
-#' @return A named numeric vector with the following components, in this order:
-#' \describe{
-#'   \item{Estimate}{Exponentiated point estimate (on the original ratio scale).}
-#'   \item{SE}{Standard error of the log-transformed estimate.}
-#'   \item{z or t}{Test statistic (label depends on \code{df}).}
-#'   \item{df}{Degrees of freedom used (if applicable).}
-#'   \item{p or p-one}{p-value (two-sided or one-sided, depending on \code{one_sided}).}
-#'   \item{LL}{Lower limit of the confidence interval (on ratio scale).}
-#'   \item{UL}{Upper limit of the confidence interval (on ratio scale).}
-#' }
+#' @return
+#' A \code{data.frame} with the back-calculated statistics including Estimate, SE,
+#' test statistic (t or z), degrees of freedom (df), p-value, and confidence interval bounds.
+#' The output has class \code{"backcalc"} and contains attribute
+#' \code{"Approximations"} if \code{attr = TRUE}.
 #'
 #' @details
 #' This function works on the log-transformed scale of ratios. It supports partial information
@@ -49,21 +45,18 @@
 #' @export
 backcalc_ratios <- function(ratio = NULL, se = NULL, n = NULL, df = NULL,
                             p = NULL, ci = NULL, statistic = NULL,
-                            one_sided = FALSE, digits = 3, conf.level = 0.95) {
-  
+                            one_sided = FALSE, digits = 3, conf.level = 0.95, attr = TRUE) {
+
+  messages <- character(0)
+  approx_notes <- character(0)
+
   # Validate ratio input
   if (is.null(ratio)) {
-    message("Insufficient information: a ratio (or two ratios) must be provided.")
-    return(invisible(NULL))
+    messages <- c(messages, "A ratio (or two ratios) must be provided.")
+  } else if (!is.numeric(ratio) || any(is.na(ratio)) || any(ratio <= 0)) {
+    messages <- c(messages, "Ratios must be positive numeric values without NA.")
   }
-  
-  if (!is.numeric(ratio) || any(is.na(ratio)) || any(ratio <= 0)) {
-    message("Ratios must be positive numeric values without NA.")
-    return(invisible(NULL))
-  }
-  
-  approx_notes <- character(0)
-  
+
   get_crit <- function(df_local = NULL) {
     alpha <- 1 - conf.level
     if (!is.null(df_local)) {
@@ -72,7 +65,14 @@ backcalc_ratios <- function(ratio = NULL, se = NULL, n = NULL, df = NULL,
       qnorm(1 - alpha / ifelse(one_sided, 1, 2))
     }
   }
-  
+
+  # Early exit if fatal input issue
+  if (length(messages) > 0) {
+    cat(paste0("\nInsufficient Input:"), sep = "\n")
+    cat(paste0(paste(messages, collapse = "\n"), "\n\n"))
+    return(invisible(NULL))
+  }
+
   # Infer df from n if not provided
   if (is.null(df) && !is.null(n)) {
     if (length(n) == 1L) {
@@ -83,66 +83,58 @@ backcalc_ratios <- function(ratio = NULL, se = NULL, n = NULL, df = NULL,
       approx_notes <- c(approx_notes, "df vector approximated as n - 1 for each group.")
     }
   }
-  
+
   # Handle two-ratio case
   if (length(ratio) == 2) {
     estimate <- log(ratio[1]) - log(ratio[2])
     approx_notes <- c(approx_notes, "Estimate calculated as log ratio difference between two ratios.")
-    
-    # Combine SEs if both provided separately
+
     if (!is.null(se)) {
       if (length(se) == 2) {
-        se_combined <- sqrt(se[1]^2 + se[2]^2)
-        se <- se_combined
+        se <- sqrt(se[1]^2 + se[2]^2)
         approx_notes <- c(approx_notes, "SE combined using sqrt(se1^2 + se2^2).")
-      } else if (length(se) == 1) {
-        # Single SE provided for difference
-        # No change, se is SE of difference
-      } else {
-        message("SE length inconsistent with ratio length.")
-        return(invisible(NULL))
+      } else if (length(se) != 1) {
+        messages <- c(messages, "SE length inconsistent with ratio length.")
       }
     }
-    
-    # Welch–Satterthwaite df approximation if df vector and combined SE available
+
     if (!is.null(df) && length(df) == 2 && length(se) == 1 && length(se) != length(df)) {
-      # Try approximate SEs for components if possible (only if se is for difference)
-      # But without individual SEs for groups, cannot approximate df reliably
       approx_notes <- c(approx_notes, "df vector provided but SE of difference only; df not adjusted.")
-      df <- sum(df) / 2  # fallback average df for simplicity
+      df <- sum(df) / 2
     }
+
   } else {
-    # One ratio case
     estimate <- log(ratio)
   }
-  
-  # Infer SE from CI if SE missing and CI provided
+
   if (!is.null(ci) && length(ci) == 2 && is.null(se)) {
     if (all(ci > 0)) {
       crit <- get_crit(df)
       se <- abs(log(ci[2]) - log(ci[1])) / (2 * crit)
       approx_notes <- c(approx_notes, "SE approximated from CI using log scale and critical value.")
     } else {
-      message("Confidence interval values must be positive for log transformation. Ignoring CI.")
+      messages <- c(messages, "Confidence interval values must be positive for log transformation. Ignoring CI.")
     }
   }
-  
-  # Infer SE from statistic if SE missing but statistic provided
+
   if (is.null(se) && !is.null(statistic)) {
     se <- abs(estimate / statistic)
     approx_notes <- c(approx_notes, "SE approximated from statistic and estimate.")
   }
-  
-  # If still no SE, insufficient info
+
   if (is.null(se)) {
-    message("Insufficient information: SE or CI must be provided or inferable.")
+    messages <- c(messages, "SE or CI must be provided or inferable.")
+  }
+
+  # Final check: print and exit if any fatal issues were recorded
+  if (length(messages) > 0) {
+    cat(paste0("\nInsufficient Input:"), sep = "\n")
+    cat(paste0(paste(messages, collapse = "\n"), "\n\n"))
     return(invisible(NULL))
   }
-  
-  # Decide test statistic type based on df presence
+
   stat_type <- if (!is.null(df)) "t" else "z"
-  
-  # Infer p-value if not provided
+
   if (is.null(p)) {
     if (stat_type == "t") {
       p <- if (one_sided) 1 - pt(estimate / se, df) else 2 * (1 - pt(abs(estimate / se), df))
@@ -150,20 +142,17 @@ backcalc_ratios <- function(ratio = NULL, se = NULL, n = NULL, df = NULL,
       p <- if (one_sided) 1 - pnorm(estimate / se) else 2 * (1 - pnorm(abs(estimate / se)))
     }
   }
-  
-  # Infer statistic if not provided
+
   if (is.null(statistic)) {
     statistic <- estimate / se
   }
-  
-  # Confidence interval on ratio scale
+
   crit <- get_crit(df)
   ci_lower <- exp(estimate - crit * se)
   ci_upper <- exp(estimate + crit * se)
   estimate_exp <- exp(estimate)
-  
-  # Prepare result vector in desired order and rounded
-  result <- c(
+
+  result <- data.frame(
     Estimate = round(estimate_exp, digits),
     SE = round(se, digits),
     statistic = round(statistic, digits),
@@ -172,15 +161,14 @@ backcalc_ratios <- function(ratio = NULL, se = NULL, n = NULL, df = NULL,
     LL = round(ci_lower, digits),
     UL = round(ci_upper, digits)
   )
-  
-  # Rename statistic and p based on sidedness and stat type
+
   names(result)[names(result) == "statistic"] <- stat_type
   names(result)[names(result) == "p"] <- if (one_sided) "p-one" else "p"
-  
-  # Print notes if any
-  if (length(approx_notes)) {
-    cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
-  }
-  
+  rownames(result) <- "Outcome"
+
+  class(result) <- c("backcalc", class(result))
+  attr(result, "Approximations") <- approx_notes
+  attr(result, "attr") <- attr
+
   return(result)
 }

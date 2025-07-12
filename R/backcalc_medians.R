@@ -21,18 +21,14 @@
 #' @param one_sided Logical. Whether the test is one-sided (default FALSE).
 #' @param conf.level Numeric scalar. Confidence level for intervals (default 0.95).
 #' @param digits Integer. Number of decimal places to round results (default 3).
+#' @param attr Logical; if TRUE, attaches approximation messages as an attribute (default TRUE).
 #'
-#' @return A named numeric vector with components:
-#' \describe{
-#'   \item{Estimate}{Back-calculated estimate (median difference or median).}
-#'   \item{SE}{Standard error of the estimate.}
-#'   \item{z or t}{Test statistic, z for robust inference, t for parametric inference with df.}
-#'   \item{df}{Degrees of freedom (if applicable; NA otherwise).}
-#'   \item{p or p-one}{Two-sided or one-sided p-value.}
-#'   \item{LL}{Lower confidence limit.}
-#'   \item{UL}{Upper confidence limit.}
-#' }
-#'
+#' @return
+#' A \code{data.frame} with the back-calculated statistics including Estimate, SE,
+#' test statistic (t or z), degrees of freedom (df), p-value, and confidence interval bounds.
+#' The output has class \code{"backcalc"} and contains attribute
+#' \code{"Approximations"} if \code{attr = TRUE}.
+#' 
 #' @details
 #' The function supports inference for medians using IQR, MAD, or range to approximate SE
 #' with normal-based confidence intervals and z-tests. When parametric inputs like SD and sample size
@@ -53,7 +49,7 @@ backcalc_medians <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL
                              p = NULL, ci = NULL, statistic = NULL,
                              iqr = NULL, mad = NULL, range = NULL,
                              paired = FALSE, one_sided = FALSE,
-                             conf.level = 0.95, digits = 3) {
+                             conf.level = 0.95, digits = 3, attr = TRUE) {
   estimate <- m
   messages <- character(0)
   approx_notes <- character(0)
@@ -227,7 +223,11 @@ backcalc_medians <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL
   
   # Check for insufficient information
   if (is.null(estimate) || (is.null(se) && is.null(p) && is.null(ci) && is.null(statistic))) {
-    message("Insufficient information: Provide estimate and at least one of SE, p-value, CI, or test statistic.")
+    messages <- c(messages, "Provide estimate and at least one of SE, p-value, CI, or test statistic.")
+if (length(messages)) {
+    cat(paste0("\nInsufficient Input:"), sep = "\n")
+    cat(paste0(paste(messages, collapse = "\n"), "\n\n"))
+}
     return(invisible(NULL))
   }
   
@@ -267,7 +267,7 @@ backcalc_medians <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL
   ci_upper <- estimate + crit * se
   
   # Compose output
-  result <- c(
+  result <- data.frame(
     Estimate = round(estimate, digits),
     SE = round(se, digits),
     statistic = round(statistic, digits),
@@ -276,13 +276,14 @@ backcalc_medians <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL
     LL = round(ci_lower, digits),
     UL = round(ci_upper, digits)
   )
-  
-  # Rename keys for reporting
+
   names(result)[names(result) == "p"] <- ifelse(one_sided, "p-one", "p")
   names(result)[names(result) == "statistic"] <- statistic_type
-  
-  if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
-  if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
+  rownames(result) <- "Outcome"
+
+  class(result) <- c("backcalc", class(result))
+  attr(result, "Approximations") <- approx_notes
+  attr(result, "attr") <- attr
   
   return(result)
 }

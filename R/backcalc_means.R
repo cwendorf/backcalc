@@ -1,39 +1,36 @@
 #' Backcalculate Missing Inferential Statistics for Means
 #'
-#' \code{backcalc_means()} reconstructs inferential statistics related to means from partial information.
+#' This function reconstructs inferential statistics related to means from partial information.
 #' It can estimate standard errors, confidence intervals, p-values, test statistics (t or z), degrees of freedom,
 #' and point estimates when some components are missing, supporting one-sample, paired, and two-sample cases.
 #'
-#' @param m Numeric or length-2 numeric vector. Point estimate(s) (e.g., mean for one group,
-#' or two values for two groups where difference = m[1] - m[2]).
-#' @param se Numeric. Standard error of the estimate.
-#' @param sd Numeric or length-2 numeric vector. Standard deviation(s) for one or two groups.
-#' @param n Numeric or length-2 numeric vector. Sample size(s) for one or two groups.
-#' @param df Numeric. Degrees of freedom.
-#' @param p Numeric. P-value.
-#' @param ci Numeric vector of length 2. Confidence interval as c(lower, upper).
-#' @param paired Logical. Whether data come from a paired/matched design (default FALSE).
-#' @param one_sided Logical. Whether the test is one-sided (default FALSE).
-#' @param digits Integer. Number of decimal digits to round the results (default 3).
-#' @param statistic Numeric. Test statistic value (t or z).
-#' @param conf.level Numeric. Confidence level for intervals (default 0.95).
+#' @param m Numeric vector of means or mean differences. For two-sample cases, provide
+#'   a vector of length 2 representing group means.
+#' @param se Numeric vector of standard errors corresponding to the means or difference.
+#' @param sd Numeric vector of standard deviations for each group.
+#' @param n Numeric vector of sample sizes for each group.
+#' @param df Degrees of freedom associated with the estimate(s).
+#' @param p P-value(s) associated with the test statistic.
+#' @param ci Numeric vector of length 2 specifying a confidence interval (lower and upper bounds).
+#' @param statistic Test statistic value (e.g., t or z statistic).
+#' @param paired Logical indicating whether the comparison is paired (default is FALSE).
+#' @param one_sided Logical indicating whether a one-sided test is used (default is FALSE).
+#' @param conf.level Confidence level for intervals (default 0.95).
+#' @param digits Number of digits to round the output statistics (default 3).
+#' @param attr Logical; if TRUE, attaches approximation messages as attributes (default TRUE).
 #'
-#' @return Named numeric vector containing:
-#' \describe{
-#'   \item{Estimate}{Point estimate (difference if two values provided)}
-#'   \item{SE}{Standard error of estimate}
-#'   \item{t / z}{Test statistic (t if df provided, otherwise z)}
-#'   \item{df}{Degrees of freedom (if available)}
-#'   \item{p / p-one}{Two-sided or one-sided p-value}
-#'   \item{LL}{Lower bound of the confidence interval}
-#'   \item{UL}{Upper bound of the confidence interval}
-#' }
-#'
+#' @return
+#' A \code{data.frame} with the back-calculated statistics including Estimate, SE,
+#' test statistic (t or z), degrees of freedom (df), p-value, and confidence interval bounds.
+#' The output has class \code{"backcalc"} and contains attribute
+#' \code{"Approximations"} if \code{attr = TRUE}.
+#' 
 #' @details
-#' The function infers missing statistics using provided inputs. For two-sample tests,
-#' it calculates standard error and degrees of freedom using pooled or Welch's approximation as appropriate.
-#' When sample sizes are provided, it defaults to using the t-distribution for inference rather than normal approximation.
-#' The confidence interval is computed based on the specified \code{conf.level}.
+#' The function handles both one- and two-sample cases and calculates missing values using
+#' standard formulas and approximations. It supports pooled and Welch-Satterthwaite
+#' degrees of freedom, approximation of SE from SD and sample size, estimation from CI
+#' width, and estimation of test statistics and p-values. Messages about assumptions
+#' and approximations are stored as attributes.
 #'
 #' @examples
 #' # One-sample example: Mean, SE, and sample size given (uses t-distribution)
@@ -49,10 +46,10 @@
 backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
                            p = NULL, ci = NULL, statistic = NULL,
                            paired = FALSE, one_sided = FALSE,
-                           conf.level = 0.95, digits = 3) {
+                           conf.level = 0.95, digits = 3, attr = TRUE) {
   estimate <- m
-  messages <- character(0)
-  approx_notes <- character(0)
+  messages <- character()
+  approx_notes <- character()
 
   get_crit <- function(df = NULL) {
     alpha <- 1 - conf.level
@@ -70,7 +67,6 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
   len_sd <- ifelse(is.null(sd), 0, length(sd))
   len_n <- ifelse(is.null(n), 0, length(n))
 
-  # Handle special case: two means + two SDs + single n => assume equal sample sizes
   two_sample_case <- (len_sd == 2 && len_n == 2 && !paired)
   if (!two_sample_case && len_sd == 2 && len_n == 1 && !paired && !is.null(m) && length(m) == 2) {
     n <- rep(n, 2)
@@ -120,7 +116,6 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
     }
   }
 
-  # FIX: Infer df if SE has been computed and df still missing
   if (is.null(df) && !is.null(n)) {
     if (length(n) == 1) {
       df <- n - 1
@@ -155,8 +150,11 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
   }
 
   if (is.null(estimate) || (is.null(se) && is.null(p) && is.null(ci) && is.null(statistic))) {
-    messages <- c(messages, "Insufficient input: Provide estimate and at least one of SE, p-value, CI, or test statistic.")
-    if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
+    messages <- c(messages, "Provide estimate and at least one of SE, p-value, CI, or test statistic.")
+  if (length(messages)) {
+    cat(paste0("\nInsufficient Input:"), sep = "\n")
+    cat(paste0(paste(messages, collapse = "\n"), "\n\n"))
+  }
     return(invisible(NULL))
   }
 
@@ -187,7 +185,7 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
   ci_lower <- estimate - crit * se
   ci_upper <- estimate + crit * se
 
-  result <- c(
+  result <- data.frame(
     Estimate = round(estimate, digits),
     SE = round(se, digits),
     statistic = round(statistic, digits),
@@ -199,9 +197,10 @@ backcalc_means <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
 
   names(result)[names(result) == "p"] <- ifelse(one_sided, "p-one", "p")
   names(result)[names(result) == "statistic"] <- statistic_type
-
-  if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
-  if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
+  rownames(result) <- "Outcome"
+  class(result) <- c("backcalc", class(result))
+  attr(result, "Approximations") <- approx_notes
+  attr(result, "attr") <- attr
 
   return(result)
 }

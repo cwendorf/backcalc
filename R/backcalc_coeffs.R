@@ -1,12 +1,9 @@
 #' Backcalculate Missing Inferential Statistics for Regression Coefficients
 #'
-#' \code{backcalc_coeffs()} reconstructs inferential statistics for a regression coefficient.
+#' This function reconstructs inferential statistics for a regression coefficient.
 #' It allows for partial input of summary or inferential statistics and infers missing values
 #' such as standard errors, test statistics, confidence intervals, p-values, and degrees of freedom.
 #' It supports both unstandardized and standardized coefficients.
-#' 
-#' The function infers as much as possible based on the inputs provided. It supports inputs including
-#' raw correlations, sample sizes, standard errors, confidence intervals, p-values, test statistics, and degrees of freedom.
 #'
 #' @param b Numeric. Unstandardized regression coefficient.
 #' @param se Numeric. Standard error of the unstandardized coefficient.
@@ -21,17 +18,13 @@
 #' @param one_sided Logical. Whether the hypothesis test is one-sided. Default is \code{FALSE} (two-sided).
 #' @param conf.level Numeric between 0 and 1. Confidence level for the confidence interval. Default is \code{0.95}.
 #' @param digits Integer. Number of decimal digits to round the output. Default is \code{3}.
+#' @param attr Logical; if TRUE, attaches approximation messages as an attribute (default TRUE).
 #'
-#' @return A named numeric vector containing:
-#' \describe{
-#'   \item{Estimate}{Regression coefficient (standardized or unstandardized)}
-#'   \item{SE}{Standard error of the coefficient}
-#'   \item{t or z}{Test statistic used, depending on \code{df} presence}
-#'   \item{df}{Degrees of freedom (if available or inferred), otherwise \code{NA}}
-#'   \item{p or p_one}{P-value (one- or two-sided)}
-#'   \item{LL}{Lower bound of the confidence interval}
-#'   \item{UL}{Upper bound of the confidence interval}
-#' }
+#' @return
+#' A \code{data.frame} with the back-calculated statistics including Estimate, SE,
+#' test statistic (t or z), degrees of freedom (df), p-value, and confidence interval bounds.
+#' The output has class \code{"backcalc"} and contains attribute
+#' \code{"Approximations"} if \code{attr = TRUE}.
 #'
 #' @details
 #' The function accepts a flexible combination of inputs. If sufficient information is not provided,
@@ -57,10 +50,10 @@ backcalc_coeffs <- function(b = NULL, se = NULL,
                             df = NULL, n = NULL,
                             p = NULL,
                             ci = NULL,
-                            statistic = NULL,  # renamed from stat
-                            one_sided = FALSE, 
+                            statistic = NULL,
+                            one_sided = FALSE,
                             conf.level = 0.95,
-                            digits = 3) {
+                            digits = 3, attr = TRUE) {
   messages <- character(0)
   approx_notes <- character(0)
 
@@ -165,28 +158,31 @@ backcalc_coeffs <- function(b = NULL, se = NULL,
 
   # --- Final check for minimal info ---
   if (is.null(estimate) || is.null(se_val)) {
-    messages <- c(messages, "Insufficient information: cannot estimate coefficient or SE.")
-    cat(paste(messages, collapse = "\n"), "\n")
+    messages <- c(messages, "Cannot estimate coefficient or SE.")
+    cat(paste0("\nInsufficient Input:"), sep = "\n")
+    cat(paste0(paste(messages, collapse = "\n"), "\n\n"))
     return(invisible(NULL))
   }
 
   # --- Assemble result ---
-  stat_name <- stat_type
-  p_name <- if (one_sided) "p_one" else "p"
 
-  result <- c(
-    Estimate = round(estimate, digits),
-    SE = round(se_val, digits),
-    setNames(round(statistic, digits), stat_name),
-    df = if (!is.null(df)) round(df, 0) else NA,
-    setNames(round(p, digits), p_name),
-    LL = round(ci_lower, digits),
-    UL = round(ci_upper, digits)
-  )
+result <- data.frame(
+  Estimate = round(estimate, digits),
+  SE = round(se_val, digits),
+  Statistic = round(statistic, digits),
+  df = if (!is.null(df)) round(df, 0) else NA,
+  p_value = round(p, digits),
+  LL = round(ci_lower, digits),
+  UL = round(ci_upper, digits)
+)
 
-  # --- Messages and notes ---
-  if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
-  if (length(approx_notes)) cat("Note(s):\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
+names(result)[3] <- stat_type
+names(result)[5] <- if (one_sided) "p-one" else "p"
+  rownames(result) <- "Outcome"
+
+  class(result) <- c("backcalc", class(result))
+  attr(result, "Approximations") <- approx_notes
+  attr(result, "attr") <- attr
 
   return(result)
 }

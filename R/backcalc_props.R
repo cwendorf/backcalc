@@ -1,6 +1,6 @@
 #' Backcalculate Missing Inferential Statistics for Proportions
 #'
-#' \code{backcalc_props()} reconstructs inferential statistics related to proportions from partial information.
+#' This function reconstructs inferential statistics related to proportions from partial information.
 #' It can estimate standard errors, confidence intervals, p-values, test statistics (t or z), degrees of freedom,
 #' and point estimates when some components are missing, supporting one-sample, paired, and two-sample cases.
 #'
@@ -18,17 +18,13 @@
 #' @param conf.level Confidence level for the confidence interval. Default is 0.95.
 #' @param method Character. Either \code{"wald"} (default) for normal approximations or \code{"exact"} for exact binomial CI (one-sample only).
 #' @param continuity Logical. Whether to apply continuity correction in two-sample Wald test. Default is \code{FALSE}.
-#'
-#' @return A named numeric vector with:
-#' \describe{
-#'   \item{Estimate}{Point estimate (difference in proportions, or single proportion)}
-#'   \item{SE}{Standard error of the estimate}
-#'   \item{z or t}{Test statistic (depending on whether z or t is used)}
-#'   \item{df}{Degrees of freedom (NA for z-tests)}
-#'   \item{p or p-one}{P-value (two-sided or one-sided)}
-#'   \item{LL}{Lower limit of the confidence interval}
-#'   \item{UL}{Upper limit of the confidence interval}
-#' }
+#' @param attr Logical; if TRUE, attaches approximation messages as attributes (default TRUE).
+#' 
+#' @return
+#' A \code{data.frame} with the back-calculated statistics including Estimate, SE,
+#' test statistic (t or z), degrees of freedom (df), p-value, and confidence interval bounds.
+#' The output has class \code{"backcalc"} and contains attribute
+#' \code{"Approximations"} if \code{attr = TRUE}.
 #'
 #' @details
 #' This function is designed to handle partial or minimal inputs by inferring missing values when possible.
@@ -48,9 +44,11 @@
 backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL,
                            p = NULL, one_sided = FALSE, digits = 3,
                            interval_type = "wald", statistic = NULL, df = NULL,
-                           conf.level = 0.95, method = "wald", continuity = FALSE) {
+                           conf.level = 0.95, method = "wald", continuity = FALSE, attr = TRUE) {
   if (!method %in% c("wald", "exact")) {
-    cat("Invalid method. Choose 'wald' or 'exact'.\n")
+    messages <- "Invalid method. Choose 'wald' or 'exact'."
+    cat(paste0("\nInsufficient Input:"), sep = "\n")
+    cat(paste0(paste(messages, collapse = "\n"), "\n\n"))
     return(invisible(NULL))
   }
 
@@ -79,7 +77,9 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
   # One-sample exact binomial
   if (method == "exact") {
     if (is.null(x) || is.null(n) || length(x) != 1 || length(n) != 1) {
-      cat("Exact method requires single x and n values.\n")
+      messages <- c(messages, "Exact method requires single x and n values.")
+    cat(paste0("\nInsufficient Input:"), sep = "\n")
+    cat(paste0(paste(messages, collapse = "\n"), "\n\n"))
       return(invisible(NULL))
     }
     est <- x / n
@@ -89,7 +89,7 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
     p_val <- binom.test(x, n)$p.value
     stat_type <- "z"
 
-    result <- c(
+    result <- data.frame(
       Estimate = round(est, digits),
       SE = round(se_exact, digits),
       statistic = round(statistic_val, digits),
@@ -101,9 +101,16 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
 
     names(result)[names(result) == "statistic"] <- stat_type
     names(result)[names(result) == "p"] <- ifelse(one_sided, "p-one", "p")
+    rownames(result) <- "Outcome"
 
-    if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
-    if (length(approx_notes)) cat("Notes:\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
+    class(result) <- c("backcalc", class(result))
+    attr(result, "Approximations") <- approx_notes
+    attr(result, "attr") <- attr
+
+    if (length(messages)) {
+    cat(paste0("\nInsufficient Input:"), sep = "\n")
+    cat(paste0(paste(messages, collapse = "\n"), "\n\n"))
+    }
 
     return(result)
   }
@@ -130,7 +137,7 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
 
       approx_notes <- c(approx_notes, "Standard error and confidence interval estimated from test statistic and p-value.")
 
-      result <- c(
+      result <- data.frame(
         Estimate = round(est, digits),
         SE = round(se_calc, digits),
         statistic = round(statistic, digits),
@@ -140,11 +147,16 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
         UL = round(ci_upper, digits)
       )
 
-      names(result)[names(result) == "statistic"] <- stat_type
-      names(result)[names(result) == "p"] <- ifelse(one_sided, "p-one", "p")
+      rownames(result) <- "Outcome"
 
-      if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
-      if (length(approx_notes)) cat("Notes:\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
+      class(result) <- c("backcalc", class(result))
+      attr(result, "Approximations") <- approx_notes
+      attr(result, "attr") <- attr
+
+      if (length(messages)) {
+    cat(paste0("\nInsufficient Input:"), sep = "\n")
+    cat(paste0(paste(messages, collapse = "\n"), "\n\n"))
+      }
 
       return(result)
     }
@@ -186,7 +198,7 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
       ci_lower <- est - crit * se_calc
       ci_upper <- est + crit * se_calc
 
-      result <- c(
+      result <- data.frame(
         Estimate = round(est, digits),
         SE = round(se_calc, digits),
         statistic = round(statistic, digits),
@@ -196,11 +208,16 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
         UL = round(ci_upper, digits)
       )
 
-      names(result)[names(result) == "statistic"] <- stat_type
-      names(result)[names(result) == "p"] <- ifelse(one_sided, "p-one", "p")
+      rownames(result) <- "Outcome"
 
-      if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
-      if (length(approx_notes)) cat("Notes:\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
+      class(result) <- c("backcalc", class(result))
+      attr(result, "Approximations") <- approx_notes
+      attr(result, "attr") <- attr
+
+      if (length(messages)) {
+    cat(paste0("\nInsufficient Input:"), sep = "\n")
+    cat(paste0(paste(messages, collapse = "\n"), "\n\n"))
+      }
 
       return(result)
     } else {
@@ -227,7 +244,9 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
       }
 
       if (is.null(prop_calc) || is.null(n)) {
-        cat("Insufficient input: Provide 'prop' or ('x' and 'n').\n")
+        messages <- c(messages, "Provide 'prop' or ('x' and 'n').")
+    cat(paste0("\nInsufficient Input:"), sep = "\n")
+    cat(paste0(paste(messages, collapse = "\n"), "\n\n"))
         return(invisible(NULL))
       }
 
@@ -251,7 +270,7 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
       ci_lower <- est - crit * se_calc
       ci_upper <- est + crit * se_calc
 
-      result <- c(
+      result <- data.frame(
         Estimate = round(est, digits),
         SE = round(se_calc, digits),
         statistic = round(statistic, digits),
@@ -263,14 +282,18 @@ backcalc_props <- function(prop = NULL, se = NULL, n = NULL, x = NULL, ci = NULL
 
       names(result)[names(result) == "statistic"] <- stat_type
       names(result)[names(result) == "p"] <- ifelse(one_sided, "p-one", "p")
+      rownames(result) <- "Outcome"
 
-      if (length(messages)) cat(paste(messages, collapse = "\n"), "\n")
-      if (length(approx_notes)) cat("Notes:\n", paste(approx_notes, collapse = "\n"), "\n", sep = "")
+      class(result) <- c("backcalc", class(result))
+      attr(result, "Approximations") <- approx_notes
+      attr(result, "attr") <- attr
 
       return(result)
     }
   }
 
-  cat("Unsupported combination of inputs or method.\n")
-  return()
+  messages <- c(messages, "Unsupported combination of inputs or method.")
+    cat(paste0("\nInsufficient Input:"), sep = "\n")
+    cat(paste0(paste(messages, collapse = "\n"), "\n\n"))
+  return(invisible(NULL))
 }
