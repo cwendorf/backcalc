@@ -14,7 +14,8 @@ backcalc_corrs(
   one_sided = FALSE,
   digits = 3,
   statistic = NULL,
-  conf.level = 0.95
+  conf.level = 0.95,
+  attr = TRUE
 )
 }
 \arguments{
@@ -37,21 +38,17 @@ backcalc_corrs(
 \item{statistic}{Numeric. Test statistic (usually a t- or z-value). Can be used to infer \code{se} if missing.}
 
 \item{conf.level}{Numeric between 0 and 1. Confidence level for the confidence interval (default is \code{0.95}).}
+
+\item{attr}{Logical; if TRUE, attaches approximation messages as attributes (default TRUE).}
 }
 \value{
-A named numeric vector containing:
-\describe{
-\item{Estimate}{Estimated correlation (or Fisher z-difference if comparing two correlations).}
-\item{SE}{Standard error of the Fisher z-transformed correlation.}
-\item{t or z}{Test statistic (type depends on whether \code{df} is available).}
-\item{df}{Degrees of freedom (if available or inferred).}
-\item{p or p-one}{Two-sided or one-sided p-value.}
-\item{LL}{Lower bound of the confidence interval (on correlation scale).}
-\item{UL}{Upper bound of the confidence interval (on correlation scale).}
-}
+A \code{data.frame} with the back-calculated statistics including Estimate, SE,
+test statistic (t or z), degrees of freedom (df), p-value, and confidence interval bounds.
+The output has class \code{"backcalc"} and contains attribute
+\code{"Approximations"} if \code{attr = TRUE}.
 }
 \description{
-\code{backcalc_corrs()} reconstructs missing inferential statistics for correlation coefficients
+This function reconstructs missing inferential statistics for correlation coefficients
 using Fisher's z-transformation. It supports both one-sample and two-sample correlation comparisons
 and allows flexible combinations of inputs to infer standard errors, test statistics, p-values,
 confidence intervals, and degrees of freedom.

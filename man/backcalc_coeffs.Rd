@@ -18,7 +18,8 @@ backcalc_coeffs(
   statistic = NULL,
   one_sided = FALSE,
   conf.level = 0.95,
-  digits = 3
+  digits = 3,
+  attr = TRUE
 )
 }
 \arguments{
@@ -47,29 +48,22 @@ backcalc_coeffs(
 \item{conf.level}{Numeric between 0 and 1. Confidence level for the confidence interval. Default is \code{0.95}.}
 
 \item{digits}{Integer. Number of decimal digits to round the output. Default is \code{3}.}
+
+\item{attr}{Logical; if TRUE, attaches approximation messages as an attribute (default TRUE).}
 }
 \value{
-A named numeric vector containing:
-\describe{
-\item{Estimate}{Regression coefficient (standardized or unstandardized)}
-\item{SE}{Standard error of the coefficient}
-\item{t or z}{Test statistic used, depending on \code{df} presence}
-\item{df}{Degrees of freedom (if available or inferred), otherwise \code{NA}}
-\item{p or p_one}{P-value (one- or two-sided)}
-\item{LL}{Lower bound of the confidence interval}
-\item{UL}{Upper bound of the confidence interval}
-}
+A \code{data.frame} with the back-calculated statistics including Estimate, SE,
+test statistic (t or z), degrees of freedom (df), p-value, and confidence interval bounds.
+The output has class \code{"backcalc"} and contains attribute
+\code{"Approximations"} if \code{attr = TRUE}.
 }
 \description{
-\code{backcalc_coeffs()} reconstructs inferential statistics for a regression coefficient.
+This function reconstructs inferential statistics for a regression coefficient.
 It allows for partial input of summary or inferential statistics and infers missing values
 such as standard errors, test statistics, confidence intervals, p-values, and degrees of freedom.
 It supports both unstandardized and standardized coefficients.
 }
 \details{
-The function infers as much as possible based on the inputs provided. It supports inputs including
-raw correlations, sample sizes, standard errors, confidence intervals, p-values, test statistics, and degrees of freedom.
-
 The function accepts a flexible combination of inputs. If sufficient information is not provided,
 it attempts to approximate missing values where logically possible. Standardized coefficients can be
 derived from unstandardized ones using the provided standard deviations. Missing SEs or test statistics

@@ -18,7 +18,8 @@ backcalc_props(
   df = NULL,
   conf.level = 0.95,
   method = "wald",
-  continuity = FALSE
+  continuity = FALSE,
+  attr = TRUE
 )
 }
 \arguments{
@@ -49,21 +50,17 @@ backcalc_props(
 \item{method}{Character. Either \code{"wald"} (default) for normal approximations or \code{"exact"} for exact binomial CI (one-sample only).}
 
 \item{continuity}{Logical. Whether to apply continuity correction in two-sample Wald test. Default is \code{FALSE}.}
+
+\item{attr}{Logical; if TRUE, attaches approximation messages as attributes (default TRUE).}
 }
 \value{
-A named numeric vector with:
-\describe{
-\item{Estimate}{Point estimate (difference in proportions, or single proportion)}
-\item{SE}{Standard error of the estimate}
-\item{z or t}{Test statistic (depending on whether z or t is used)}
-\item{df}{Degrees of freedom (NA for z-tests)}
-\item{p or p-one}{P-value (two-sided or one-sided)}
-\item{LL}{Lower limit of the confidence interval}
-\item{UL}{Upper limit of the confidence interval}
-}
+A \code{data.frame} with the back-calculated statistics including Estimate, SE,
+test statistic (t or z), degrees of freedom (df), p-value, and confidence interval bounds.
+The output has class \code{"backcalc"} and contains attribute
+\code{"Approximations"} if \code{attr = TRUE}.
 }
 \description{
-\code{backcalc_props()} reconstructs inferential statistics related to proportions from partial information.
+This function reconstructs inferential statistics related to proportions from partial information.
 It can estimate standard errors, confidence intervals, p-values, test statistics (t or z), degrees of freedom,
 and point estimates when some components are missing, supporting one-sample, paired, and two-sample cases.
 }

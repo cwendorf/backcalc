@@ -19,7 +19,8 @@ backcalc_medians(
   paired = FALSE,
   one_sided = FALSE,
   conf.level = 0.95,
-  digits = 3
+  digits = 3,
+  attr = TRUE
 )
 }
 \arguments{
@@ -52,18 +53,14 @@ backcalc_medians(
 \item{conf.level}{Numeric scalar. Confidence level for intervals (default 0.95).}
 
 \item{digits}{Integer. Number of decimal places to round results (default 3).}
+
+\item{attr}{Logical; if TRUE, attaches approximation messages as an attribute (default TRUE).}
 }
 \value{
-A named numeric vector with components:
-\describe{
-\item{Estimate}{Back-calculated estimate (median difference or median).}
-\item{SE}{Standard error of the estimate.}
-\item{z or t}{Test statistic, z for robust inference, t for parametric inference with df.}
-\item{df}{Degrees of freedom (if applicable; NA otherwise).}
-\item{p or p-one}{Two-sided or one-sided p-value.}
-\item{LL}{Lower confidence limit.}
-\item{UL}{Upper confidence limit.}
-}
+A \code{data.frame} with the back-calculated statistics including Estimate, SE,
+test statistic (t or z), degrees of freedom (df), p-value, and confidence interval bounds.
+The output has class \code{"backcalc"} and contains attribute
+\code{"Approximations"} if \code{attr = TRUE}.
 }
 \description{
 This function estimates standard errors, test statistics, p-values, confidence intervals,

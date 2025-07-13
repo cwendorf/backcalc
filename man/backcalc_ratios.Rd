@@ -14,7 +14,8 @@ backcalc_ratios(
   statistic = NULL,
   one_sided = FALSE,
   digits = 3,
-  conf.level = 0.95
+  conf.level = 0.95,
+  attr = TRUE
 )
 }
 \arguments{
@@ -38,21 +39,17 @@ When a vector of two ratios is supplied, the function compares them via their lo
 \item{digits}{Integer. Number of digits to round outputs to. Default is \code{3}.}
 
 \item{conf.level}{Numeric. Confidence level used to compute interval. Default is \code{0.95}.}
+
+\item{attr}{Logical; if TRUE, attaches approximation messages as attributes (default TRUE).}
 }
 \value{
-A named numeric vector with the following components, in this order:
-\describe{
-\item{Estimate}{Exponentiated point estimate (on the original ratio scale).}
-\item{SE}{Standard error of the log-transformed estimate.}
-\item{z or t}{Test statistic (label depends on \code{df}).}
-\item{df}{Degrees of freedom used (if applicable).}
-\item{p or p-one}{p-value (two-sided or one-sided, depending on \code{one_sided}).}
-\item{LL}{Lower limit of the confidence interval (on ratio scale).}
-\item{UL}{Upper limit of the confidence interval (on ratio scale).}
-}
+A \code{data.frame} with the back-calculated statistics including Estimate, SE,
+test statistic (t or z), degrees of freedom (df), p-value, and confidence interval bounds.
+The output has class \code{"backcalc"} and contains attribute
+\code{"Approximations"} if \code{attr = TRUE}.
 }
 \description{
-\code{backcalc_ratios()} reconstructs inferential statistics (e.g., SE, test statistic,
+This function reconstructs inferential statistics (e.g., SE, test statistic,
 p-value, confidence interval) for ratio-type measures (such as odds ratios or risk ratios)
 using the log transformation internally. The function allows flexible input and determines
 the appropriate test type (z or t) based on the presence of degrees of freedom.

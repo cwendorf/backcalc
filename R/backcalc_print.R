@@ -74,16 +74,10 @@ print.backcalc <- function(x, ...) {
   invisible(x)
 }
 
-
-#' Knit Print Method for backcalc Objects
-#'
-#' Ensures Notes and Approximations are shown during knitr rendering
-#'
-#' @param x An object of class backcalc
-#' @param ... Additional arguments
-#' @return Character string formatted as Markdown output
+#' Knit print method for backcalc objects
+#' Ensures Notes and Approximations print in Rmd
 #' @export
 knit_print.backcalc <- function(x, ...) {
-  out <- paste(capture.output(print(x, ...)), collapse = "\n")
-  knitr::asis_output(paste0("```\n", out, "\n```"))
+  out <- capture.output(print(x, ...))  # This captures ALL printed output including cat()
+  knitr::asis_output(paste0("```\n", paste(out, collapse = "\n"), "\n```"))
 }
