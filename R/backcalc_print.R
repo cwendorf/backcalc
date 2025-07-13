@@ -73,3 +73,17 @@ print.backcalc <- function(x, ...) {
   
   invisible(x)
 }
+
+#' Knit Print Method for backcalc Objects
+#'
+#' Emulates base R printing in knitr output
+#' without Markdown formatting.
+#'
+#' @param x An object of class backcalc
+#' @param ... Additional arguments (ignored)
+#'
+#' @export
+knit_print.backcalc <- function(x, ...) {
+  out <- capture.output(print(x, ...))  # Use your custom print.backcalc
+  knitr::asis_output(paste0("```\n", paste(out, collapse = "\n"), "\n```"))
+}
