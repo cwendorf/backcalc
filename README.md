@@ -45,4 +45,4 @@ This package contains a set of examples to demonstrate its use:
 
 ### Citation
 
-Wendorf, C.A. (2025). *backcalc: Reconstruct missing inferential statsitics* [R Package]. [https://github.com/cwendorf/backcalc](https://github.com/cwendorf/backcalc)
+Wendorf, C.A. (2025). *backcalc: Reconstruct missing inferential statistics* [R Package]. [https://github.com/cwendorf/backcalc](https://github.com/cwendorf/backcalc)
