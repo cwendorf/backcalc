@@ -1,4 +1,4 @@
-# backcalc 
+# backcalc
 ## Means Examples
 
 source("http://raw.githubusercontent.com/cwendorf/backcalc/main/source-backcalc.R")
