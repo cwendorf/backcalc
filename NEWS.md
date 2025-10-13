@@ -2,6 +2,7 @@
 
 ## backcalc next release
 
+- Added analysis of variance designs
 - Added medians and median differences
 - Added ability to specify confidence level
 - Provided a full set of examples for each function
