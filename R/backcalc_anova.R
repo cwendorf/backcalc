@@ -15,9 +15,23 @@
 #' @param subjects Numeric vector: number of subjects (for within/mixed designs).
 #' @param epsilon Numeric vector: sphericity correction factors.
 #' @param effect Character vector: "main" or "interaction".
+#' @param labels Optional character vector of row labels (one per effect). If omitted,
+#'   names are derived from `levels` and `effect` type.
 #' @param conf.level Confidence level for eta-squared CI.
 #' @param digits Rounding digits for output.
 #' @param attr Attach approximation notes as attributes.
+#'
+#' @examples
+#' # 1. One-way between-subjects ANOVA (single effect)
+#' backcalc_anova(F = 5.2, df1 = 2, df2 = 30,
+#'                design = "between", levels = list(3), n = 33,
+#'                labels = "Treatment")
+#'
+#' # 2. Two separate main effects (e.g., reporting each factor separately)
+#' backcalc_anova(F = c(5.2, NA), df1 = c(2, NA), df2 = c(30, NA),
+#'                p = c(NA, 0.01), design = "between",
+#'                levels = list(3, 4), n = 33,
+#'                labels = c("FactorA", "FactorB"))
 #'
 #' @return A data.frame with one row per effect, containing F, df1, df2, p, 
 #' Cohen's f, partial eta-squared, and CI bounds for eta-squared. Attributes store approximation notes.
@@ -27,7 +41,7 @@ backcalc_anova <- function(F = NULL, df1 = NULL, df2 = NULL,
                            p = NULL, eta2 = NULL, f = NULL,
                            design = "between",
                            n = NULL, levels = NULL, subjects = NULL,
-                           epsilon = 1, effect = "main",
+                           epsilon = 1, effect = "main", labels = NULL,
                            conf.level = 0.95, digits = 3, attr = TRUE) {
   
   # --- Helper: recycle singletons ---
@@ -68,6 +82,11 @@ backcalc_anova <- function(F = NULL, df1 = NULL, df2 = NULL,
   
   results <- vector("list", len)
   approx_all <- vector("list", len)
+  # Recycle labels if provided
+  if (!is.null(labels)) {
+    if (length(labels) %in% c(0,1)) labels <- rep(labels, len) else labels <- labels
+    if (length(labels) != len) labels <- rep(labels, length.out = len)
+  }
   
   for (i in seq_len(len)) {
     approx_notes <- character()
@@ -170,9 +189,29 @@ backcalc_anova <- function(F = NULL, df1 = NULL, df2 = NULL,
   }
   
   final <- do.call(rbind, results)
-  rownames(final) <- paste0("Effect", seq_len(len))
+  # Row naming precedence: user labels > names(levels list) > generated effect descriptors
+  if (!is.null(labels)) {
+    rownames(final) <- labels
+  } else if (!is.null(names(levels)) && any(nzchar(names(levels)))) {
+    rn <- names(levels)
+    rn[!nzchar(rn)] <- paste0("Effect", which(!nzchar(rn)))
+    rownames(final) <- rn
+  } else {
+    derived_names <- character(len)
+    for (i in seq_len(len)) {
+      lv <- levels[[i]]
+      if (length(lv) == 1) {
+        derived_names[i] <- paste0("Factor(k=", lv[1], ")")
+      } else if (effect[i] == "interaction") {
+        derived_names[i] <- paste0("Interaction(", paste(lv, collapse="x"), ")")
+      } else {
+        derived_names[i] <- paste0("Effect", i)
+      }
+    }
+    rownames(final) <- derived_names
+  }
   class(final) <- c("backcalc", class(final))
-  attr(final, "Approximations") <- approx_notes
+  attr(final, "Approximations") <- approx_all
   attr(final, "attr") <- attr
   return(final)
 }

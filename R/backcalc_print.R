@@ -66,9 +66,22 @@ print.backcalc <- function(x, ...) {
   
   approximations <- attr(x, "Approximations")
   if (!is.null(approximations) && length(approximations)) {
-    cat("Note(s):\n")
-    cat(paste0(approximations), sep = "\n")
-    cat("\n")
+    cat("Notes:\n")
+    note_lines <- character()
+    rn <- rownames(x)
+    if (is.list(approximations)) {
+      for (i in seq_along(approximations)) {
+        notes_i <- approximations[[i]]
+        if (length(notes_i)) {
+          for (n_i in notes_i) {
+            note_lines <- c(note_lines, paste0(rn[i], ": ", n_i))
+          }
+        }
+      }
+    } else if (is.character(approximations)) {
+      note_lines <- approximations
+    }
+    if (length(note_lines)) cat(paste(note_lines, collapse = "\n"), "\n\n")
   }
   
   invisible(x)

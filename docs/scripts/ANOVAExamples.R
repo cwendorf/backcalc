@@ -3,15 +3,15 @@
 
 ### Full ANOVA Cases
 
-# 1. One-way between-subjects ANOVA
+# 1. One-way between-subjects ANOVA (single factor)
 backcalc_anova(
-  F = c(5.2, NA),         # First effect has F, second only p
-  df1 = c(2, NA),
-  df2 = c(30, NA),
-  p = c(NA, 0.01),
+  F = 5.2,
+  df1 = 2,
+  df2 = 30,
   design = "between",
-  levels = list(c(3), c(4)),  # 3 levels, 4 levels
-  n = 33
+  levels = list(3),  # 3 levels for the single factor
+  n = 33,
+  labels = "Treatment"
 )
 
 # 2. Repeated-measures ANOVA (single factor) with sphericity correction
@@ -24,26 +24,28 @@ backcalc_anova(
   epsilon = 0.75
 )
 
-# 3. Factorial between-subjects ANOVA (2×3)
+# 3. Factorial between-subjects ANOVA (2×3): two mains + interaction
 backcalc_anova(
   F = c(6.4, 3.2, 2.5),
   df1 = NA, df2 = NA,
   design = "between",
   levels = list(c(2, 3), c(2, 3), c(2, 3)),
   n = 36,
-  effect = c("main", "main", "interaction")
+  effect = c("main", "main", "interaction"),
+  labels = c("FactorA", "FactorB", "A×B")
 )
 
-# 4. Mixed design (Between × Within)
+# 4. Mixed design (Between × Within): between main, within main, interaction
 backcalc_anova(
   F = c(5.5, 4.2, 1.8),
   df1 = NA, df2 = NA,
   design = c("between", "within", "mixed"),
   levels = list(c(2), c(3), c(2, 3)),
-  n = 20,               # per between group
-  subjects = 10,        # per condition for within
+  n = 20,               # total sample size between groups
+  subjects = 10,        # subjects per cell for within factor
   epsilon = c(1, 0.85, 0.85),
-  effect = c("main", "main", "interaction")
+  effect = c("main", "main", "interaction"),
+  labels = c("Group", "Time", "Group×Time")
 )
 
 ### Minimal Input Cases

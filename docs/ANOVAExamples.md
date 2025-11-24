@@ -14,28 +14,25 @@ constraints.
 ### Full ANOVA Cases
 
 ``` r
-# 1. One-way between-subjects ANOVA
+# 1. One-way between-subjects ANOVA (single factor)
 backcalc_anova(
-  F = c(5.2, NA),         # First effect has F, second only p
-  df1 = c(2, NA),
-  df2 = c(30, NA),
-  p = c(NA, 0.01),
+  F = 5.2,
+  df1 = 2,
+  df2 = 30,
   design = "between",
-  levels = list(c(3), c(4)),  # 3 levels, 4 levels
-  n = 33
+  levels = list(3),  # 3 levels for the single factor
+  n = 33,
+  labels = "Treatment"
 )
 ```
 
+                  F   df1    df2     p     f  eta2    LL    UL
+    Treatment 5.200 2.000 30.000 0.012 0.589 0.257 0.002 0.218
 
-                F   df1    df2     p     f  eta2    LL    UL
-    Effect1 5.200 2.000 30.000 0.012 0.589 0.257 0.002 0.218
-    Effect2 4.538 3.000 29.000 0.010 0.685 0.319 0.007 0.272
-
-    Note(s):
-    F-statistic approximated from p-value.
-    Partial eta-squared computed from F, df1, df2.
-    Cohen's f computed from partial eta-squared.
-    CI for partial eta-squared is approximate.
+    Notes:
+    Treatment: Partial eta-squared computed from F, df1, df2.
+    Treatment: Cohen's f computed from partial eta-squared.
+    Treatment: CI for partial eta-squared is approximate.
 
 ``` r
 # 2. Repeated-measures ANOVA (single factor) with sphericity correction
@@ -49,15 +46,14 @@ backcalc_anova(
 )
 ```
 
+                    F   df1    df2     p     f  eta2    LL    UL
+    Factor(k=4) 4.800 2.250 24.750 0.015 0.661 0.304 0.003 0.272
 
-                F   df1    df2     p     f  eta2    LL    UL
-    Effect1 4.800 2.250 24.750 0.015 0.661 0.304 0.003 0.272
-
-    Note(s):
-    Applied sphericity correction ε = 0.75.
-    Partial eta-squared computed from F, df1, df2.
-    Cohen's f computed from partial eta-squared.
-    CI for partial eta-squared is approximate.
+    Notes:
+    Factor(k=4): Applied sphericity correction ε = 0.75.
+    Factor(k=4): Partial eta-squared computed from F, df1, df2.
+    Factor(k=4): Cohen's f computed from partial eta-squared.
+    Factor(k=4): CI for partial eta-squared is approximate.
 
 ``` r
 # 3. Factorial between-subjects ANOVA (2×3)
@@ -67,20 +63,26 @@ backcalc_anova(
   design = "between",
   levels = list(c(2, 3), c(2, 3), c(2, 3)),
   n = 36,
-  effect = c("main", "main", "interaction")
+  effect = c("main", "main", "interaction"),
+  labels = c("FactorA", "FactorB", "A×B")
 )
 ```
 
-
                 F   df1    df2     p     f  eta2    LL    UL
-    Effect1 6.400 1.000 30.000 0.017 0.462 0.176 0.000 0.157
-    Effect2 3.200 1.000 30.000 0.084 0.327 0.096 0.000 0.157
-    Effect3 2.500 2.000 30.000 0.099 0.408 0.143 0.002 0.218
+    FactorA 6.400 1.000 30.000 0.017 0.462 0.176 0.000 0.157
+    FactorB 3.200 1.000 30.000 0.084 0.327 0.096 0.000 0.157
+    A×B     2.500 2.000 30.000 0.099 0.408 0.143 0.002 0.218
 
-    Note(s):
-    Partial eta-squared computed from F, df1, df2.
-    Cohen's f computed from partial eta-squared.
-    CI for partial eta-squared is approximate.
+    Notes:
+    FactorA: Partial eta-squared computed from F, df1, df2.
+    FactorA: Cohen's f computed from partial eta-squared.
+    FactorA: CI for partial eta-squared is approximate.
+    FactorB: Partial eta-squared computed from F, df1, df2.
+    FactorB: Cohen's f computed from partial eta-squared.
+    FactorB: CI for partial eta-squared is approximate.
+    A×B: Partial eta-squared computed from F, df1, df2.
+    A×B: Cohen's f computed from partial eta-squared.
+    A×B: CI for partial eta-squared is approximate.
 
 ``` r
 # 4. Mixed design (Between × Within)
@@ -89,24 +91,31 @@ backcalc_anova(
   df1 = NA, df2 = NA,
   design = c("between", "within", "mixed"),
   levels = list(c(2), c(3), c(2, 3)),
-  n = 20,               # per between group
-  subjects = 10,        # per condition for within
+  n = 20,               # total sample size between groups
+  subjects = 10,        # subjects per cell for within factor
   epsilon = c(1, 0.85, 0.85),
-  effect = c("main", "main", "interaction")
+  effect = c("main", "main", "interaction"),
+  labels = c("Group", "Time", "Group×Time")
 )
 ```
 
+                   F   df1    df2     p     f  eta2    LL    UL
+    Group      5.500 1.000 18.000 0.031 0.553 0.234 0.000 0.249
+    Time       4.200 1.700 15.300 0.040 0.683 0.318 0.002 0.359
+    Group×Time 1.800 1.700 15.300 0.201 0.447 0.167 0.002 0.359
 
-                F   df1    df2     p     f  eta2    LL    UL
-    Effect1 5.500 1.000 18.000 0.031 0.553 0.234 0.000 0.249
-    Effect2 4.200 1.700 15.300 0.040 0.683 0.318 0.002 0.359
-    Effect3 1.800 1.700 15.300 0.201 0.447 0.167 0.002 0.359
-
-    Note(s):
-    Applied sphericity correction ε = 0.85.
-    Partial eta-squared computed from F, df1, df2.
-    Cohen's f computed from partial eta-squared.
-    CI for partial eta-squared is approximate.
+    Notes:
+    Group: Partial eta-squared computed from F, df1, df2.
+    Group: Cohen's f computed from partial eta-squared.
+    Group: CI for partial eta-squared is approximate.
+    Time: Applied sphericity correction ε = 0.85.
+    Time: Partial eta-squared computed from F, df1, df2.
+    Time: Cohen's f computed from partial eta-squared.
+    Time: CI for partial eta-squared is approximate.
+    Group×Time: Applied sphericity correction ε = 0.85.
+    Group×Time: Partial eta-squared computed from F, df1, df2.
+    Group×Time: Cohen's f computed from partial eta-squared.
+    Group×Time: CI for partial eta-squared is approximate.
 
 ### Minimal Input Cases
 
@@ -124,9 +133,9 @@ backcalc_anova(
     Effect1 2.647 2.000 30.000 NA 0.420 0.150 0.002 0.218
 
     Note(s):
-    F-statistic computed from partial eta-squared.
-    Cohen's f computed from partial eta-squared.
-    CI for partial eta-squared is approximate.
+    Effect1: F-statistic computed from partial eta-squared.
+    Effect1: Cohen's f computed from partial eta-squared.
+    Effect1: CI for partial eta-squared is approximate.
 
 ``` r
 # 6. Only p and dfs given, reconstruct F and η²p
@@ -142,10 +151,10 @@ backcalc_anova(
     Effect1 7.219 1.000 28.000 0.012 0.508 0.205 0.000 0.167
 
     Note(s):
-    F-statistic approximated from p-value.
-    Partial eta-squared computed from F, df1, df2.
-    Cohen's f computed from partial eta-squared.
-    CI for partial eta-squared is approximate.
+    Effect1: F-statistic approximated from p-value.
+    Effect1: Partial eta-squared computed from F, df1, df2.
+    Effect1: Cohen's f computed from partial eta-squared.
+    Effect1: CI for partial eta-squared is approximate.
 
 ``` r
 # 7. Only F and dfs given, calculate p and η²p
@@ -161,6 +170,6 @@ backcalc_anova(
     Effect1 4.500 1.000 22.000 0.045 0.452 0.170 0.000 0.208
 
     Note(s):
-    Partial eta-squared computed from F, df1, df2.
-    Cohen's f computed from partial eta-squared.
-    CI for partial eta-squared is approximate.
+    Effect1: Partial eta-squared computed from F, df1, df2.
+    Effect1: Cohen's f computed from partial eta-squared.
+    Effect1: CI for partial eta-squared is approximate.
