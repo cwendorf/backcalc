@@ -2,6 +2,7 @@
 
 - [Full ANOVA Cases](#full-anova-cases)
 - [Minimal Input Cases](#minimal-input-cases)
+- [Insufficient Input Cases](#insufficient-input-cases)
 
 ------------------------------------------------------------------------
 
