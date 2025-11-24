@@ -30,13 +30,13 @@ source("http://raw.githubusercontent.com/cwendorf/backcalc/main/source-backcalc.
 
 This package contains a set of examples to demonstrate its use:
 
-- [ANOVA Examples](./docs/ANOVAExamples.md) - Between, Within, Factorial, and Mixed Design ANOVAs
 - [Means Examples](./docs/MeansExamples.md) - Means and mean differences
 - [Correlations Examples](./docs/CorrelationsExamples.md) - Correlations and correlation differences
 - [Coefficients Examples](./docs/CoefficientsExamples.md) - Raw and standardized regresssion coefficients
 - [Medians Examples](./docs/MediansExamples.md) - Medians and median differences
 - [Proportions Examples](./docs/ProportionsExamples.md) - Proportions and proportion differences
 - [Ratios Examples](./docs/RatiosExamples.md) - Ratios and ratio differences
+- [ANOVA Examples](./docs/ANOVAExamples.md) - Between, Within, Factorial, and Mixed Design ANOVAs
 
 ### Contact Me
 
