@@ -60,28 +60,63 @@ print.backcalc <- function(x, ...) {
     return(invisible(df_for_display))
   }
   
-  cat("\n")
-  print(df_for_display, ...)
-  cat("\n")
-  
   approximations <- attr(x, "Approximations")
+  # Determine if all effects are insufficient
+  all_insufficient <- FALSE
+  if (!is.null(approximations) && length(approximations) && is.list(approximations)) {
+    insuff_flags <- vapply(approximations, function(notes) any(grepl("^Insufficient Input:", notes)), logical(1))
+    all_insufficient <- all(insuff_flags) && length(insuff_flags) > 0
+  }
+  
+  if (!all_insufficient) {
+    cat("\n")
+    print(df_for_display, ...)
+    cat("\n")
+  }
+  
   if (!is.null(approximations) && length(approximations)) {
-    cat("Notes:\n")
-    note_lines <- character()
     rn <- rownames(x)
-    if (is.list(approximations)) {
-      for (i in seq_along(approximations)) {
-        notes_i <- approximations[[i]]
-        if (length(notes_i)) {
-          for (n_i in notes_i) {
-            note_lines <- c(note_lines, paste0(rn[i], ": ", n_i))
+    if (all_insufficient) {
+      # Specialized header for complete insufficiency
+      cat("\nInsufficient Input:\n")
+      insuff_lines <- character()
+      if (is.list(approximations)) {
+        for (i in seq_along(approximations)) {
+          notes_i <- approximations[[i]]
+          insuff_i <- notes_i[grepl("^Insufficient Input:", notes_i)]
+          if (length(insuff_i)) {
+            trimmed <- sub("^Insufficient Input:\\s*", "", insuff_i)
+            for (tmsg in trimmed) {
+              insuff_lines <- c(insuff_lines, paste0(rn[i], ": ", tmsg))
+            }
           }
         }
+      } else if (is.character(approximations)) {
+        insuff_raw <- approximations[grepl("^Insufficient Input:", approximations)]
+        trimmed <- sub("^Insufficient Input:\\s*", "", insuff_raw)
+        for (tmsg in trimmed) {
+          insuff_lines <- c(insuff_lines, paste0(rn[1], ": ", tmsg))
+        }
       }
-    } else if (is.character(approximations)) {
-      note_lines <- approximations
+      if (length(insuff_lines)) cat(paste(insuff_lines, collapse = "\n"), "\n\n")
+    } else {
+      # Standard notes header
+      cat("Notes:\n")
+      note_lines <- character()
+      if (is.list(approximations)) {
+        for (i in seq_along(approximations)) {
+          notes_i <- approximations[[i]]
+          if (length(notes_i)) {
+            for (n_i in notes_i) {
+              note_lines <- c(note_lines, paste0(rn[i], ": ", n_i))
+            }
+          }
+        }
+      } else if (is.character(approximations)) {
+        note_lines <- approximations
+      }
+      if (length(note_lines)) cat(paste(note_lines, collapse = "\n"), "\n\n")
     }
-    if (length(note_lines)) cat(paste(note_lines, collapse = "\n"), "\n\n")
   }
   
   invisible(x)

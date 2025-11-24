@@ -107,3 +107,23 @@ backcalc_anova(
   df2 = 22
 )
 ```
+
+### Insufficient Input Cases
+
+```{r}
+# 8. Only dfs provided (cannot compute F, p, or effect sizes)
+backcalc_anova(
+  df1 = 2,
+  df2 = 30
+)
+
+# 9. Only F provided (missing dfs so p and effect sizes cannot be derived)
+backcalc_anova(
+  F = 5.2
+)
+
+# 10. Only eta2 provided (without dfs cannot derive F or CI)
+backcalc_anova(
+  eta2 = 0.12
+)
+```

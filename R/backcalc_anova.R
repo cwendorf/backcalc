@@ -160,6 +160,11 @@ backcalc_anova <- function(F = NULL, df1 = NULL, df2 = NULL,
     if (is.na(eta2[i]) && !is.na(f[i])) {
       eta2[i] <- f[i]^2 / (1 + f[i]^2)
       approx_notes <- c(approx_notes, "Partial eta-squared computed from Cohen's f.")
+      # After deriving eta2 from f, compute F if dfs available and F still missing
+      if (is.na(F[i]) && !is.na(df1[i]) && !is.na(df2[i])) {
+        F[i] <- (eta2[i] / (1 - eta2[i])) * (df2[i] / df1[i])
+        approx_notes <- c(approx_notes, "F-statistic computed from Cohen's f and dfs via eta-squared.")
+      }
     }
     
     # --- CI for eta2 ---
@@ -185,6 +190,29 @@ backcalc_anova <- function(F = NULL, df1 = NULL, df2 = NULL,
       LL = round(ci_eta2[1], digits),
       UL = round(ci_eta2[2], digits)
     )
+    # --- Insufficient input messaging ---
+    # Identify minimal provided stats
+    core_provided <- c(!is.na(F[i]), !is.na(p[i]), !is.na(eta2[i]), !is.na(f[i]))
+    dfs_provided <- !is.na(df1[i]) && !is.na(df2[i])
+    if (!any(core_provided)) {
+      # Nothing to compute effect or p
+      if (dfs_provided) {
+        approx_notes <- c(approx_notes, "Insufficient Input: Provide F, p, partial eta-squared (eta2), or Cohen's f along with df1 and df2.")
+      } else {
+        approx_notes <- c(approx_notes, "Insufficient Input: Degrees of freedom (df1, df2) and at least one statistic (F, p, eta2, or f) must be provided.")
+      }
+    } else if (!dfs_provided) {
+      # A statistic present but dfs missing
+      if (!is.na(F[i])) {
+        approx_notes <- c(approx_notes, "Insufficient Input: Numerator (df1) and denominator (df2) degrees of freedom required with F.")
+      } else if (!is.na(p[i])) {
+        approx_notes <- c(approx_notes, "Insufficient Input: df1 and df2 required with p to reconstruct F and effect sizes.")
+      } else if (!is.na(eta2[i])) {
+        approx_notes <- c(approx_notes, "Insufficient Input: df1 and df2 required to compute F, p, and CI from partial eta-squared.")
+      } else if (!is.na(f[i])) {
+        approx_notes <- c(approx_notes, "Insufficient Input: df1 and df2 required to derive eta-squared and F from Cohen's f.")
+      }
+    }
     approx_all[[i]] <- approx_notes
   }
   

@@ -165,7 +165,6 @@ backcalc_anova(
 )
 ```
 
-
                 F   df1    df2     p     f  eta2    LL    UL
     Effect1 4.500 1.000 22.000 0.045 0.452 0.170 0.000 0.208
 
@@ -173,3 +172,36 @@ backcalc_anova(
     Effect1: Partial eta-squared computed from F, df1, df2.
     Effect1: Cohen's f computed from partial eta-squared.
     Effect1: CI for partial eta-squared is approximate.
+
+### Insufficient Input Cases
+
+``` r
+# 8. Only dfs provided (cannot compute F, p, or effect sizes)
+backcalc_anova(
+  df1 = 2,
+  df2 = 30
+)
+```
+
+    Insufficient Input:
+    Effect1: Provide F, p, partial eta-squared (eta2), or Cohen's f along with df1 and df2.
+
+``` r
+# 9. Only F provided (missing dfs so p and effect sizes cannot be derived)
+backcalc_anova(
+  F = 5.2
+)
+```
+
+    Insufficient Input:
+    Effect1: Numerator (df1) and denominator (df2) degrees of freedom required with F.
+
+``` r
+# 10. Only eta2 provided (without dfs cannot derive F or CI)
+backcalc_anova(
+  eta2 = 0.12
+)
+```
+
+    Insufficient Input:
+    Effect1: df1 and df2 required to compute F, p, and CI from partial eta-squared.
