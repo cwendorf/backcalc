@@ -7,7 +7,7 @@ less complete input, moving from miminal required inference to maximal
 inference on the part of the function. Similarly, the structure
 highlights the flexibility of the function across diverse study designs
 and input constraints.
-s
+
 - [One Sample Cases](#one-sample-cases)
 - [Two Sample Cases](#two-sample-cases)
 - [Insufficient Information Cases](#insufficient-information-cases)
