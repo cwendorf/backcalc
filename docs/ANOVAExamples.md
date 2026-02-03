@@ -2,17 +2,17 @@
 
 ## ANOVA Examples
 
-- [Full ANOVA Cases](#full-anova-cases)
-- [Minimal Input Cases](#minimal-input-cases)
-- [Insufficient Input Cases](#insufficient-input-cases)
-
-------------------------------------------------------------------------
-
 The sections below progress from more complete input to less complete
 input, moving from miminal required inference to maximal inference on
 the part of the function. Similarly, the structure highlights the
 flexibility of the function across diverse study designs and input
 constraints.
+
+- [Full ANOVA Cases](#full-anova-cases)
+- [Minimal Input Cases](#minimal-input-cases)
+- [Insufficient Input Cases](#insufficient-input-cases)
+
+------------------------------------------------------------------------
 
 ### Full ANOVA Cases
 

@@ -2,18 +2,18 @@
 
 ## Coefficient Examples
 
-- [Unstandardized Beta Cases](#unstandardized-beta-cases)
-- [Standardized Beta and Conversion
-  Cases](#standardized-beta-and-conversion-cases)
-- [Insufficient Information Cases](#insufficient-information-cases)
-
-------------------------------------------------------------------------
 
 Each section of examples below progresses from more complete input to
 less complete input, moving from miminal required inference to maximal
 inference on the part of the function. Similarly, the structure
 highlights the flexibility of the function across diverse study designs
 and input constraints.
+
+- [Unstandardized Beta Cases](#unstandardized-beta-cases)
+- [Standardized Beta and Conversion Cases](#standardized-beta-and-conversion-cases)
+- [Insufficient Information Cases](#insufficient-information-cases)
+
+------------------------------------------------------------------------
 
 ### Unstandardized Beta Cases
 

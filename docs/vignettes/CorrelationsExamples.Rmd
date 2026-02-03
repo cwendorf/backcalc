@@ -24,14 +24,14 @@ library(backcalc)
 
 ## Correlations Examples
 
+Each section of examples below progresses from more complete input to less complete input, moving from miminal required inference to maximal inference on the part of the function. Similarly, the structure highlights the flexibility of the function across diverse study designs and input constraints.
+
 ```{r toc, echo=FALSE}
 thisfile <- knitr::current_input()
 revised_toc(thisfile, base_level = 3, toc_depth = 4)
 ```
 
 ---
-
-Each section of examples below progresses from more complete input to less complete input, moving from miminal required inference to maximal inference on the part of the function. Similarly, the structure highlights the flexibility of the function across diverse study designs and input constraints.
 
 ### One Sample Cases
 
