@@ -1,6 +1,6 @@
 # [`backcalc`](https://github.com/cwendorf/backcalc/)
 
-## Overview
+## Introduction
 
 `backcalc` is an R package designed to help researchers and students reconstruct key inferential statistics from partial or incomplete summary data commonly found in scientific literature. 
 
