@@ -39,7 +39,7 @@ This package contains a set of examples to demonstrate its use:
 - [Ratios Examples](./docs/RatiosExamples.md): Ratios and ratio differences
 - [ANOVA Examples](./docs/ANOVAExamples.md): Between, Within, Factorial, and Mixed Design ANOVAs
 
-### Contact Me
+### Contact
 
 - GitHub Issues: [https://github.com/cwendorf/backcalc/issues](https://github.com/cwendorf/backcalc/issues) 
 - Author Email: [cwendorf@uwsp.edu](mailto:cwendorf@uwsp.edu)
