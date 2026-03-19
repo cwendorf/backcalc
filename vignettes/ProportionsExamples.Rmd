@@ -28,7 +28,7 @@ Each section of examples below progresses from more complete input to less compl
 
 ```{r toc, echo=FALSE}
 thisfile <- knitr::current_input()
-revised_toc(thisfile, base_level = 3, toc_depth = 4)
+revised_toc(thisfile, base_level = 3, toc_depth = 1)
 ```
 
 ---
