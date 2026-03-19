@@ -1,19 +1,19 @@
 #' Custom Print Method for `backcalc` Objects
 #'
-#' This function provides a tailored print method for objects of class \code{backcalc}.
+#' This function provides a tailored print method for objects of class `backcalc`.
 #' It optionally displays additional attributes such as notes and approximation messages
 #' alongside the main data output.
 #'
-#' @param x An object of class \code{backcalc}, typically a matrix or data frame with
+#' @param x An object of class `backcalc`, typically a matrix or data frame with
 #'   attached attributes "Notes" and "Approximations".
-#' @param ... Additional arguments passed to the base \code{print} function.
+#' @param ... Additional arguments passed to the base `print` function.
 #'
 #' @details
-#' If the attribute \code{"attr"} is set to \code{TRUE} on the object, this method
+#' If the attribute `"attr"` is set to `TRUE` on the object, this method
 #' prints the object along with its "Notes" and "Approximations" attributes.
 #' Otherwise, it prints only the main data content.
 #'
-#' @return Invisibly returns the original object \code{x}.
+#' @return Invisibly returns the original object `x`.
 #'
 #' @export
 print.backcalc <- function(x, ...) {

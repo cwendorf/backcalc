@@ -20,10 +20,10 @@
 #' @param attr Logical; if TRUE, attaches approximation messages as attributes (default TRUE).
 #'
 #' @return
-#' A \code{data.frame} with the back-calculated statistics including Estimate, SE,
+#' A `data.frame` with the back-calculated statistics including Estimate, SE,
 #' test statistic (t or z), degrees of freedom (df), p-value, and confidence interval bounds.
-#' The output has class \code{"backcalc"} and contains attribute
-#' \code{"Approximations"} if \code{attr = TRUE}.
+#' The output has class `"backcalc"` and contains attribute
+#' `"Approximations"` if `attr = TRUE`.
 #' 
 #' @details
 #' The function handles both one- and two-sample cases and calculates missing values using

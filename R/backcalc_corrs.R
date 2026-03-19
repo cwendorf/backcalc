@@ -7,25 +7,25 @@
 #'
 #' @param r Numeric. Correlation coefficient. For one-sample cases, a single value. For two-sample comparisons, a vector of length 2.
 #' @param se Numeric. Standard error of the Fisher z-transformed correlation.
-#' @param n Numeric. Sample size. For two-sample comparisons, provide a vector of length 2. Used to infer \code{se} and \code{df} when missing.
-#' @param df Numeric. Degrees of freedom (optional). If not provided and \code{n} is available, it will be inferred.
+#' @param n Numeric. Sample size. For two-sample comparisons, provide a vector of length 2. Used to infer `se` and `df` when missing.
+#' @param df Numeric. Degrees of freedom (optional). If not provided and `n` is available, it will be inferred.
 #' @param p Numeric. p-value (optional). If not provided, it will be inferred from other inputs.
 #' @param ci Numeric vector of length 2. Confidence interval for the correlation coefficient (on the raw correlation scale, not Fisher z).
-#' @param statistic Numeric. Test statistic (usually a t- or z-value). Can be used to infer \code{se} if missing.
-#' @param one_sided Logical. Whether the test is one-sided (default is \code{FALSE}). Affects p-value and confidence interval calculation.
-#' @param conf.level Numeric between 0 and 1. Confidence level for the confidence interval (default is \code{0.95}).
-#' @param digits Integer. Number of significant digits for rounding results (default = \code{3}).
+#' @param statistic Numeric. Test statistic (usually a t- or z-value). Can be used to infer `se` if missing.
+#' @param one_sided Logical. Whether the test is one-sided (default is `FALSE`). Affects p-value and confidence interval calculation.
+#' @param conf.level Numeric between 0 and 1. Confidence level for the confidence interval (default is `0.95`).
+#' @param digits Integer. Number of significant digits for rounding results (default = `3`).
 #' @param attr Logical; if TRUE, attaches approximation messages as attributes (default TRUE).
 #'
 #' @return
-#' A \code{data.frame} with the back-calculated statistics including Estimate, SE,
+#' A `data.frame` with the back-calculated statistics including Estimate, SE,
 #' test statistic (t or z), degrees of freedom (df), p-value, and confidence interval bounds.
-#' The output has class \code{"backcalc"} and contains attribute
-#' \code{"Approximations"} if \code{attr = TRUE}.
+#' The output has class `"backcalc"` and contains attribute
+#' `"Approximations"` if `attr = TRUE`.
 #'
 #' @details
-#' The function uses Fisher's r-to-z transformation (\code{atanh()}) for inferential computations and back-transforms using \code{tanh()}.
-#' If only a subset of values is provided (e.g., only \code{r} and \code{statistic}), the function attempts to infer the rest.
+#' The function uses Fisher's r-to-z transformation (`atanh()`) for inferential computations and back-transforms using `tanh()`.
+#' If only a subset of values is provided (e.g., only `r` and `statistic`), the function attempts to infer the rest.
 #'
 #' In two-sample cases, the difference between Fisher z-transformed correlations is used as the estimate, and the standard error is derived accordingly.
 #'

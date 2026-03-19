@@ -8,21 +8,21 @@
 #' @param ratio Numeric scalar (for one group) or numeric vector of length 2 (for comparison).
 #'   When a vector of two ratios is supplied, the function compares them via their log difference.
 #' @param se Numeric. Standard error on the log scale. Can be a scalar or length 2 (for two-group case).
-#' @param n Integer. Sample size (used to infer degrees of freedom if \code{df} not given).
+#' @param n Integer. Sample size (used to infer degrees of freedom if `df` not given).
 #' @param df Numeric. Degrees of freedom. Scalar (for t-test) or length 2 (for Welch’s approximation).
 #' @param statistic Numeric. t or z test statistic. Used to infer SE if not supplied.
 #' @param p Numeric. p-value (one-sided or two-sided). Used only for display if provided.
 #' @param ci Numeric vector of length 2. Confidence interval (on the ratio scale). Used to infer SE if SE not provided.
-#' @param one_sided Logical. Whether the hypothesis test is one-sided. Default is \code{FALSE}.
-#' @param digits Integer. Number of digits to round outputs to. Default is \code{3}.
-#' @param conf.level Numeric. Confidence level used to compute interval. Default is \code{0.95}.
+#' @param one_sided Logical. Whether the hypothesis test is one-sided. Default is `FALSE`.
+#' @param digits Integer. Number of digits to round outputs to. Default is `3`.
+#' @param conf.level Numeric. Confidence level used to compute interval. Default is `0.95`.
 #' @param attr Logical; if TRUE, attaches approximation messages as attributes (default TRUE).
 #'
 #' @return
-#' A \code{data.frame} with the back-calculated statistics including Estimate, SE,
+#' A `data.frame` with the back-calculated statistics including Estimate, SE,
 #' test statistic (t or z), degrees of freedom (df), p-value, and confidence interval bounds.
-#' The output has class \code{"backcalc"} and contains attribute
-#' \code{"Approximations"} if \code{attr = TRUE}.
+#' The output has class `"backcalc"` and contains attribute
+#' `"Approximations"` if `attr = TRUE`.
 #'
 #' @details
 #' This function works on the log-transformed scale of ratios. It supports partial information

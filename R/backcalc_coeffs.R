@@ -10,27 +10,27 @@
 #' @param std_beta Numeric. Standardized regression coefficient.
 #' @param se_std Numeric. Standard error of the standardized coefficient.
 #' @param sd_x,sd_y Numeric. Standard deviations of the predictor and outcome variables. Used to convert between standardized and unstandardized forms.
-#' @param df Numeric. Degrees of freedom for a t-distribution. If omitted but \code{n} is provided, it is inferred as \code{df = n - 1}.
-#' @param n Integer. Sample size. If \code{df} is missing, \code{df} is inferred as \code{n - 1}. If \code{df} is provided but \code{n} is missing, \code{n = df + 1}.
+#' @param df Numeric. Degrees of freedom for a t-distribution. If omitted but `n` is provided, it is inferred as `df = n - 1`.
+#' @param n Integer. Sample size. If `df` is missing, `df` is inferred as `n - 1`. If `df` is provided but `n` is missing, `n = df + 1`.
 #' @param p Numeric. P-value associated with the test statistic.
 #' @param ci Numeric vector of length 2. Confidence interval bounds (lower, upper).
 #' @param statistic Numeric. Test statistic (t or z value), if already known.
-#' @param one_sided Logical. Whether the hypothesis test is one-sided. Default is \code{FALSE} (two-sided).
-#' @param conf.level Numeric between 0 and 1. Confidence level for the confidence interval. Default is \code{0.95}.
-#' @param digits Integer. Number of decimal digits to round the output. Default is \code{3}.
+#' @param one_sided Logical. Whether the hypothesis test is one-sided. Default is `FALSE` (two-sided).
+#' @param conf.level Numeric between 0 and 1. Confidence level for the confidence interval. Default is `0.95`.
+#' @param digits Integer. Number of decimal digits to round the output. Default is `3`.
 #' @param attr Logical; if TRUE, attaches approximation messages as an attribute (default TRUE).
 #'
 #' @return
-#' A \code{data.frame} with the back-calculated statistics including Estimate, SE,
+#' A `data.frame` with the back-calculated statistics including Estimate, SE,
 #' test statistic (t or z), degrees of freedom (df), p-value, and confidence interval bounds.
-#' The output has class \code{"backcalc"} and contains attribute
-#' \code{"Approximations"} if \code{attr = TRUE}.
+#' The output has class `"backcalc"` and contains attribute
+#' `"Approximations"` if `attr = TRUE`.
 #'
 #' @details
 #' The function accepts a flexible combination of inputs. If sufficient information is not provided,
 #' it attempts to approximate missing values where logically possible. Standardized coefficients can be
 #' derived from unstandardized ones using the provided standard deviations. Missing SEs or test statistics
-#' may be inferred from confidence intervals or p-values. If both \code{n} and \code{df} are missing,
+#' may be inferred from confidence intervals or p-values. If both `n` and `df` are missing,
 #' a z-distribution is assumed.
 #'
 #' @examples

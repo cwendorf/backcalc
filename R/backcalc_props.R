@@ -10,21 +10,21 @@
 #' @param x Count(s) of "successes" (used to compute proportions). A single value or vector of length 2.
 #' @param ci Confidence interval (numeric vector of length 2: lower and upper limits), if already known.
 #' @param p P-value for the test statistic. If not provided, it will be computed when possible.
-#' @param one_sided Logical. Is the test one-sided? Defaults to \code{FALSE} (i.e., two-sided).
+#' @param one_sided Logical. Is the test one-sided? Defaults to `FALSE` (i.e., two-sided).
 #' @param digits Number of decimal places to round results. Default is 3.
 #' @param interval_type Type of confidence interval. Currently unused (placeholder).
 #' @param statistic Observed test statistic (z or t), if known.
 #' @param df Degrees of freedom, required if using a t-statistic.
 #' @param conf.level Confidence level for the confidence interval. Default is 0.95.
-#' @param method Character. Either \code{"wald"} (default) for normal approximations or \code{"exact"} for exact binomial CI (one-sample only).
-#' @param continuity Logical. Whether to apply continuity correction in two-sample Wald test. Default is \code{FALSE}.
+#' @param method Character. Either `"wald"` (default) for normal approximations or `"exact"` for exact binomial CI (one-sample only).
+#' @param continuity Logical. Whether to apply continuity correction in two-sample Wald test. Default is `FALSE`.
 #' @param attr Logical; if TRUE, attaches approximation messages as attributes (default TRUE).
 #' 
 #' @return
-#' A \code{data.frame} with the back-calculated statistics including Estimate, SE,
+#' A `data.frame` with the back-calculated statistics including Estimate, SE,
 #' test statistic (t or z), degrees of freedom (df), p-value, and confidence interval bounds.
-#' The output has class \code{"backcalc"} and contains attribute
-#' \code{"Approximations"} if \code{attr = TRUE}.
+#' The output has class `"backcalc"` and contains attribute
+#' `"Approximations"` if `attr = TRUE`.
 #'
 #' @details
 #' This function is designed to handle partial or minimal inputs by inferring missing values when possible.
