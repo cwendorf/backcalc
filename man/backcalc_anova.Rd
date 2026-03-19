@@ -17,6 +17,7 @@ backcalc_anova(
   subjects = NULL,
   epsilon = 1,
   effect = "main",
+  labels = NULL,
   conf.level = 0.95,
   digits = 3,
   attr = TRUE
@@ -47,6 +48,9 @@ backcalc_anova(
 
 \item{effect}{Character vector: "main" or "interaction".}
 
+\item{labels}{Optional character vector of row labels (one per effect). If omitted,
+names are derived from \code{levels} and \code{effect} type.}
+
 \item{conf.level}{Confidence level for eta-squared CI.}
 
 \item{digits}{Rounding digits for output.}
@@ -60,4 +64,17 @@ Cohen's f, partial eta-squared, and CI bounds for eta-squared. Attributes store 
 \description{
 Handles between-subjects, within-subjects, factorial, and mixed designs, with optional
 sphericity corrections. Works with multiple effects at once.
+}
+\examples{
+# 1. One-way between-subjects ANOVA (single effect)
+backcalc_anova(F = 5.2, df1 = 2, df2 = 30,
+               design = "between", levels = list(3), n = 33,
+               labels = "Treatment")
+
+# 2. Two separate main effects (e.g., reporting each factor separately)
+backcalc_anova(F = c(5.2, NA), df1 = c(2, NA), df2 = c(30, NA),
+               p = c(NA, 0.01), design = "between",
+               levels = list(3, 4), n = 33,
+               labels = c("FactorA", "FactorB"))
+
 }
