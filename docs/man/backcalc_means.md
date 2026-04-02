@@ -1,0 +1,79 @@
+# [`backcalc`](https://github.com/cwendorf/backcalc)
+
+## Backcalculate Missing Inferential Statistics for Means
+
+**Aliases:**
+
+- `backcalc_means`
+
+### Description
+
+This function reconstructs inferential statistics related to means from partial information.
+It can estimate standard errors, confidence intervals, p-values, test statistics (t or z), degrees of freedom,
+and point estimates when some components are missing, supporting one-sample, paired, and two-sample cases.
+
+### Usage
+
+```r
+backcalc_means(
+  m = NULL,
+  se = NULL,
+  sd = NULL,
+  n = NULL,
+  df = NULL,
+  p = NULL,
+  ci = NULL,
+  statistic = NULL,
+  paired = FALSE,
+  one_sided = FALSE,
+  conf.level = 0.95,
+  digits = 3,
+  attr = TRUE
+)
+```
+
+### Arguments
+
+- **`m`**: Numeric vector of means or mean differences. For two-sample cases, provide
+a vector of length 2 representing group means.
+- **`se`**: Numeric vector of standard errors corresponding to the means or difference.
+- **`sd`**: Numeric vector of standard deviations for each group.
+- **`n`**: Numeric vector of sample sizes for each group.
+- **`df`**: Degrees of freedom associated with the estimate(s).
+- **`p`**: P-value(s) associated with the test statistic.
+- **`ci`**: Numeric vector of length 2 specifying a confidence interval (lower and upper bounds).
+- **`statistic`**: Test statistic value (e.g., t or z statistic).
+- **`paired`**: Logical indicating whether the comparison is paired (default is FALSE).
+- **`one_sided`**: Logical indicating whether a one-sided test is used (default is FALSE).
+- **`conf.level`**: Confidence level for intervals (default 0.95).
+- **`digits`**: Number of digits to round the output statistics (default 3).
+- **`attr`**: Logical; if TRUE, attaches approximation messages as attributes (default TRUE).
+
+### Details
+
+The function handles both one- and two-sample cases and calculates missing values using
+standard formulas and approximations. It supports pooled and Welch-Satterthwaite
+degrees of freedom, approximation of SE from SD and sample size, estimation from CI
+width, and estimation of test statistics and p-values. Messages about assumptions
+and approximations are stored as attributes.
+
+### Value
+
+A data.frame with the back-calculated statistics including Estimate, SE,
+test statistic (t or z), degrees of freedom (df), p-value, and confidence interval bounds.
+The output has class "backcalc" and contains attribute
+"Approximations" if attr = TRUE.
+
+### Examples
+
+```r
+# One-sample example: Mean, SE, and sample size given (uses t-distribution)
+backcalc_means(m = 25.4, se = 2.1, n = 30)
+
+# Two-sample example: Means, SDs, and sample sizes given (Welch t-test inference)
+backcalc_means(m = c(15, 12), sd = c(4, 5), n = c(40, 35))
+
+# Insufficient input example: Mean provided but no SE, p-value, or CI (warns user)
+backcalc_means(m = 25)
+```
+

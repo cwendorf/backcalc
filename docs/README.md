@@ -2,11 +2,14 @@
 
 ## Introduction
 
-`backcalc` is an R package designed to help researchers and students reconstruct key inferential statistics from partial or incomplete summary data commonly found in scientific literature. 
+`backcalc` provides functions to reconstruct key inferential statistics such as standard errors,
+confidence intervals, test statistics, and p-values from partial or incomplete summary information
+commonly reported in scientific literature. It also includes functions to calculate standardized
+effect sizes (Cohen's d, Hedges' g, Glass's delta) from various inputs.
 
 - [The Challenge](#the-challenge)
 - [The Solution](#the-solution)
-- [Examples](#examples)
+- [Resources](#resources)
 
 ------------------------------------------------------------------------
 
@@ -44,14 +47,8 @@ Unlike calculators requiring specific inputs, `backcalc` works with whatever you
 - Why certain inferences are uncertain
 - What information is missing
 
-### Examples
+### Resources
 
-This package contains a set of examples to demonstrate its use:
+- [Reference](./man/README.md): Documentation for all exported functions, including usage, arguments, and return values.
+- [Articles](./vignettes/README.md): Examples demonstrating how to use the package.
 
-- [Means Examples](./MeansExamples.md) - Means and mean differences
-- [Correlations Examples](./CorrelationsExamples.md) - Correlations and correlation differences
-- [Coefficients Examples](./CoefficientsExamples.md) - Raw and standardized regresssion coefficients
-- [Medians Examples](./MediansExamples.md) - Medians and median differences
-- [Proportions Examples](./ProportionsExamples.md) - Proportions and proportion differences
-- [Ratios Examples](./RatiosExamples.md) - Ratios and ratio differences
-- [ANOVA Examples](./ANOVAExamples.md) - Between, Within, Factorial, and Mixed Design ANOVAs
