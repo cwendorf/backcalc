@@ -1,5 +1,4 @@
-
-# `backcalc` 
+# [`backcalc`](https://github.com/cwendorf/backcalc)
 
 ## Reconstruct Missing Inferential Statistics
 
