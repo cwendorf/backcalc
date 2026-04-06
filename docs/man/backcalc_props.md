@@ -1,10 +1,6 @@
 # [`backcalc`](https://github.com/cwendorf/backcalc)
 
-## Backcalculate Missing Inferential Statistics for Proportions
-
-**Aliases:**
-
-- `backcalc_props`
+## Backcalculate Proportions
 
 ### Description
 

@@ -1,10 +1,6 @@
 # [`backcalc`](https://github.com/cwendorf/backcalc)
 
-## Backcalculate Missing Inferential Statistics for Means
-
-**Aliases:**
-
-- `backcalc_means`
+## Backcalculate Means
 
 ### Description
 

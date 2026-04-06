@@ -1,10 +1,6 @@
 # [`backcalc`](https://github.com/cwendorf/backcalc)
 
-## Backcalculate Missing Inferential Statistics for Medians
-
-**Aliases:**
-
-- `backcalc_medians`
+## Backcalculate Medians
 
 ### Description
 

@@ -1,10 +1,6 @@
 # [`backcalc`](https://github.com/cwendorf/backcalc)
 
-## Backcalculate Missing Inferential Statistics for ANOVA (Vectorised & Design-Aware)
-
-**Aliases:**
-
-- `backcalc_anova`
+## Backcalculate ANOVA
 
 ### Description
 

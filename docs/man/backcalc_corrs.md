@@ -1,10 +1,6 @@
 # [`backcalc`](https://github.com/cwendorf/backcalc)
 
-## Backcalculate Missing Inferential Statistics for Correlations
-
-**Aliases:**
-
-- `backcalc_corrs`
+## Backcalculate Correlations
 
 ### Description
 

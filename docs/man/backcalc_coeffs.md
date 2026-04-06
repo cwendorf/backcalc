@@ -1,10 +1,6 @@
 # [`backcalc`](https://github.com/cwendorf/backcalc)
 
-## Backcalculate Missing Inferential Statistics for Regression Coefficients
-
-**Aliases:**
-
-- `backcalc_coeffs`
+## Backcalculate Regression Coefficients
 
 ### Description
 

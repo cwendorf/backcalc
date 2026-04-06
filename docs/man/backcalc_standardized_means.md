@@ -1,10 +1,6 @@
 # [`backcalc`](https://github.com/cwendorf/backcalc)
 
-## Backcalculate Standardized Mean Differences (Effect Sizes)
-
-**Aliases:**
-
-- `backcalc_standardized_means`
+## Backcalculate Standardized Mean Differences
 
 ### Description
 

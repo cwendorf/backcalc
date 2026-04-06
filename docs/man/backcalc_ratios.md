@@ -1,10 +1,6 @@
 # [`backcalc`](https://github.com/cwendorf/backcalc)
 
-## Backcalculate Inferential Statistics for Ratio Measures
-
-**Aliases:**
-
-- `backcalc_ratios`
+## Backcalculate Ratio Measures
 
 ### Description
 
