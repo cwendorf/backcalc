@@ -15,7 +15,7 @@ effect sizes (Cohen's d, Hedges' g, Glass's delta) from various inputs.
 
 ### The Challenge
 
-Scientific articles rarely report complete inferential statistics. You might find:
+Scientific articles rarely report complete inferential statistics. For example, you might find:
 
 - Means and *n*, but no standard errors or confidence intervals
 - *p*-values and sample sizes, but no test statistics or effect sizes  
@@ -34,8 +34,8 @@ This makes it difficult to:
 
 `backcalc` reconstructs missing statistics from whatever information is available. It leverages mathematical relationships between statistics to back-calculate what's missing.
 
-Unlike calculators requiring specific inputs, `backcalc` works with whatever you have:
-- Mean + SE + *n*
+Unlike calculators requiring specific inputs, `backcalc` works with whatever you have. In analyzing means, for example, you can input combinations such as:
+- Mean + SE + n
 - Mean + CI + df
 - Mean + *p* + df  
 - Mean + *t* + SE
@@ -49,6 +49,6 @@ Unlike calculators requiring specific inputs, `backcalc` works with whatever you
 
 ### Resources
 
-- [Reference](./man/README.md): Documentation for all exported functions, including usage, arguments, and return values.
+- [Reference](./man/README.md): Descriptions of all exported functions, including usage, arguments, and return values.
 - [Articles](./vignettes/README.md): Examples demonstrating how to use the package.
 
