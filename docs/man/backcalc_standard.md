@@ -1,6 +1,6 @@
 # [`backcalc`](https://github.com/cwendorf/backcalc)
 
-## Backcalculate Standardized Mean Differences
+## Backcalculate Standardized Mean Differences (Effect Sizes)
 
 ### Description
 
@@ -11,7 +11,7 @@ along with confidence intervals and test statistics for one-sample, paired, and 
 ### Usage
 
 ```r
-backcalc_standardized_means(
+backcalc_standard(
   d = NULL,
   m = NULL,
   sd = NULL,
@@ -66,7 +66,8 @@ Confidence intervals for effect sizes use noncentral t-distributions when approp
 ### Value
 
 A data.frame with effect size statistics including the standardized estimate,
-standard error (of the effect size), confidence interval, and related statistics.
+standard error (of the effect size), test statistic, degrees of freedom, p-value,
+and confidence interval.
 The output has class "backcalc" and contains attribute
 "Approximations" if attr = TRUE.
 
@@ -74,15 +75,15 @@ The output has class "backcalc" and contains attribute
 
 ```r
 # One-sample: Calculate d from mean, SD, and sample size
-backcalc_standardized_means(m = 2.5, sd = 4, n = 25)
+backcalc_standard(m = 2.5, sd = 4, n = 25)
 
 # Two-sample: Calculate d from group means, SDs, and sample sizes
-backcalc_standardized_means(m = c(15, 12), sd = c(4, 5), n = c(40, 35))
+backcalc_standard(m = c(15, 12), sd = c(4, 5), n = c(40, 35))
 
 # Backcalculate d from t-statistic and sample size
-backcalc_standardized_means(statistic = 2.5, n = 50)
+backcalc_standard(statistic = 2.5, n = 50)
 
 # Two-sample with Hedges' g (bias-corrected)
-backcalc_standardized_means(m = c(15, 12), sd = c(4, 5), n = c(40, 35), type = "g")
+backcalc_standard(m = c(15, 12), sd = c(4, 5), n = c(40, 35), type = "g")
 ```
 
