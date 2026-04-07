@@ -1,6 +1,6 @@
 # backcalc
 
-## Upcoming Release
+## backcalc 0.1.260407
 
 - Added multiple regression function and examples
 - Added standardized mean differences function and examples
