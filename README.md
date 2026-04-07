@@ -29,8 +29,8 @@ source("http://raw.githubusercontent.com/cwendorf/backcalc/main/source-backcalc.
 
 This package includes the following documentation:
 
-- [Introduction](./docs/README.md):  Overview of the package and links to all resources.
-- [Reference](./docs/man/README.md): Documentation for all exported functions, including usage, arguments, and return values.
+- [Introduction](./docs/README.md): A quick overview and summary of the package.
+- [Reference](./docs/man/README.md): Descriptions of all exported functions, including usage, arguments, and return values.
 - [Articles](./docs/vignettes/README.md): Examples demonstrating how to use the package.
 
 ### Contact
