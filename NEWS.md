@@ -1,5 +1,9 @@
 # backcalc
 
+## Upcoming Release
+
+- Added multiple regression function and examples
+
 ## backcalc 0.1.251124
 
 - Added analysis of variance designs
