@@ -1,0 +1,91 @@
+---
+title: "Standardized Mean Differences Examples"
+output:
+  github_document:
+    preserve_yaml: FALSE
+vignette: >
+  %\VignetteIndexEntry{Standardized Mean Differences Examples}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(comment = NA)
+devtools::source_gist("8e6e5dc401e3fc1042ef7a030f9d19c7", filename = "revised_toc.R")
+```
+
+```{r, include=FALSE}
+if (!require(backcalc)) {
+  if (!require(remotes)) install.packages("remotes")
+  remotes::install_github("cwendorf/backcalc")
+}
+library(backcalc)
+```
+
+## Standardized Mean Differences Examples
+
+Each section of examples below progresses from more complete input to less complete input, moving from minimal required inference to maximal inference on the part of the function. Similarly, the structure highlights the flexibility of the function across diverse study designs and input constraints.
+
+```{r toc, echo=FALSE}
+thisfile <- knitr::current_input()
+revised_toc(thisfile, base_level = 3, toc_depth = 4)
+```
+
+---
+
+### One Sample Cases
+
+```{r}
+# 1. Cohen's d from mean difference, SD, and sample size (minimal inference)
+backcalc_standard(m = 2.5, sd = 4, n = 25)
+
+# 2. Hedges' g from one-sample input (bias-corrected d)
+backcalc_standard(m = 1.5, sd = 3, n = 30, type = "g")
+
+# 3. One-sample effect size from t-statistic and sample size
+backcalc_standard(statistic = 2.5, n = 50)
+
+# 4. One-sample estimate from CI midpoint plus sample size
+backcalc_standard(ci_d = c(0.2, 0.8), n = 40)
+
+# 5. Directly supplied d with sample size to obtain SE and CI
+backcalc_standard(d = 0.45, n = 60)
+```
+
+### Two and Paired Sample Cases
+
+```{r}
+# 6. Two-sample Cohen's d from means, SDs, and sample sizes
+backcalc_standard(m = c(15, 12), sd = c(4, 5), n = c(40, 35))
+
+# 7. Two-sample Hedges' g with unequal group sizes
+backcalc_standard(m = c(20, 18), sd = c(3, 3), n = c(50, 20), type = "g")
+
+# 8. Two-sample Glass's delta using group 2 as control SD
+backcalc_standard(m = c(15, 12), sd = c(4, 5), n = c(40, 35), type = "delta", control_sd = 2)
+
+# 9. Two-sample effect size from t-statistic with SDs and group sample sizes
+backcalc_standard(statistic = 3.0, sd = c(4, 5), n = c(40, 40))
+
+# 10. Paired-sample Cohen's d from mean difference, SD, and n
+backcalc_standard(m = 1.2, sd = 2.5, n = 30, paired = TRUE)
+```
+
+### Insufficient Information Cases
+
+```{r}
+# 11. Sample size only, no effect size, mean difference, or statistic
+backcalc_standard(n = 40)
+
+# 12. SD and sample size provided, but no mean difference or effect size
+backcalc_standard(sd = 3, n = 35)
+
+# 13. Test statistic provided without sample size
+backcalc_standard(statistic = 2.1)
+
+# 14. P-value and sample size provided, but no effect size or statistic
+backcalc_standard(p = 0.03, n = 45)
+
+# 15. Mean difference only, missing SD and effect size
+backcalc_standard(m = 1.8)
+```

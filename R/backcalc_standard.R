@@ -26,7 +26,8 @@
 #'
 #' @return
 #' A `data.frame` with effect size statistics including the standardized estimate,
-#' standard error (of the effect size), confidence interval, and related statistics.
+#' standard error (of the effect size), test statistic, degrees of freedom, p-value,
+#' and confidence interval.
 #' The output has class `"backcalc"` and contains attribute
 #' `"Approximations"` if `attr = TRUE`.
 #'
@@ -43,19 +44,19 @@
 #'
 #' @examples
 #' # One-sample: Calculate d from mean, SD, and sample size
-#' backcalc_standardized_means(m = 2.5, sd = 4, n = 25)
+#' backcalc_standard(m = 2.5, sd = 4, n = 25)
 #'
 #' # Two-sample: Calculate d from group means, SDs, and sample sizes
-#' backcalc_standardized_means(m = c(15, 12), sd = c(4, 5), n = c(40, 35))
+#' backcalc_standard(m = c(15, 12), sd = c(4, 5), n = c(40, 35))
 #'
 #' # Backcalculate d from t-statistic and sample size
-#' backcalc_standardized_means(statistic = 2.5, n = 50)
+#' backcalc_standard(statistic = 2.5, n = 50)
 #'
 #' # Two-sample with Hedges' g (bias-corrected)
-#' backcalc_standardized_means(m = c(15, 12), sd = c(4, 5), n = c(40, 35), type = "g")
+#' backcalc_standard(m = c(15, 12), sd = c(4, 5), n = c(40, 35), type = "g")
 #'
 #' @export
-backcalc_standardized_means <- function(d = NULL, m = NULL, sd = NULL, n = NULL, se = NULL,
+backcalc_standard <- function(d = NULL, m = NULL, sd = NULL, n = NULL, se = NULL,
                                         statistic = NULL, p = NULL, ci_d = NULL,
                                         paired = FALSE, one_sided = FALSE,
                                         type = "d", control_sd = 1,
@@ -207,6 +208,31 @@ backcalc_standardized_means <- function(d = NULL, m = NULL, sd = NULL, n = NULL,
     }
   }
 
+  # Compute test statistic and p-value when possible
+  statistic_type <- if (!is.null(df)) "t" else "z"
+  stat_val <- NA_real_
+  p_val <- p
+
+  if (!is.null(se_d) && se_d != 0) {
+    stat_val <- estimate / se_d
+  }
+
+  if (is.null(p_val) && !is.na(stat_val)) {
+    if (statistic_type == "t") {
+      p_val <- if (one_sided) {
+        1 - pt(stat_val, df)
+      } else {
+        2 * (1 - pt(abs(stat_val), df))
+      }
+    } else {
+      p_val <- if (one_sided) {
+        1 - pnorm(stat_val)
+      } else {
+        2 * (1 - pnorm(abs(stat_val)))
+      }
+    }
+  }
+
   # Compute confidence interval for effect size using noncentral t-distribution
   ci_lower <- NA
   ci_upper <- NA
@@ -230,10 +256,15 @@ backcalc_standardized_means <- function(d = NULL, m = NULL, sd = NULL, n = NULL,
   result <- data.frame(
     Estimate = round(estimate, digits),
     SE = if (!is.null(se_d)) round(se_d, digits) else NA,
+    statistic = if (!is.na(stat_val)) round(stat_val, digits) else NA,
     df = if (!is.null(df)) round(df, 0) else NA,
+    p = if (!is.null(p_val)) round(p_val, digits) else NA,
     LL = if (!is.na(ci_lower)) round(ci_lower, digits) else NA,
     UL = if (!is.na(ci_upper)) round(ci_upper, digits) else NA
   )
+
+  names(result)[names(result) == "statistic"] <- statistic_type
+  names(result)[names(result) == "p"] <- ifelse(one_sided, "p-one", "p")
 
   # Add type label to estimate
   type_label <- switch(type, "d" = "Cohen's d", "g" = "Hedges' g", "delta" = "Glass's Δ", "d")
