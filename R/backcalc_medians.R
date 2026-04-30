@@ -4,11 +4,10 @@
 #' and degrees of freedom for median-based statistics using summary-level data.
 #' It supports robust measures of spread such as interquartile range (IQR), median absolute deviation (MAD),
 #' and range, applying normal approximation for inference without relying on parametric assumptions.
-#' When parametric inputs (e.g., standard deviations) are provided, t-distribution based inference is used.
+#' When an explicit standard error or degrees of freedom are provided, t-based inference may be used.
 #'
-#' @param m Numeric scalar or vector. Median(s) of the group(s). For two-sample comparisons, provide a length-2 vector.
+#' @param mdn Numeric scalar or vector. Median(s) of the group(s). For two-sample comparisons, provide a length-2 vector.
 #' @param se Numeric scalar or vector. Standard error(s) of the estimate(s).
-#' @param sd Numeric scalar or vector. Standard deviation(s) of the group(s).
 #' @param n Numeric scalar or vector. Sample size(s).
 #' @param df Numeric scalar. Degrees of freedom for t-distribution inference.
 #' @param p Numeric scalar. p-value for the test statistic.
@@ -31,32 +30,31 @@
 #' 
 #' @details
 #' The function supports inference for medians using IQR, MAD, or range to approximate SE
-#' with normal-based confidence intervals and z-tests. When parametric inputs like SD and sample size
-#' are given without robust measures, Welch's t-test approximation is used.
+#' with normal-based confidence intervals and z-tests. If an explicit SE or degrees of freedom is
+#' supplied, t-based inference may be used when appropriate.
 #'
 #' @examples
 #' # One-sample: Median, IQR, and sample size
-#' backcalc_medians(m = 50, iqr = 20, n = 30)
+#' backcalc_medians(mdn = 50, iqr = 20, n = 30)
 #'
 #' # Two-sample: Group medians, MAD, and sample size
-#' backcalc_medians(m = c(75, 68), mad = 9, n = 40)
+#' backcalc_medians(mdn = c(75, 68), mad = 9, n = 40)
 #'
 #' # Insufficient info: Only median and sample size, no dispersion
-#' backcalc_medians(m = c(52, 49), n = 30)
+#' backcalc_medians(mdn = c(52, 49), n = 30)
 #' 
 #' @export
-backcalc_medians <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL,
+backcalc_medians <- function(mdn = NULL, se = NULL, n = NULL, df = NULL,
                              p = NULL, ci = NULL, statistic = NULL,
                              iqr = NULL, mad = NULL, range = NULL,
                              paired = FALSE, one_sided = FALSE,
                              conf.level = 0.95, digits = 3, attr = TRUE) {
-  estimate <- m
+  estimate <- mdn
   messages <- character(0)
   approx_notes <- character(0)
   
-  # Determine if parametric inference (mean/SD) or robust (median/IQR/MAD/range)
+  # Determine if robust (median/IQR/MAD/range) or if an SE was directly supplied
   robust_input <- !is.null(iqr) || !is.null(mad) || !is.null(range)
-  parametric_input <- !is.null(sd) || !is.null(se)
   
   # Critical value function depending on inference type
   get_crit <- function(df = NULL, robust = FALSE) {
@@ -75,12 +73,6 @@ backcalc_medians <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL
   }
   
   # Normalize lengths for two-sample cases
-  if (!is.null(sd) && length(sd) == 2 && !is.null(n) && length(n) == 1) {
-    n <- rep(n, 2)
-  }
-  if (!is.null(n) && length(n) == 2 && !is.null(sd) && length(sd) == 1) {
-    sd <- rep(sd, 2)
-  }
   if (!is.null(iqr) && length(iqr) == 2 && !is.null(n) && length(n) == 1) {
     n <- rep(n, 2)
   }
@@ -107,25 +99,25 @@ backcalc_medians <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL
   } else {
     # Check if two groups with appropriate input lengths
     group_lengths <- c(
-      sd_len = ifelse(is.null(sd), 0, length(sd)),
+      se_len = ifelse(is.null(se), 0, length(se)),
       iqr_len = ifelse(is.null(iqr), 0, length(iqr)),
       mad_len = ifelse(is.null(mad), 0, length(mad)),
       range_len = ifelse(is.null(range), 0, length(range)),
       n_len = ifelse(is.null(n), 0, length(n))
     )
     if (group_lengths["n_len"] == 2 && 
-        (group_lengths["sd_len"] == 2 || group_lengths["iqr_len"] == 2 || 
+        (group_lengths["se_len"] == 2 || group_lengths["iqr_len"] == 2 || 
          group_lengths["mad_len"] == 2 || group_lengths["range_len"] == 2)) {
       two_sample_case <- TRUE
     }
   }
   
   # Handle estimate difference if two-sample
-  if (two_sample_case && !is.null(m) && length(m) == 2) {
-    estimate <- m[1] - m[2]
-  } else if (!two_sample_case && !is.null(m) && length(m) == 2) {
+  if (two_sample_case && !is.null(mdn) && length(mdn) == 2) {
+    estimate <- mdn[1] - mdn[2]
+  } else if (!two_sample_case && !is.null(mdn) && length(mdn) == 2) {
     # For one sample with vector, take difference anyway
-    estimate <- m[1] - m[2]
+    estimate <- mdn[1] - mdn[2]
   }
   
   # Approximate SE from dispersion measures (robust)
@@ -162,38 +154,7 @@ backcalc_medians <- function(m = NULL, se = NULL, sd = NULL, n = NULL, df = NULL
     }
   }
   
-  # If parametric input only and no robust input, handle parametric SE
-  if (!robust_input && parametric_input && is.null(se) && !is.null(sd) && !is.null(n)) {
-    if (length(sd) == length(n) || length(sd) == 1 || length(n) == 1) {
-      if (two_sample_case) {
-        var1 <- sd[1]^2
-        var2 <- sd[2]^2
-        n1 <- n[1]
-        n2 <- n[2]
-        if (!is.null(m) && length(m) == 2) {
-          estimate <- m[1] - m[2]
-        }
-        if (var1 == var2 && n1 == n2) {
-          pooled_var <- ((n1 - 1) * var1 + (n2 - 1) * var2) / (n1 + n2 - 2)
-          se <- sqrt(pooled_var * (1 / n1 + 1 / n2))
-          if (is.null(df)) df <- n1 + n2 - 2
-        } else {
-          se <- sqrt(var1 / n1 + var2 / n2)
-          if (is.null(df)) {
-            numerator <- (var1 / n1 + var2 / n2)^2
-            denominator <- ((var1 / n1)^2) / (n1 - 1) + ((var2 / n2)^2) / (n2 - 1)
-            df <- numerator / denominator
-            approx_notes <- c(approx_notes, "Welch-Satterthwaite approximation used for df.")
-          }
-        }
-      } else {
-        # One sample parametric
-        se <- sd / sqrt(n)
-      }
-    } else {
-      messages <- c(messages, "Length mismatch between sd and n.")
-    }
-  }
+  
   
   # If CI provided and se missing, approximate se from CI width
   if (!is.null(ci)) {

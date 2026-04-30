@@ -5,9 +5,8 @@
 \title{Backcalculate Missing Inferential Statistics for Medians}
 \usage{
 backcalc_medians(
-  m = NULL,
+  mdn = NULL,
   se = NULL,
-  sd = NULL,
   n = NULL,
   df = NULL,
   p = NULL,
@@ -24,11 +23,9 @@ backcalc_medians(
 )
 }
 \arguments{
-\item{m}{Numeric scalar or vector. Median(s) of the group(s). For two-sample comparisons, provide a length-2 vector.}
+\item{mdn}{Numeric scalar or vector. Median(s) of the group(s). For two-sample comparisons, provide a length-2 vector.}
 
 \item{se}{Numeric scalar or vector. Standard error(s) of the estimate(s).}
-
-\item{sd}{Numeric scalar or vector. Standard deviation(s) of the group(s).}
 
 \item{n}{Numeric scalar or vector. Sample size(s).}
 
@@ -67,21 +64,21 @@ This function estimates standard errors, test statistics, p-values, confidence i
 and degrees of freedom for median-based statistics using summary-level data.
 It supports robust measures of spread such as interquartile range (IQR), median absolute deviation (MAD),
 and range, applying normal approximation for inference without relying on parametric assumptions.
-When parametric inputs (e.g., standard deviations) are provided, t-distribution based inference is used.
+When an explicit standard error or degrees of freedom are provided, t-based inference may be used.
 }
 \details{
 The function supports inference for medians using IQR, MAD, or range to approximate SE
-with normal-based confidence intervals and z-tests. When parametric inputs like SD and sample size
-are given without robust measures, Welch's t-test approximation is used.
+with normal-based confidence intervals and z-tests. If an explicit SE or degrees of freedom is
+supplied, t-based inference may be used when appropriate.
 }
 \examples{
 # One-sample: Median, IQR, and sample size
-backcalc_medians(m = 50, iqr = 20, n = 30)
+backcalc_medians(mdn = 50, iqr = 20, n = 30)
 
 # Two-sample: Group medians, MAD, and sample size
-backcalc_medians(m = c(75, 68), mad = 9, n = 40)
+backcalc_medians(mdn = c(75, 68), mad = 9, n = 40)
 
 # Insufficient info: Only median and sample size, no dispersion
-backcalc_medians(m = c(52, 49), n = 30)
+backcalc_medians(mdn = c(52, 49), n = 30)
 
 }

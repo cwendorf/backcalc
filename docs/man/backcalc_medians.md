@@ -14,7 +14,7 @@ When parametric inputs (e.g., standard deviations) are provided, t-distribution 
 
 ```r
 backcalc_medians(
-  m = NULL,
+  mdn = NULL,
   se = NULL,
   sd = NULL,
   n = NULL,
@@ -68,13 +68,10 @@ The output has class "backcalc" and contains attribute
 ### Examples
 
 ```r
-# One-sample: Median, IQR, and sample size
-backcalc_medians(m = 50, iqr = 20, n = 30)
+backcalc_medians(mdn = 50, iqr = 20, n = 30)
 
-# Two-sample: Group medians, MAD, and sample size
-backcalc_medians(m = c(75, 68), mad = 9, n = 40)
+backcalc_medians(mdn = c(75, 68), mad = 9, n = 40)
 
-# Insufficient info: Only median and sample size, no dispersion
-backcalc_medians(m = c(52, 49), n = 30)
+backcalc_medians(mdn = c(52, 49), n = 30)
 ```
 
