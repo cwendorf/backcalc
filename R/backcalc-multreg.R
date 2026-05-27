@@ -257,13 +257,21 @@ backcalc_multreg <- function(
     ))
   }
   
-  # Process intercept first
-  intercept_res <- process_coef(intercept, intercept_se, NA_real_, NA_real_, NA_real_, NA_real_, NA_real_, c(NA_real_, NA_real_), NA_real_, "Intercept", TRUE)
-  if (is.null(intercept_res)) return(invisible(NULL))
+  has_intercept <- !is.null(intercept) || !is.null(intercept_se)
+  
+  # Process intercept first when supplied
+  if (has_intercept) {
+    intercept_res <- process_coef(intercept, intercept_se, NA_real_, NA_real_, NA_real_, NA_real_, NA_real_, c(NA_real_, NA_real_), NA_real_, "Intercept", TRUE)
+    if (is.null(intercept_res)) return(invisible(NULL))
+  }
   
   # Prepare result containers
-  res_list <- vector("list", n_preds + 1)
-  res_list[[1]] <- intercept_res
+  res_list <- vector("list", n_preds + if (has_intercept) 1 else 0)
+  out_index <- 1
+  if (has_intercept) {
+    res_list[[1]] <- intercept_res
+    out_index <- 2
+  }
   
   # Process each predictor
   for (i in seq_len(n_preds)) {
@@ -277,19 +285,20 @@ backcalc_multreg <- function(
       FALSE
     )
     if (is.null(res)) return(invisible(NULL))
-    res_list[[i + 1]] <- res
+    res_list[[out_index]] <- res
+    out_index <- out_index + 1
   }
   
   # Build data frame output
   out_df <- do.call(rbind, lapply(res_list, function(x) {
     as.data.frame(x[1:7], stringsAsFactors = FALSE)
   }))
-  rownames(out_df) <- var_names
+  rownames(out_df) <- if (has_intercept) var_names else var_names[-1]
   
   # Collect notes
   approx_notes <- unlist(lapply(seq_along(res_list), function(i) {
     if (length(res_list[[i]]$Notes) == 0) return(NULL)
-    paste0(var_names[i], ": ", paste(res_list[[i]]$Notes, collapse = " "))
+    paste0(if (has_intercept) var_names[i] else var_names[i + 1], ": ", paste(res_list[[i]]$Notes, collapse = " "))
   }))
   
   class(out_df) <- c("backcalc", class(out_df))
