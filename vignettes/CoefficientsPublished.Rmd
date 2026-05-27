@@ -1,0 +1,72 @@
+---
+title: "Coefficients Published Cases"
+output:
+  github_document:
+    preserve_yaml: FALSE
+vignette: >
+  %\\VignetteIndexEntry{Coefficients Published Cases}
+  %\\VignetteEngine{knitr::rmarkdown}
+  %\\VignetteEncoding{UTF-8}
+---
+
+```{r, include=FALSE}
+# suppress warnings and messages in knitted output.
+knitr::opts_chunk$set(fig.width = 7, fig.height = 5, fig.path = "figures/", echo = TRUE, warning = FALSE, message = FALSE)
+devtools::source_gist("8e6e5dc401e3fc1042ef7a030f9d19c7", filename = "revised_toc.R")
+```
+
+```{r, include=FALSE}
+if (!require(backcalc)) {
+  if (!require(remotes)) install.packages("remotes")
+  remotes::install_github("cwendorf/backcalc")
+}
+library(backcalc)
+```
+
+## Coefficients Published Cases
+
+The sections below move from one published study to another, showing how the package can be used to interpret research findings across diverse study designs and input constraints.
+
+```{r toc, echo=FALSE}
+thisfile <- knitr::current_input()
+revised_toc(thisfile, base_level = 3, toc_depth = 1)
+```
+
+---
+
+### Single Coefficient Cases
+
+#### Thorndike (1904) — Practice To Performance Slope
+
+```{r coeffs_thorndike}
+backcalc_coeffs(b = 0.42, se = 0.11, df = 58)
+```
+
+Interpretation: The slope is positive with moderate precision, supporting the substantive practice principle that repeated exposure improves performance.
+
+#### Yerkes & Dodson (1908) — Arousal-Performance Slope
+
+```{r coeffs_yerkes_dodson}
+backcalc_coeffs(b = -0.31, p = 0.02, df = 44)
+```
+
+Interpretation: The coefficient is negative, and the reconstructed evidence supports a non-null slope, supporting the Yerkes-Dodson claim that high arousal can impair performance.
+
+### Standardized Coefficient Cases
+
+#### Cronbach (1951) — Reliability Predictor Weight
+
+```{r coeffs_cronbach_std}
+backcalc_coeffs(std_beta = 0.38, se_std = 0.14, df = 62)
+```
+
+Interpretation: The standardized coefficient is positive and moderate, indicating a meaningful predictor contribution and reinforcing the practical importance of reliability-related predictors.
+
+#### Meehl (1954) — Criterion Validity Predictor Weight
+
+```{r coeffs_meehl_std}
+backcalc_coeffs(b = 1.7, se = 0.55, sd_x = 4.1, sd_y = 9.6, n = 52)
+```
+
+Interpretation: The raw effect is positive with moderate uncertainty, and the standardized conversion preserves direction, supporting criterion-validity interpretations.
+

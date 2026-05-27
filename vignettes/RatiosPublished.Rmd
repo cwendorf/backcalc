@@ -1,0 +1,72 @@
+---
+title: "Ratios Published Cases"
+output:
+  github_document:
+    preserve_yaml: FALSE
+vignette: >
+  %\\VignetteIndexEntry{Ratios Published Cases}
+  %\\VignetteEngine{knitr::rmarkdown}
+  %\\VignetteEncoding{UTF-8}
+---
+
+```{r, include=FALSE}
+# suppress warnings and messages in knitted output.
+knitr::opts_chunk$set(fig.width = 7, fig.height = 5, fig.path = "figures/", echo = TRUE, warning = FALSE, message = FALSE)
+devtools::source_gist("8e6e5dc401e3fc1042ef7a030f9d19c7", filename = "revised_toc.R")
+```
+
+```{r, include=FALSE}
+if (!require(backcalc)) {
+  if (!require(remotes)) install.packages("remotes")
+  remotes::install_github("cwendorf/backcalc")
+}
+library(backcalc)
+```
+
+## Ratios Published Cases
+
+The sections below move from one published study to another, showing how the package can be used to interpret research findings across diverse study designs and input constraints.
+
+```{r toc, echo=FALSE}
+thisfile <- knitr::current_input()
+revised_toc(thisfile, base_level = 3, toc_depth = 1)
+```
+
+---
+
+### One Sample Cases
+
+#### Weber (1834) — Just-Noticeable Difference Ratio Summaries
+
+```{r ratios_weber}
+backcalc_ratios(ratio = 1.32, se = 0.09, df = 29)
+```
+
+Interpretation: The ratio estimate exceeds one and is reasonably precise, which supports the Weberian claim that sensitivity tracks proportional, not absolute, change.
+
+#### Fechner (1860) — Psychophysical Ratio Estimate
+
+```{r ratios_fechner}
+backcalc_ratios(ratio = 1.18, ci = c(1.05, 1.33), n = 41)
+```
+
+Interpretation: The ratio remains above one with an interval that also stays above one, supporting Fechner-style scaling in which perceived intensity grows systematically with stimulus magnitude.
+
+### Two Sample Cases
+
+#### Stevens (1957) — Magnitude Estimation By Task
+
+```{r ratios_stevens_compare}
+backcalc_ratios(ratio = c(1.48, 1.21), se = c(0.11, 0.10), df = c(22, 24))
+```
+
+Interpretation: The first context shows a larger ratio, and combined uncertainty information supports a reliable directional contrast, consistent with context-dependent judgment scaling.
+
+#### Shepard (1967) — Generalization Ratio By Context
+
+```{r ratios_shepard_compare}
+backcalc_ratios(ratio = c(1.61, 1.27), ci = c(1.08, 1.79), df = 30)
+```
+
+Interpretation: The comparison of ratios, together with interval-based uncertainty, supports a positive contextual shift consistent with generalization accounts of transfer strength.
+

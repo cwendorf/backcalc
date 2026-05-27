@@ -1,0 +1,72 @@
+---
+title: "ANOVA Published Cases"
+output:
+  github_document:
+    preserve_yaml: FALSE
+vignette: >
+  %\\VignetteIndexEntry{ANOVA Published Cases}
+  %\\VignetteEngine{knitr::rmarkdown}
+  %\\VignetteEncoding{UTF-8}
+---
+
+```{r, include=FALSE}
+# suppress warnings and messages in knitted output.
+knitr::opts_chunk$set(fig.width = 7, fig.height = 5, fig.path = "figures/", echo = TRUE, warning = FALSE, message = FALSE)
+devtools::source_gist("8e6e5dc401e3fc1042ef7a030f9d19c7", filename = "revised_toc.R")
+```
+
+```{r, include=FALSE}
+if (!require(backcalc)) {
+  if (!require(remotes)) install.packages("remotes")
+  remotes::install_github("cwendorf/backcalc")
+}
+library(backcalc)
+```
+
+## ANOVA Published Cases
+
+The sections below move from one published study to another, showing how the package can be used to interpret research findings across diverse study designs and input constraints.
+
+```{r toc, echo=FALSE}
+thisfile <- knitr::current_input()
+revised_toc(thisfile, base_level = 3, toc_depth = 1)
+```
+
+---
+
+### Between-Subjects Cases
+
+#### Sherif (1936) — Autokinetic Judgment Conditions
+
+```{r anova_sherif_between}
+backcalc_anova(F = 6.84, df1 = 2, df2 = 57, design = "between")
+```
+
+Interpretation: The reconstructed between-condition evidence indicates reliable mean separation across conditions, supporting the claim that social framing shifts ambiguous judgments.
+
+#### Zimbardo et al. (1973) — Prison-Role Behavior Index
+
+```{r anova_zimbardo_between}
+backcalc_anova(F = 4.21, df1 = 1, df2 = 22, design = "between")
+```
+
+Interpretation: The group contrast shows clear evidence, supporting role-internalization accounts in which assigned institutional roles shape behavior.
+
+### Repeated Or Mixed Cases
+
+#### Stroop (1935) — Condition Effect Over Repeated Trials
+
+```{r anova_stroop_within}
+backcalc_anova(F = 9.63, df1 = 2, df2 = 62, design = "within", epsilon = 0.92)
+```
+
+Interpretation: The within-design effect is strong, supporting the Stroop conclusion that conflict between automatic and controlled processes persists across trials.
+
+#### Latane et al. (1981) — Group-Size By Setting Mixed Design
+
+```{r anova_latane_mixed}
+backcalc_anova(F = 3.55, df1 = 2, df2 = 84, design = "mixed")
+```
+
+Interpretation: The mixed-design result indicates systematic condition differences, aligning with social-impact models of group presence and size effects.
+

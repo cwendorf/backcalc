@@ -1,0 +1,90 @@
+---
+title: "Medians Published Cases"
+output:
+  github_document:
+    preserve_yaml: FALSE
+vignette: >
+  %\\VignetteIndexEntry{Medians Published Cases}
+  %\\VignetteEngine{knitr::rmarkdown}
+  %\\VignetteEncoding{UTF-8}
+---
+
+```{r, include=FALSE}
+# suppress warnings and messages in knitted output.
+knitr::opts_chunk$set(fig.width = 7, fig.height = 5, fig.path = "figures/", echo = TRUE, warning = FALSE, message = FALSE)
+devtools::source_gist("8e6e5dc401e3fc1042ef7a030f9d19c7", filename = "revised_toc.R")
+```
+
+```{r, include=FALSE}
+if (!require(backcalc)) {
+  if (!require(remotes)) install.packages("remotes")
+  remotes::install_github("cwendorf/backcalc")
+}
+library(backcalc)
+```
+
+## Medians Published Cases
+
+The sections below move from one published study to another, showing how the package can be used to interpret research findings across diverse study designs and input constraints.
+
+```{r toc, echo=FALSE}
+thisfile <- knitr::current_input()
+revised_toc(thisfile, base_level = 3, toc_depth = 1)
+```
+
+---
+
+### One Sample Cases
+
+#### Ebbinghaus (1885) — Retention Interval Comparison
+
+```{r medians_ebbinghaus}
+backcalc_medians(mdn = 36, iqr = 18, n = 28)
+```
+
+Interpretation: The positive central estimate with nontrivial dispersion indicates a stable retention level but broad spread, supporting the substantive conclusion that memory changes substantially over delay.
+
+#### Rosenthal & Jacobson (1968) — Gain Score Median
+
+```{r medians_rosenthal_jacobson}
+backcalc_medians(mdn = 5.0, mad = 2.7, n = 24)
+```
+
+Interpretation: The positive median gain and moderate uncertainty support a directional improvement pattern consistent with expectancy-based classroom effects.
+
+### Paired Sample Cases
+
+#### Stroop (1935) — Interference Condition Difference Scores
+
+```{r medians_stroop_paired}
+backcalc_medians(mdn = 7.0, iqr = 9.5, n = 32, paired = TRUE)
+```
+
+Interpretation: The paired median shift with appreciable spread indicates a consistent directional interference effect, matching the Stroop claim that automatic reading competes with controlled color naming.
+
+#### Tversky & Kahneman (1974) — Judgment Shift Scores
+
+```{r medians_tversky_kahneman_paired}
+backcalc_medians(mdn = 4.0, range = 20, n = 30, paired = TRUE)
+```
+
+Interpretation: The positive paired shift alongside broad uncertainty still supports the directional claim predicted by anchoring-and-adjustment accounts.
+
+### Two Sample Cases
+
+#### Festinger & Carlsmith (1959) — Dissonance Condition Ratings
+
+```{r medians_festinger_carlsmith}
+backcalc_medians(mdn = c(7.0, 5.5), iqr = c(2.4, 2.8), n = c(20, 20))
+```
+
+Interpretation: The median contrast with moderate dispersion in both groups supports a directional between-condition difference aligned with cognitive dissonance interpretations.
+
+#### Mischel et al. (1972) — Delay-Choice Outcomes
+
+```{r medians_mischel_twosample}
+backcalc_medians(mdn = c(15, 9), mad = c(4, 5), n = c(26, 24))
+```
+
+Interpretation: The sizable median gap, despite group variability, indicates a meaningful condition difference consistent with delay-of-gratification accounts of self-control.
+

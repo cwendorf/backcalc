@@ -1,0 +1,72 @@
+---
+title: "Proportions Published Cases"
+output:
+  github_document:
+    preserve_yaml: FALSE
+vignette: >
+  %\\VignetteIndexEntry{Proportions Published Cases}
+  %\\VignetteEngine{knitr::rmarkdown}
+  %\\VignetteEncoding{UTF-8}
+---
+
+```{r, include=FALSE}
+# suppress warnings and messages in knitted output.
+knitr::opts_chunk$set(fig.width = 7, fig.height = 5, fig.path = "figures/", echo = TRUE, warning = FALSE, message = FALSE)
+devtools::source_gist("8e6e5dc401e3fc1042ef7a030f9d19c7", filename = "revised_toc.R")
+```
+
+```{r, include=FALSE}
+if (!require(backcalc)) {
+  if (!require(remotes)) install.packages("remotes")
+  remotes::install_github("cwendorf/backcalc")
+}
+library(backcalc)
+```
+
+## Proportions Published Cases
+
+The sections below move from one published study to another, showing how the package can be used to interpret research findings across diverse study designs and input constraints.
+
+```{r toc, echo=FALSE}
+thisfile <- knitr::current_input()
+revised_toc(thisfile, base_level = 3, toc_depth = 1)
+```
+
+---
+
+### One Sample Cases
+
+#### Milgram (1963) — Baseline Obedience Rate
+
+```{r props_milgram_baseline}
+backcalc_props(x = 26, n = 40)
+```
+
+Interpretation: The observed proportion is high, and its reconstructed interval remains well above trivial levels, supporting Milgram's substantive conclusion that many participants complied under authority pressure.
+
+#### Darley & Batson (1973) — Helping In The Seminary Study
+
+```{r props_darley_batson}
+backcalc_props(x = 10, n = 40)
+```
+
+Interpretation: The helping proportion is low, and the uncertainty band stays far from ceiling behavior, supporting the situationist interpretation that context can suppress prosocial action.
+
+### Two Sample Cases
+
+#### Milgram (1963) — Baseline Vs. Touch-Proximity Conditions
+
+```{r props_milgram_condition_compare}
+backcalc_props(x = c(26, 12), n = c(40, 40))
+```
+
+Interpretation: The two-group difference in proportions is large and directionally consistent, supporting the claim that situational manipulations of social distance can materially reduce obedience.
+
+#### Latane & Darley (1968) — Seizure Study, Alone Vs. Group Condition
+
+```{r props_latane_darley_compare}
+backcalc_props(x = c(11, 4), n = c(13, 13))
+```
+
+Interpretation: The substantial proportion gap indicates a strong directional effect, substantiating the bystander-effect claim that shared responsibility diffuses intervention.
+

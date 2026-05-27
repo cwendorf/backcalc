@@ -1,0 +1,90 @@
+---
+title: "Means Published Cases"
+output:
+  github_document:
+    preserve_yaml: FALSE
+vignette: >
+  %\\VignetteIndexEntry{Means Published Cases}
+  %\\VignetteEngine{knitr::rmarkdown}
+  %\\VignetteEncoding{UTF-8}
+---
+
+```{r, include=FALSE}
+# suppress warnings and messages in knitted output.
+knitr::opts_chunk$set(fig.width = 7, fig.height = 5, fig.path = "figures/", echo = TRUE, warning = FALSE, message = FALSE)
+devtools::source_gist("8e6e5dc401e3fc1042ef7a030f9d19c7", filename = "revised_toc.R")
+```
+
+```{r, include=FALSE}
+if (!require(backcalc)) {
+  if (!require(remotes)) install.packages("remotes")
+  remotes::install_github("cwendorf/backcalc")
+}
+library(backcalc)
+```
+
+## Means Published Cases
+
+The sections below move from one published study to another, showing how the package can be used to interpret research findings across diverse study designs and input constraints.
+
+```{r toc, echo=FALSE}
+thisfile <- knitr::current_input()
+revised_toc(thisfile, base_level = 3, toc_depth = 1)
+```
+
+---
+
+### One Sample Cases
+
+#### Loftus & Palmer (1974) — "Smashed" Condition
+
+```{r means_loftus_palmer}
+backcalc_means(m = 40.8, se = 1.19, df = 44)
+```
+
+Interpretation: Because the estimated mean is clearly positive with moderate uncertainty, the result supports the classic claim that wording can shift eyewitness judgments, implying reconstructive memory processes.
+
+#### Dutton & Aron (1974) — High Bridge Condition
+
+```{r means_dutton_aron}
+backcalc_means(m = 2.99, se = 0.268, df = 19)
+```
+
+Interpretation: The positive estimate and relatively small uncertainty indicate a stable directional effect, consistent with misattribution of arousal from context to attraction.
+
+### Paired Sample Cases
+
+#### Milgram (1963) — Shock Differences
+
+```{r means_milgram_paired}
+backcalc_means(m = 0.15, se = 0.05, df = 39, paired = TRUE)
+```
+
+Interpretation: The paired estimate is positive and precise relative to its size, which supports a reliable within-subject shift consistent with classic obedience effects under authority pressure.
+
+#### Haney et al. (1973) — Aggression Scores
+
+```{r means_haney_paired}
+backcalc_means(m = 2.0, se = 0.306, df = 23, paired = TRUE)
+```
+
+Interpretation: The positive paired effect with moderate uncertainty indicates a meaningful condition-related increase, aligning with the claim that institutional roles can rapidly shape aggressive behavior.
+
+### Two Sample Cases
+
+#### Bandura et al. (1961) — Bobo Doll Study
+
+```{r means_bandura_twosample}
+backcalc_means(m = 1.0, se = 0.217, df = 45)
+```
+
+Interpretation: The between-group estimate is positive with acceptable precision, supporting the substantive social-learning interpretation that modeled aggression elevates children's aggressive responding.
+
+#### Asch (1951) — Conformity Rates
+
+```{r means_asch_twosample}
+backcalc_means(m = 0.32, se = 0.0259, df = 58)
+```
+
+Interpretation: The positive estimate paired with very small uncertainty implies a robust group difference, reinforcing the conformity conclusion that majority pressure shifts public judgments.
+

@@ -1,0 +1,72 @@
+---
+title: "Standardized Effects Published Cases"
+output:
+  github_document:
+    preserve_yaml: FALSE
+vignette: >
+  %\\VignetteIndexEntry{Standardized Effects Published Cases}
+  %\\VignetteEngine{knitr::rmarkdown}
+  %\\VignetteEncoding{UTF-8}
+---
+
+```{r, include=FALSE}
+# suppress warnings and messages in knitted output.
+knitr::opts_chunk$set(fig.width = 7, fig.height = 5, fig.path = "figures/", echo = TRUE, warning = FALSE, message = FALSE)
+devtools::source_gist("8e6e5dc401e3fc1042ef7a030f9d19c7", filename = "revised_toc.R")
+```
+
+```{r, include=FALSE}
+if (!require(backcalc)) {
+  if (!require(remotes)) install.packages("remotes")
+  remotes::install_github("cwendorf/backcalc")
+}
+library(backcalc)
+```
+
+## Standardized Effects Published Cases
+
+The sections below move from one published study to another, showing how the package can be used to interpret research findings across diverse study designs and input constraints.
+
+```{r toc, echo=FALSE}
+thisfile <- knitr::current_input()
+revised_toc(thisfile, base_level = 3, toc_depth = 1)
+```
+
+---
+
+### One Sample Cases
+
+#### Triplett (1898) — Social Facilitation Effect Size
+
+```{r standard_triplett}
+backcalc_standard(m = 1.8, sd = 4.9, n = 40, type = "d")
+```
+
+Interpretation: The standardized effect is positive, indicating nontrivial directional change and supporting the social-facilitation claim that coaction can enhance performance.
+
+#### Lewin et al. (1939) — Leadership Climate Effect Size
+
+```{r standard_lewin}
+backcalc_standard(statistic = 2.35, n = 36, type = "g")
+```
+
+Interpretation: The reconstructed Hedges g remains positive after small-sample correction, consistent with leadership-climate theories linking social climate to behavior change.
+
+### Two Sample Cases
+
+#### Bandura et al. (1961) — Aggression Score Contrast
+
+```{r standard_bandura}
+backcalc_standard(m = c(1.00, 0.46), sd = c(0.95, 0.89), n = c(24, 24), type = "d")
+```
+
+Interpretation: The between-group standardized difference is positive, indicating a practical effect size that reinforces social-learning interpretations of generalized aggression.
+
+#### Darley & Latane (1968) — Helping Latency Contrast
+
+```{r standard_darley_latane}
+backcalc_standard(m = c(38.2, 61.5), sd = c(20.4, 27.6), n = c(18, 18), type = "g")
+```
+
+Interpretation: The standardized contrast is substantial, supporting bystander-effect mechanisms in which social context alters urgency and helping latency.
+

@@ -1,0 +1,72 @@
+---
+title: "Correlations Published Cases"
+output:
+  github_document:
+    preserve_yaml: FALSE
+vignette: >
+  %\\VignetteIndexEntry{Correlations Published Cases}
+  %\\VignetteEngine{knitr::rmarkdown}
+  %\\VignetteEncoding{UTF-8}
+---
+
+```{r, include=FALSE}
+# suppress warnings and messages in knitted output.
+knitr::opts_chunk$set(fig.width = 7, fig.height = 5, fig.path = "figures/", echo = TRUE, warning = FALSE, message = FALSE)
+devtools::source_gist("8e6e5dc401e3fc1042ef7a030f9d19c7", filename = "revised_toc.R")
+```
+
+```{r, include=FALSE}
+if (!require(backcalc)) {
+  if (!require(remotes)) install.packages("remotes")
+  remotes::install_github("cwendorf/backcalc")
+}
+library(backcalc)
+```
+
+## Correlations Published Cases
+
+The sections below move from one published study to another, showing how the package can be used to interpret research findings across diverse study designs and input constraints.
+
+```{r toc, echo=FALSE}
+thisfile <- knitr::current_input()
+revised_toc(thisfile, base_level = 3, toc_depth = 1)
+```
+
+---
+
+### One Sample Cases
+
+#### Rosenhan (1973) — Confidence And Diagnostic Certainty
+
+```{r corrs_rosenhan}
+backcalc_corrs(r = 0.42, n = 48)
+```
+
+Interpretation: The positive correlation with moderate sample size indicates meaningful co-movement, supporting the substantive claim that confidence and diagnostic certainty can become tightly coupled.
+
+#### Tolman (1948) — Maze Performance And Trials
+
+```{r corrs_tolman}
+backcalc_corrs(r = 0.57, ci = c(0.33, 0.73), n = 36)
+```
+
+Interpretation: The correlation is large and its interval remains clearly positive, supporting purposive-learning interpretations linking experience to maze performance.
+
+### Two Sample Cases
+
+#### Maccoby & Jacklin (1974) — Subgroup Correlation Comparison
+
+```{r corrs_maccoby_jacklin_compare}
+backcalc_corrs(r = c(0.34, 0.11), n = c(82, 79))
+```
+
+Interpretation: The subgroup correlations differ in magnitude, and the comparison supports a directional gap, suggesting the construct relationship varies across populations.
+
+#### Sherif et al. (1961) — Intergroup Context Correlation Shift
+
+```{r corrs_sherif_compare}
+backcalc_corrs(r = c(0.46, 0.20), n = c(40, 38))
+```
+
+Interpretation: The correlation decreases across contexts, and the reconstructed difference supports attenuation, aligning with accounts that social setting weakens expected trait-behavior coupling.
+

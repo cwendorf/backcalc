@@ -1,0 +1,64 @@
+---
+title: "Regression Published Cases"
+output:
+  github_document:
+    preserve_yaml: FALSE
+vignette: >
+  %\\VignetteIndexEntry{Regression Published Cases}
+  %\\VignetteEngine{knitr::rmarkdown}
+  %\\VignetteEncoding{UTF-8}
+---
+
+```{r, include=FALSE}
+# suppress warnings and messages in knitted output.
+knitr::opts_chunk$set(fig.width = 7, fig.height = 5, fig.path = "figures/", echo = TRUE, warning = FALSE, message = FALSE)
+devtools::source_gist("8e6e5dc401e3fc1042ef7a030f9d19c7", filename = "revised_toc.R")
+```
+
+```{r, include=FALSE}
+if (!require(backcalc)) {
+  if (!require(remotes)) install.packages("remotes")
+  remotes::install_github("cwendorf/backcalc")
+}
+library(backcalc)
+```
+
+## Regression Published Cases
+
+The sections below move from one published study to another, showing how the package can be used to interpret research findings across diverse input constraints for multiple regression coefficients.
+
+```{r toc, echo=FALSE}
+thisfile <- knitr::current_input()
+revised_toc(thisfile, base_level = 3, toc_depth = 1)
+```
+
+---
+
+### Multiple Regression Cases
+
+#### Coleman et al. (1966) — School Outcomes Model
+
+```{r multreg_coleman}
+backcalc_multreg(
+  intercept = 2.1,
+  intercept_se = 0.6,
+  b = c(0.45, -0.28, 0.33),
+  se = c(0.12, 0.10, 0.11),
+  n = 120
+)
+```
+
+Interpretation: The model includes both positive and negative coefficients with moderate uncertainty, supporting a multicausal substantive account where predictors influence outcomes in different directions.
+
+#### Jencks et al. (1972) — Educational Attainment Model
+
+```{r multreg_jencks}
+backcalc_multreg(
+  b = c(0.52, 0.19, -0.14, 0.27),
+  p = c(0.001, 0.04, 0.09, 0.02),
+  n = 150
+)
+```
+
+Interpretation: The evidence pattern indicates several predictors with clearer support and one weaker effect, supporting the claim that attainment is jointly determined but unequally weighted across predictors.
+
