@@ -14,7 +14,7 @@ Means and mean differences
 Standardized mean differences and effect sizes
 
 - [Standardized Means Examples](./StandardizedExamples.md): One sample, two and paired sample, and insufficient information cases
-- [Standardized Published](./StandardizedPublished.md): One sample and two sample cases from published classic studies
+- [Standardized Means Published](./StandardizedPublished.md): One sample and two sample cases from published classic studies
 
 Analysis of variance
 

@@ -1,5 +1,4 @@
-Standardized Mean Differences Examples
-================
+# [`backcalc`](https://github.com/cwendorf/backcalc/)
 
 ## Standardized Mean Differences Examples
 

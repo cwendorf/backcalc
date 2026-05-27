@@ -1,6 +1,6 @@
 # [`backcalc`](https://github.com/cwendorf/backcalc/)
 
-## Standardized Effects Published Cases
+## Standardized Mean Differences Published Cases
 
 The sections below move from one published study to another, showing how
 the package can be used to interpret research findings across diverse

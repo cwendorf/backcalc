@@ -1,10 +1,10 @@
 ---
-title: "Standardized Effects Published Cases"
+title: "Standardized Mean Differences Published Cases"
 output:
   github_document:
     preserve_yaml: FALSE
 vignette: >
-  %\\VignetteIndexEntry{Standardized Effects Published Cases}
+  %\\VignetteIndexEntry{Standardized Mean Differences Published Cases}
   %\\VignetteEngine{knitr::rmarkdown}
   %\\VignetteEncoding{UTF-8}
 ---
@@ -23,7 +23,7 @@ if (!require(backcalc)) {
 library(backcalc)
 ```
 
-## Standardized Effects Published Cases
+## Standardized Mean Differences Published Cases
 
 The sections below move from one published study to another, showing how the package can be used to interpret research findings across diverse study designs and input constraints.
 
