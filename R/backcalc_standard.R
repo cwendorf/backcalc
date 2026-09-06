@@ -71,16 +71,6 @@ backcalc_standard <- function(d = NULL, m = NULL, sd = NULL, n = NULL, se = NULL
     return(invisible(NULL))
   }
 
-  # Helper function to get critical value
-  get_crit <- function(df = NULL) {
-    alpha <- 1 - conf.level
-    if (one_sided) {
-      if (!is.null(df)) qt(1 - alpha, df) else qnorm(1 - alpha)
-    } else {
-      if (!is.null(df)) qt(1 - alpha / 2, df) else qnorm(1 - alpha / 2)
-    }
-  }
-
   # Helper to compute pooled SD
   compute_pooled_sd <- function(sd, n) {
     if (length(sd) == 1 && length(n) == 2) {

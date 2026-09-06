@@ -89,8 +89,6 @@ backcalc_multreg <- function(
     }
   }
   
-  messages <- character(0)
-  
   # Number of predictors
   n_preds <- max(length(b), length(se), length(std_beta), length(se_std), length(p), length(statistic))
   n_preds <- max(n_preds, ifelse(is.null(ci), 0, length(ci)))
@@ -136,16 +134,6 @@ backcalc_multreg <- function(
   stat_type <- if (!is.null(df)) "t" else "z"
   crit_val <- get_crit(df)
   
-  # Initialize output vectors
-  est_out <- numeric(n_preds + 1)
-  se_out <- numeric(n_preds + 1)
-  stat_out <- numeric(n_preds + 1)
-  p_out <- numeric(n_preds + 1)
-  ll_out <- numeric(n_preds + 1)
-  ul_out <- numeric(n_preds + 1)
-  
-  approx_per_var <- vector("list", n_preds + 1)
-  names(approx_per_var) <- var_names
   
   # Function to process one coefficient (including intercept)
   process_coef <- function(est, se_, stdb, sse, sdx, sdy, pval, ci_, stat, varname, is_intercept = FALSE) {
@@ -295,10 +283,11 @@ backcalc_multreg <- function(
   }))
   rownames(out_df) <- if (has_intercept) var_names else var_names[-1]
   
-  # Collect notes
+  # Collect per-variable approximation notes and flatten to a character vector
   approx_notes <- unlist(lapply(seq_along(res_list), function(i) {
-    if (length(res_list[[i]]$Notes) == 0) return(NULL)
-    paste0(if (has_intercept) var_names[i] else var_names[i + 1], ": ", paste(res_list[[i]]$Notes, collapse = " "))
+    notes_i <- res_list[[i]]$Notes
+    if (is.null(notes_i) || length(notes_i) == 0) return(NULL)
+    paste0(if (has_intercept) var_names[i] else var_names[i + 1], ": ", paste(notes_i, collapse = " "))
   }))
   
   class(out_df) <- c("backcalc", class(out_df))
