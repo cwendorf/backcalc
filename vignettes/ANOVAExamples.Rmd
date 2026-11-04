@@ -35,8 +35,9 @@ revised_toc(thisfile, base_level = 3, toc_depth = 1)
 
 ### Full ANOVA Cases
 
+#### 1. One-way between-subjects ANOVA (single factor)
+
 ```{r}
-# 1. One-way between-subjects ANOVA (single factor)
 backcalc_anova(
   F = 5.2,
   df1 = 2,
@@ -47,7 +48,11 @@ backcalc_anova(
   labels = "Treatment"
 )
 
-# 2. Repeated-measures ANOVA (single within factor with sphericity correction)
+```
+
+#### 2. Repeated-measures ANOVA (single within factor with sphericity correction)
+
+```{r}
 backcalc_anova(
   F = 4.8,
   df1 = NA, df2 = NA,
@@ -58,7 +63,11 @@ backcalc_anova(
   labels = "Time"
 )
 
-# 3. Factorial between-subjects ANOVA (2×3): two main effects + interaction
+```
+
+#### 3. Factorial between-subjects ANOVA (2×3): two main effects + interaction
+
+```{r}
 backcalc_anova(
   F = c(6.4, 3.2, 2.5),
   df1 = NA, df2 = NA,
@@ -69,7 +78,11 @@ backcalc_anova(
   labels = c("FactorA", "FactorB", "A×B")
 )
 
-# 4. Mixed design (Between × Within): between main, within main, interaction
+```
+
+#### 4. Mixed design (Between × Within): between main, within main, interaction
+
+```{r}
 backcalc_anova(
   F = c(5.5, 4.2, 1.8),
   df1 = NA, df2 = NA,
@@ -81,49 +94,70 @@ backcalc_anova(
   effect = c("main", "main", "interaction"),
   labels = c("Group", "Time", "Group×Time")
 )
+
 ```
 
 ### Minimal Input Cases
 
+#### 5. Only η²p and df given, reconstruct F and p
+
 ```{r}
-# 5. Only η²p and df given, reconstruct F and p
 backcalc_anova(
   eta2 = 0.15,
   df1 = 2,
   df2 = 30
 )
 
-# 6. Only p and dfs given, reconstruct F and η²p
+```
+
+#### 6. Only p and dfs given, reconstruct F and η²p
+
+```{r}
 backcalc_anova(
   p = 0.012,
   df1 = 1,
   df2 = 28
 )
 
-# 7. Only F and dfs given, calculate p and η²p
+```
+
+#### 7. Only F and dfs given, calculate p and η²p
+
+```{r}
 backcalc_anova(
   F = 4.5,
   df1 = 1,
   df2 = 22
 )
+
 ```
 
 ### Insufficient Input Cases
 
+#### 8. Only dfs provided (cannot compute F, p, or effect sizes)
+
 ```{r}
-# 8. Only dfs provided (cannot compute F, p, or effect sizes)
 backcalc_anova(
   df1 = 2,
   df2 = 30
 )
 
-# 9. Only F provided (missing dfs so p and effect sizes cannot be derived)
+```
+
+#### 9. Only F provided (missing dfs so p and effect sizes cannot be derived)
+
+```{r}
 backcalc_anova(
   F = 5.2
 )
 
-# 10. Only eta2 provided (without dfs cannot derive F or CI)
+```
+
+#### 10. Only eta2 provided (without dfs cannot derive F or CI)
+
+```{r}
 backcalc_anova(
   eta2 = 0.12
 )
+
 ```

@@ -16,8 +16,9 @@ constraints for multiple regression coefficients.
 
 ### Unstandardized Coefficients Cases
 
+#### 1. Full info: unstandardized coefficients, standard errors, and df
+
 ``` r
-# 1. Full info: unstandardized coefficients, standard errors, and df
 backcalc_multreg(
   intercept = 3.2, intercept_se = 0.5,
   b = c(0.4, 0.8), se = c(0.1, 0.15),
@@ -36,8 +37,9 @@ backcalc_multreg(
     X1: p-value computed from statistic.
     X2: p-value computed from statistic. 
 
+#### 2. Unstandardized coefficients, SEs, and standard deviations; infer standardized coefficients
+
 ``` r
-# 2. Unstandardized coefficients, SEs, and standard deviations; infer standardized coefficients
 backcalc_multreg(
   intercept = 1.8, intercept_se = 0.4,
   b = c(0.7, 1.2, 0.3),
@@ -61,8 +63,9 @@ backcalc_multreg(
     X2: Standardized beta approximated from unstandardized beta and SDs. SE of standardized beta approximated from unstandardized SE and SDs. p-value computed from statistic.
     X3: Standardized beta approximated from unstandardized beta and SDs. SE of standardized beta approximated from unstandardized SE and SDs. p-value computed from statistic. 
 
+#### 3. Unstandardized coefficients with SEs and sample size; infer df and t-test
+
 ``` r
-# 3. Unstandardized coefficients with SEs and sample size; infer df and t-test
 backcalc_multreg(
   intercept = 3.1, intercept_se = 0.55,
   b = c(0.6, 0.8),
@@ -82,8 +85,9 @@ backcalc_multreg(
     X1: p-value computed from statistic.
     X2: p-value computed from statistic. 
 
+#### 4. Unstandardized coefficients with SEs and test statistics; no df, use z-test
+
 ``` r
-# 4. Unstandardized coefficients with SEs and test statistics; no df, use z-test
 backcalc_multreg(
   intercept = 3.1, intercept_se = 0.55,
   b = c(0.6, 0.8),
@@ -103,8 +107,9 @@ backcalc_multreg(
     X1: p-value computed from statistic.
     X2: p-value computed from statistic. 
 
+#### 5. Unstandardized coefficients and p-values given; infer SEs and test statistics
+
 ``` r
-# 5. Unstandardized coefficients and p-values given; infer SEs and test statistics
 backcalc_multreg(
   intercept = 2.4, intercept_se = 0.35,
   b = c(0.4, 0.7),
@@ -126,8 +131,9 @@ backcalc_multreg(
 
 ### Standardized Coefficients Cases
 
+#### 6. Standardized betas with SEs and sample size
+
 ``` r
-# 6. Standardized betas with SEs and sample size
 backcalc_multreg(
   intercept = 3.2, intercept_se = 0.5,
   std_beta = c(0.3, 0.5), se_std = c(0.1, 0.12),
@@ -146,8 +152,9 @@ backcalc_multreg(
     X1: p-value computed from statistic.
     X2: p-value computed from statistic. 
 
+#### 7. Standardized betas with SEs and degrees of freedom
+
 ``` r
-# 7. Standardized betas with SEs and degrees of freedom
 backcalc_multreg(
   intercept = 2.5, intercept_se = 0.3,
   std_beta = c(0.25, 0.55, 0.1),
@@ -169,8 +176,9 @@ backcalc_multreg(
     X2: p-value computed from statistic.
     X3: p-value computed from statistic. 
 
+#### 8. Unstandardized coefficients with SEs and standard deviations; infer standardized betas
+
 ``` r
-# 8. Unstandardized coefficients with SEs and standard deviations; infer standardized betas
 backcalc_multreg(
   intercept = 2.0, intercept_se = 0.6,
   b = c(1.1, 0.5), se = c(0.3, 0.2),
@@ -190,8 +198,9 @@ backcalc_multreg(
     X1: Standardized beta approximated from unstandardized beta and SDs. SE of standardized beta approximated from unstandardized SE and SDs. p-value computed from statistic.
     X2: Standardized beta approximated from unstandardized beta and SDs. SE of standardized beta approximated from unstandardized SE and SDs. p-value computed from statistic. 
 
+#### 9. Standardized betas with missing SEs; use unstandardized input for approximation
+
 ``` r
-# 9. Standardized betas with missing SEs; use unstandardized input for approximation
 backcalc_multreg(
   intercept = 3.0, intercept_se = 0.45,
   std_beta = c(0.3, NA, 0.5),
@@ -217,8 +226,9 @@ backcalc_multreg(
     X2: Standardized beta approximated from unstandardized beta and SDs. SE of standardized beta approximated from unstandardized SE and SDs. p-value computed from statistic.
     X3: p-value computed from statistic. 
 
+#### 10. Intercept with confidence intervals for predictors and sample size; infer SEs
+
 ``` r
-# 10. Intercept with confidence intervals for predictors and sample size; infer SEs
 backcalc_multreg(
   intercept = 4.5, intercept_se = 0.4,
   ci = list(c(0.2, 0.8), c(0.1, 0.9)),
@@ -239,8 +249,9 @@ backcalc_multreg(
 
 ### Insufficient Information Cases
 
+#### 11. Predictors with no estimates and no confidence intervals
+
 ``` r
-# 11. Predictors with no estimates and no confidence intervals
 backcalc_multreg(
   intercept = 2.0, intercept_se = 0.4,
   se = c(0.1, 0.15),
@@ -252,8 +263,9 @@ backcalc_multreg(
     Insufficient Input for X1:
     Cannot estimate coefficient or SE.
 
+#### 12. Standardized betas provided, but SEs missing with no sample size or df
+
 ``` r
-# 12. Standardized betas provided, but SEs missing with no sample size or df
 backcalc_multreg(
   intercept = 1.8, intercept_se = 0.25,
   std_beta = c(0.2, 0.5, 0.3)
@@ -264,8 +276,9 @@ backcalc_multreg(
     Insufficient Input for X1:
     Cannot estimate coefficient or SE.
 
+#### 13. Intercept with unstandardized predictor, missing SE for second predictor
+
 ``` r
-# 13. Intercept with unstandardized predictor, missing SE for second predictor
 backcalc_multreg(
   intercept = 1.5, intercept_se = 0.25,
   b = c(0.5, NA), se = c(0.1, NA), p = c(NA, 0.05),
@@ -277,8 +290,9 @@ backcalc_multreg(
     Insufficient Input for X2:
     Cannot estimate coefficient or SE.
 
+#### 14. Intercept with predictor estimates only, missing SE information
+
 ``` r
-# 14. Intercept with predictor estimates only, missing SE information
 backcalc_multreg(
   intercept = 2.0, intercept_se = 0.4,
   b = c(0.5, 0.8)
@@ -289,8 +303,9 @@ backcalc_multreg(
     Insufficient Input for X1:
     Cannot estimate coefficient or SE.
 
+#### 15. Intercept with predictor p-values only, no estimates or df provided
+
 ``` r
-# 15. Intercept with predictor p-values only, no estimates or df provided
 backcalc_multreg(
   intercept = 1.5, intercept_se = 0.3,
   p = c(0.05, 0.01)

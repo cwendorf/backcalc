@@ -35,15 +35,20 @@ revised_toc(thisfile, base_level = 3, toc_depth = 1)
 
 ### Unstandardized Coefficients Cases
 
+#### 1. Full info: unstandardized coefficients, standard errors, and df
+
 ```{r}
-# 1. Full info: unstandardized coefficients, standard errors, and df
 backcalc_multreg(
   intercept = 3.2, intercept_se = 0.5,
   b = c(0.4, 0.8), se = c(0.1, 0.15),
   df = 50
 )
 
-# 2. Unstandardized coefficients, SEs, and standard deviations; infer standardized coefficients
+```
+
+#### 2. Unstandardized coefficients, SEs, and standard deviations; infer standardized coefficients
+
+```{r}
 backcalc_multreg(
   intercept = 1.8, intercept_se = 0.4,
   b = c(0.7, 1.2, 0.3),
@@ -53,7 +58,11 @@ backcalc_multreg(
   n = 110
 )
 
-# 3. Unstandardized coefficients with SEs and sample size; infer df and t-test
+```
+
+#### 3. Unstandardized coefficients with SEs and sample size; infer df and t-test
+
+```{r}
 backcalc_multreg(
   intercept = 3.1, intercept_se = 0.55,
   b = c(0.6, 0.8),
@@ -61,7 +70,11 @@ backcalc_multreg(
   n = 85
 )
 
-# 4. Unstandardized coefficients with SEs and test statistics; no df, use z-test
+```
+
+#### 4. Unstandardized coefficients with SEs and test statistics; no df, use z-test
+
+```{r}
 backcalc_multreg(
   intercept = 3.1, intercept_se = 0.55,
   b = c(0.6, 0.8),
@@ -69,26 +82,36 @@ backcalc_multreg(
   statistic = c(4, 6)
 )
 
-# 5. Unstandardized coefficients and p-values given; infer SEs and test statistics
+```
+
+#### 5. Unstandardized coefficients and p-values given; infer SEs and test statistics
+
+```{r}
 backcalc_multreg(
   intercept = 2.4, intercept_se = 0.35,
   b = c(0.4, 0.7),
   p = c(0.04, 0.01),
   n = 85
 )
+
 ```
 
 ### Standardized Coefficients Cases
 
+#### 6. Standardized betas with SEs and sample size
+
 ```{r}
-# 6. Standardized betas with SEs and sample size
 backcalc_multreg(
   intercept = 3.2, intercept_se = 0.5,
   std_beta = c(0.3, 0.5), se_std = c(0.1, 0.12),
   n = 100
 )
 
-# 7. Standardized betas with SEs and degrees of freedom
+```
+
+#### 7. Standardized betas with SEs and degrees of freedom
+
+```{r}
 backcalc_multreg(
   intercept = 2.5, intercept_se = 0.3,
   std_beta = c(0.25, 0.55, 0.1),
@@ -96,7 +119,11 @@ backcalc_multreg(
   df = 90
 )
 
-# 8. Unstandardized coefficients with SEs and standard deviations; infer standardized betas
+```
+
+#### 8. Unstandardized coefficients with SEs and standard deviations; infer standardized betas
+
+```{r}
 backcalc_multreg(
   intercept = 2.0, intercept_se = 0.6,
   b = c(1.1, 0.5), se = c(0.3, 0.2),
@@ -104,7 +131,11 @@ backcalc_multreg(
   n = 120
 )
 
-# 9. Standardized betas with missing SEs; use unstandardized input for approximation
+```
+
+#### 9. Standardized betas with missing SEs; use unstandardized input for approximation
+
+```{r}
 backcalc_multreg(
   intercept = 3.0, intercept_se = 0.45,
   std_beta = c(0.3, NA, 0.5),
@@ -116,46 +147,69 @@ backcalc_multreg(
   n = 130
 )
 
-# 10. Intercept with confidence intervals for predictors and sample size; infer SEs
+```
+
+#### 10. Intercept with confidence intervals for predictors and sample size; infer SEs
+
+```{r}
 backcalc_multreg(
   intercept = 4.5, intercept_se = 0.4,
   ci = list(c(0.2, 0.8), c(0.1, 0.9)),
   n = 80
 )
+
 ```
 
 ### Insufficient Information Cases
 
+#### 11. Predictors with no estimates and no confidence intervals
+
 ```{r}
-# 11. Predictors with no estimates and no confidence intervals
 backcalc_multreg(
   intercept = 2.0, intercept_se = 0.4,
   se = c(0.1, 0.15),
   n = 100
 )
 
-# 12. Standardized betas provided, but SEs missing with no sample size or df
+```
+
+#### 12. Standardized betas provided, but SEs missing with no sample size or df
+
+```{r}
 backcalc_multreg(
   intercept = 1.8, intercept_se = 0.25,
   std_beta = c(0.2, 0.5, 0.3)
 )
 
-# 13. Intercept with unstandardized predictor, missing SE for second predictor
+```
+
+#### 13. Intercept with unstandardized predictor, missing SE for second predictor
+
+```{r}
 backcalc_multreg(
   intercept = 1.5, intercept_se = 0.25,
   b = c(0.5, NA), se = c(0.1, NA), p = c(NA, 0.05),
   n = 150
 )
 
-# 14. Intercept with predictor estimates only, missing SE information
+```
+
+#### 14. Intercept with predictor estimates only, missing SE information
+
+```{r}
 backcalc_multreg(
   intercept = 2.0, intercept_se = 0.4,
   b = c(0.5, 0.8)
 )
 
-# 15. Intercept with predictor p-values only, no estimates or df provided
+```
+
+#### 15. Intercept with predictor p-values only, no estimates or df provided
+
+```{r}
 backcalc_multreg(
   intercept = 1.5, intercept_se = 0.3,
   p = c(0.05, 0.01)
 )
+
 ```

@@ -16,8 +16,9 @@ constraints.
 
 ### Full ANOVA Cases
 
+#### 1. One-way between-subjects ANOVA (single factor)
+
 ``` r
-# 1. One-way between-subjects ANOVA (single factor)
 backcalc_anova(
   F = 5.2,
   df1 = 2,
@@ -37,8 +38,9 @@ backcalc_anova(
     Treatment: Cohen's f computed from partial eta-squared.
     Treatment: CI for partial eta-squared is approximate.
 
+#### 2. Repeated-measures ANOVA (single factor) with sphericity correction
+
 ``` r
-# 2. Repeated-measures ANOVA (single factor) with sphericity correction
 backcalc_anova(
   F = 4.8,
   df1 = NA, df2 = NA,
@@ -58,8 +60,9 @@ backcalc_anova(
     Factor(k=4): Cohen's f computed from partial eta-squared.
     Factor(k=4): CI for partial eta-squared is approximate.
 
+#### 3. Factorial between-subjects ANOVA (2×3)
+
 ``` r
-# 3. Factorial between-subjects ANOVA (2×3)
 backcalc_anova(
   F = c(6.4, 3.2, 2.5),
   df1 = NA, df2 = NA,
@@ -87,8 +90,9 @@ backcalc_anova(
     A×B: Cohen's f computed from partial eta-squared.
     A×B: CI for partial eta-squared is approximate.
 
+#### 4. Mixed design (Between × Within)
+
 ``` r
-# 4. Mixed design (Between × Within)
 backcalc_anova(
   F = c(5.5, 4.2, 1.8),
   df1 = NA, df2 = NA,
@@ -122,8 +126,9 @@ backcalc_anova(
 
 ### Minimal Input Cases
 
+#### 5. Only η²p and df given, reconstruct F and p
+
 ``` r
-# 5. Only η²p and df given, reconstruct F and p
 backcalc_anova(
   eta2 = 0.15,
   df1 = 2,
@@ -140,8 +145,9 @@ backcalc_anova(
     Effect1: Cohen's f computed from partial eta-squared.
     Effect1: CI for partial eta-squared is approximate.
 
+#### 6. Only p and dfs given, reconstruct F and η²p
+
 ``` r
-# 6. Only p and dfs given, reconstruct F and η²p
 backcalc_anova(
   p = 0.012,
   df1 = 1,
@@ -159,8 +165,9 @@ backcalc_anova(
     Effect1: Cohen's f computed from partial eta-squared.
     Effect1: CI for partial eta-squared is approximate.
 
+#### 7. Only F and dfs given, calculate p and η²p
+
 ``` r
-# 7. Only F and dfs given, calculate p and η²p
 backcalc_anova(
   F = 4.5,
   df1 = 1,
@@ -178,8 +185,9 @@ backcalc_anova(
 
 ### Insufficient Input Cases
 
+#### 8. Only dfs provided (cannot compute F, p, or effect sizes)
+
 ``` r
-# 8. Only dfs provided (cannot compute F, p, or effect sizes)
 backcalc_anova(
   df1 = 2,
   df2 = 30
@@ -189,8 +197,9 @@ backcalc_anova(
     Insufficient Input:
     Effect1: Provide F, p, partial eta-squared (eta2), or Cohen's f along with df1 and df2.
 
+#### 9. Only F provided (missing dfs so p and effect sizes cannot be derived)
+
 ``` r
-# 9. Only F provided (missing dfs so p and effect sizes cannot be derived)
 backcalc_anova(
   F = 5.2
 )
@@ -199,8 +208,9 @@ backcalc_anova(
     Insufficient Input:
     Effect1: Numerator (df1) and denominator (df2) degrees of freedom required with F.
 
+#### 10. Only eta2 provided (without dfs cannot derive F or CI)
+
 ``` r
-# 10. Only eta2 provided (without dfs cannot derive F or CI)
 backcalc_anova(
   eta2 = 0.12
 )

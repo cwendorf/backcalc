@@ -35,57 +35,111 @@ revised_toc(thisfile, base_level = 3, toc_depth = 1)
 
 ### One Sample Cases
 
+#### 1.  Median, IQR, and sample size
+
 ```{r}
-# 1.  Median, IQR, and sample size
 backcalc_medians(mdn = 50, iqr = 20, n = 30)
 
-# 2.  Median, MAD, and sample size
+```
+
+#### 2.  Median, MAD, and sample size
+
+```{r}
 backcalc_medians(mdn = 48, mad = 12, n = 25)
 
-# 3.  Median, IQR, paired design
+```
+
+#### 3.  Median, IQR, paired design
+
+```{r}
 backcalc_medians(mdn = 42, iqr = 15, n = 20, paired = TRUE)
 
-# 4.  Median, MAD, one-sided test
+```
+
+#### 4.  Median, MAD, one-sided test
+
+```{r}
 backcalc_medians(mdn = 55, mad = 10, n = 40, one_sided = TRUE)
 
-# 5. median + MAD + n, no paired, no one-sided
+```
+
+#### 5. median + MAD + n, no paired, no one-sided
+
+```{r}
 backcalc_medians(mdn = 55, range = 30, n = 20)
+
 ```
 
 ### Two Sample Cases
 
+#### 6.  Group medians, IQR, and sample size
+
 ```{r}
-# 6.  Group medians, IQR, and sample size
 backcalc_medians(mdn = c(60, 50), iqr = 20, n = 30)
 
-# 7.  Group medians, MAD, and sample size
+```
+
+#### 7.  Group medians, MAD, and sample size
+
+```{r}
 backcalc_medians(mdn = c(75, 68), mad = 9, n = 40)
 
-# 8.  Paired medians, IQR, and n
+```
+
+#### 8.  Paired medians, IQR, and n
+
+```{r}
 backcalc_medians(mdn = c(45, 40), iqr = 10, n = 20, paired = TRUE)
 
-# 9.  Group medians, IQR, n, one-sided
+```
+
+#### 9.  Group medians, IQR, n, one-sided
+
+```{r}
 backcalc_medians(mdn = c(82, 78), iqr = 12, n = 35, one_sided = TRUE)
 
-# 10. two medians, two MADs, two sample sizes (no IQR used here)
+```
+
+#### 10. two medians, two MADs, two sample sizes (no IQR used here)
+
+```{r}
 backcalc_medians(mdn = c(92, 85), mad = c(7, 10), n = c(25, 28))
+
 ```
 
 ### Insufficient Information Cases
 
+#### 11. Only IQR provided
+
 ```{r}
-# 11. Only IQR provided
 backcalc_medians(iqr = 10)
 
-# 12. Only MAD provided
+```
+
+#### 12. Only MAD provided
+
+```{r}
 backcalc_medians(mad = 5)
 
-# 13. Only sample size provided
+```
+
+#### 13. Only sample size provided
+
+```{r}
 backcalc_medians(n = 30)
 
-# 14. Median provided, no n or spread
+```
+
+#### 14. Median provided, no n or spread
+
+```{r}
 backcalc_medians(mdn = 50)
 
-# 15. Medians and sample size, but no dispersion
+```
+
+#### 15. Medians and sample size, but no dispersion
+
+```{r}
 backcalc_medians(mdn = c(52, 49), n = 30)
+
 ```

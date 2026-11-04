@@ -16,8 +16,9 @@ and input constraints.
 
 ### One Sample Cases
 
+#### 1. Cohen's d from mean difference, SD, and sample size (minimal inference)
+
 ``` r
-# 1. Cohen's d from mean difference, SD, and sample size (minimal inference)
 backcalc_standard(m = 2.5, sd = 4, n = 25)
 ```
 
@@ -28,8 +29,9 @@ backcalc_standard(m = 2.5, sd = 4, n = 25)
     Notes:
     Effect size calculated from mean difference and SD. 
 
+#### 2. Hedges' g from one-sample input (bias-corrected d)
+
 ``` r
-# 2. Hedges' g from one-sample input (bias-corrected d)
 backcalc_standard(m = 1.5, sd = 3, n = 30, type = "g")
 ```
 
@@ -41,8 +43,9 @@ backcalc_standard(m = 1.5, sd = 3, n = 30, type = "g")
     Effect size calculated from mean difference and SD.
     Hedges' g bias-correction applied. 
 
+#### 3. One-sample effect size from t-statistic and sample size
+
 ``` r
-# 3. One-sample effect size from t-statistic and sample size
 backcalc_standard(statistic = 2.5, n = 50)
 ```
 
@@ -53,8 +56,9 @@ backcalc_standard(statistic = 2.5, n = 50)
     Notes:
     Effect size estimated from t-statistic. 
 
+#### 4. One-sample estimate from CI midpoint plus sample size
+
 ``` r
-# 4. One-sample estimate from CI midpoint plus sample size
 backcalc_standard(ci_d = c(0.2, 0.8), n = 40)
 ```
 
@@ -65,8 +69,9 @@ backcalc_standard(ci_d = c(0.2, 0.8), n = 40)
     Notes:
     Effect size estimated from CI midpoint. 
 
+#### 5. Directly supplied d with sample size to obtain SE and CI
+
 ``` r
-# 5. Directly supplied d with sample size to obtain SE and CI
 backcalc_standard(d = 0.45, n = 60)
 ```
 
@@ -76,8 +81,9 @@ backcalc_standard(d = 0.45, n = 60)
 
 ### Two and Paired Sample Cases
 
+#### 6. Two-sample Cohen's d from means, SDs, and sample sizes
+
 ``` r
-# 6. Two-sample Cohen's d from means, SDs, and sample sizes
 backcalc_standard(m = c(15, 12), sd = c(4, 5), n = c(40, 35))
 ```
 
@@ -88,8 +94,9 @@ backcalc_standard(m = c(15, 12), sd = c(4, 5), n = c(40, 35))
     Notes:
     Effect size calculated from means and pooled SD. 
 
+#### 7. Two-sample Hedges' g with unequal group sizes
+
 ``` r
-# 7. Two-sample Hedges' g with unequal group sizes
 backcalc_standard(m = c(20, 18), sd = c(3, 3), n = c(50, 20), type = "g")
 ```
 
@@ -101,8 +108,9 @@ backcalc_standard(m = c(20, 18), sd = c(3, 3), n = c(50, 20), type = "g")
     Effect size calculated from means and pooled SD.
     Hedges' g bias-correction applied. 
 
+#### 8. Two-sample Glass's delta using group 2 as control SD
+
 ``` r
-# 8. Two-sample Glass's delta using group 2 as control SD
 backcalc_standard(m = c(15, 12), sd = c(4, 5), n = c(40, 35), type = "delta", control_sd = 2)
 ```
 
@@ -114,8 +122,9 @@ backcalc_standard(m = c(15, 12), sd = c(4, 5), n = c(40, 35), type = "delta", co
     Effect size calculated from means and pooled SD.
     Glass's delta calculated using group 2 SD. 
 
+#### 9. Two-sample effect size from t-statistic with SDs and group sample sizes
+
 ``` r
-# 9. Two-sample effect size from t-statistic with SDs and group sample sizes
 backcalc_standard(statistic = 3.0, sd = c(4, 5), n = c(40, 40))
 ```
 
@@ -126,8 +135,9 @@ backcalc_standard(statistic = 3.0, sd = c(4, 5), n = c(40, 40))
     Notes:
     Effect size estimated from t-statistic. 
 
+#### 10. Paired-sample Cohen's d from mean difference, SD, and n
+
 ``` r
-# 10. Paired-sample Cohen's d from mean difference, SD, and n
 backcalc_standard(m = 1.2, sd = 2.5, n = 30, paired = TRUE)
 ```
 
@@ -141,8 +151,9 @@ backcalc_standard(m = 1.2, sd = 2.5, n = 30, paired = TRUE)
 
 ### Insufficient Information Cases
 
+#### 11. Sample size only, no effect size, mean difference, or statistic
+
 ``` r
-# 11. Sample size only, no effect size, mean difference, or statistic
 backcalc_standard(n = 40)
 ```
 
@@ -150,8 +161,9 @@ backcalc_standard(n = 40)
     Insufficient Input:
     Provide either: (1) effect size d, or (2) means/mean-diff with SD, or (3) statistic with sample size.
 
+#### 12. SD and sample size provided, but no mean difference or effect size
+
 ``` r
-# 12. SD and sample size provided, but no mean difference or effect size
 backcalc_standard(sd = 3, n = 35)
 ```
 
@@ -159,8 +171,9 @@ backcalc_standard(sd = 3, n = 35)
     Insufficient Input:
     Provide either: (1) effect size d, or (2) means/mean-diff with SD, or (3) statistic with sample size.
 
+#### 13. Test statistic provided without sample size
+
 ``` r
-# 13. Test statistic provided without sample size
 backcalc_standard(statistic = 2.1)
 ```
 
@@ -168,8 +181,9 @@ backcalc_standard(statistic = 2.1)
     Insufficient Input:
     Provide either: (1) effect size d, or (2) means/mean-diff with SD, or (3) statistic with sample size.
 
+#### 14. P-value and sample size provided, but no effect size or statistic
+
 ``` r
-# 14. P-value and sample size provided, but no effect size or statistic
 backcalc_standard(p = 0.03, n = 45)
 ```
 
@@ -177,8 +191,9 @@ backcalc_standard(p = 0.03, n = 45)
     Insufficient Input:
     Provide either: (1) effect size d, or (2) means/mean-diff with SD, or (3) statistic with sample size.
 
+#### 15. Mean difference only, missing SD and effect size
+
 ``` r
-# 15. Mean difference only, missing SD and effect size
 backcalc_standard(m = 1.8)
 ```
 

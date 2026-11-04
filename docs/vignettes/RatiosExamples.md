@@ -16,8 +16,9 @@ and input constraints.
 
 ### One Sample Cases
 
+#### 1. Ratio and SE provided (no inference needed)
+
 ``` r
-# 1. Ratio and SE provided (no inference needed)
 backcalc_ratios(ratio = 2.5, se = 0.2)
 ```
 
@@ -25,8 +26,9 @@ backcalc_ratios(ratio = 2.5, se = 0.2)
             Estimate    SE     z df     p    LL    UL
     Outcome    2.500 0.200 4.581 NA 0.000 1.689 3.700
 
+#### 2. Ratio and confidence interval provided (infer SE from CI)
+
 ``` r
-# 2. Ratio and confidence interval provided (infer SE from CI)
 backcalc_ratios(ratio = 1.8, ci = c(1.3, 2.5))
 ```
 
@@ -37,8 +39,9 @@ backcalc_ratios(ratio = 1.8, ci = c(1.3, 2.5))
     Note(s):
     SE approximated from CI using log scale and critical value.
 
+#### 3. Ratio and test statistic provided (infer SE from statistic)
+
 ``` r
-# 3. Ratio and test statistic provided (infer SE from statistic)
 backcalc_ratios(ratio = 3.0, statistic = 4.0)
 ```
 
@@ -49,8 +52,9 @@ backcalc_ratios(ratio = 3.0, statistic = 4.0)
     Note(s):
     SE approximated from statistic and estimate.
 
+#### 4. Ratio, test statistic, and df provided (infer SE and p)
+
 ``` r
-# 4. Ratio, test statistic, and df provided (infer SE and p)
 backcalc_ratios(ratio = 2.2, statistic = 2.5, df = 29)
 ```
 
@@ -61,8 +65,9 @@ backcalc_ratios(ratio = 2.2, statistic = 2.5, df = 29)
     Note(s):
     SE approximated from statistic and estimate.
 
+#### 5. Ratio, test statistic, and sample size (infer SE, df, p, and CI)
+
 ``` r
-# 5. Ratio, test statistic, and sample size (infer SE, df, p, and CI)
 backcalc_ratios(ratio = 1.5, statistic = 2.1, n = 40)
 ```
 
@@ -76,8 +81,9 @@ backcalc_ratios(ratio = 1.5, statistic = 2.1, n = 40)
 
 ### Two Sample Cases
 
+#### 6. Two ratios and SEs provided (no inference needed)
+
 ``` r
-# 6. Two ratios and SEs provided (no inference needed)
 backcalc_ratios(ratio = c(2.5, 1.8), se = c(0.2, 0.1))
 ```
 
@@ -89,8 +95,9 @@ backcalc_ratios(ratio = c(2.5, 1.8), se = c(0.2, 0.1))
     Estimate calculated as log ratio difference between two ratios.
     SE combined using sqrt(se1^2 + se2^2).
 
+#### 7. Two ratios, SEs, and dfs provided (Welch-Satterthwaite df calculation)
+
 ``` r
-# 7. Two ratios, SEs, and dfs provided (Welch-Satterthwaite df calculation)
 backcalc_ratios(ratio = c(3.2, 1.9), se = c(0.25, 0.15), df = c(25, 30))
 ```
 
@@ -103,8 +110,9 @@ backcalc_ratios(ratio = c(3.2, 1.9), se = c(0.25, 0.15), df = c(25, 30))
     SE combined using sqrt(se1^2 + se2^2).
     df vector provided but SE of difference only; df not adjusted.
 
+#### 8. Two ratios, SE for first group, and CI for the difference (infer second SE and test stats)
+
 ``` r
-# 8. Two ratios, SE for first group, and CI for the difference (infer second SE and test stats)
 backcalc_ratios(ratio = c(2.0, 1.5), se = 0.12, ci = c(1.2, 3.0))
 ```
 
@@ -115,8 +123,9 @@ backcalc_ratios(ratio = c(2.0, 1.5), se = 0.12, ci = c(1.2, 3.0))
     Note(s):
     Estimate calculated as log ratio difference between two ratios.
 
+#### 9. Two ratios, SE for first group, test statistic and df provided (infer missing SE and p)
+
 ``` r
-# 9. Two ratios, SE for first group, test statistic and df provided (infer missing SE and p)
 backcalc_ratios(ratio = c(2.0, 1.5), se = 0.15, statistic = 3.0, df = 40)
 ```
 
@@ -127,8 +136,9 @@ backcalc_ratios(ratio = c(2.0, 1.5), se = 0.15, statistic = 3.0, df = 40)
     Note(s):
     Estimate calculated as log ratio difference between two ratios.
 
+#### 10. Two ratios and CI provided (infer SE and all inferential stats)
+
 ``` r
-# 10. Two ratios and CI provided (infer SE and all inferential stats)
 backcalc_ratios(ratio = c(2.1, 1.7), ci = c(1.05, 3.1))
 ```
 
@@ -142,8 +152,9 @@ backcalc_ratios(ratio = c(2.1, 1.7), ci = c(1.05, 3.1))
 
 ### Insufficient Information Cases
 
+#### 11. No ratio provided (immediate insufficient info)
+
 ``` r
-# 11. No ratio provided (immediate insufficient info)
 backcalc_ratios()
 ```
 
@@ -151,8 +162,9 @@ backcalc_ratios()
     Insufficient Input:
     A ratio (or two ratios) must be provided.
 
+#### 12. Ratio provided but no SE, statistic, or CI (insufficient SE)
+
 ``` r
-# 12. Ratio provided but no SE, statistic, or CI (insufficient SE)
 backcalc_ratios(ratio = 2.3)
 ```
 
@@ -160,8 +172,9 @@ backcalc_ratios(ratio = 2.3)
     Insufficient Input:
     SE or CI must be provided or inferable.
 
+#### 13. Two-sample ratio vector with SE missing (insufficient info, triggers message)
+
 ``` r
-# 13. Two-sample ratio vector with SE missing (insufficient info, triggers message)
 backcalc_ratios(ratio = c(2.5, 1.9))
 ```
 
@@ -169,8 +182,9 @@ backcalc_ratios(ratio = c(2.5, 1.9))
     Insufficient Input:
     SE or CI must be provided or inferable.
 
+#### 14. Ratio and p-value provided but no SE, statistic, or CI (insufficient SE)
+
 ``` r
-# 14. Ratio and p-value provided but no SE, statistic, or CI (insufficient SE)
 backcalc_ratios(ratio = 1.8, p = 0.05)
 ```
 
@@ -178,8 +192,9 @@ backcalc_ratios(ratio = 1.8, p = 0.05)
     Insufficient Input:
     SE or CI must be provided or inferable.
 
+#### 15. Ratio with zero or negative value (invalid for log transform, insufficient info)
+
 ``` r
-# 15. Ratio with zero or negative value (invalid for log transform, insufficient info)
 backcalc_ratios(ratio = c(-1.5, 2.0))
 ```
 

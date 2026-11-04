@@ -16,8 +16,9 @@ and input constraints.
 
 ### One Sample Cases
 
+#### 1.  Median, IQR, and sample size
+
 ``` r
-# 1.  Median, IQR, and sample size
 backcalc_medians(mdn = 50, iqr = 20, n = 30)
 ```
 
@@ -28,8 +29,9 @@ backcalc_medians(mdn = 50, iqr = 20, n = 30)
     Note(s):
     SE approximated from IQR and sample size using normal approximation.
 
+#### 2.  Median, MAD, and sample size
+
 ``` r
-# 2.  Median, MAD, and sample size
 backcalc_medians(mdn = 48, mad = 12, n = 25)
 ```
 
@@ -40,8 +42,9 @@ backcalc_medians(mdn = 48, mad = 12, n = 25)
     Note(s):
     SE approximated from MAD and sample size using normal approximation.
 
+#### 3.  Median, IQR, paired design
+
 ``` r
-# 3.  Median, IQR, paired design
 backcalc_medians(mdn = 42, iqr = 15, n = 20, paired = TRUE)
 ```
 
@@ -52,8 +55,9 @@ backcalc_medians(mdn = 42, iqr = 15, n = 20, paired = TRUE)
     Note(s):
     SE approximated from IQR and sample size using normal approximation.
 
+#### 4.  Median, MAD, one-sided test
+
 ``` r
-# 4.  Median, MAD, one-sided test
 backcalc_medians(mdn = 55, mad = 10, n = 40, one_sided = TRUE)
 ```
 
@@ -64,8 +68,9 @@ backcalc_medians(mdn = 55, mad = 10, n = 40, one_sided = TRUE)
     Note(s):
     SE approximated from MAD and sample size using normal approximation.
 
+#### 5. median + MAD + n, no paired, no one-sided
+
 ``` r
-# 5. median + MAD + n, no paired, no one-sided
 backcalc_medians(mdn = 55, range = 30, n = 20)
 ```
 
@@ -78,8 +83,9 @@ backcalc_medians(mdn = 55, range = 30, n = 20)
 
 ### Two Sample Cases
 
+#### 6.  Group medians, IQR, and sample size
+
 ``` r
-# 6.  Group medians, IQR, and sample size
 backcalc_medians(mdn = c(60, 50), iqr = 20, n = 30)
 ```
 
@@ -90,8 +96,9 @@ backcalc_medians(mdn = c(60, 50), iqr = 20, n = 30)
     Note(s):
     SE approximated from IQR and sample size using normal approximation.
 
+#### 7.  Group medians, MAD, and sample size
+
 ``` r
-# 7.  Group medians, MAD, and sample size
 backcalc_medians(mdn = c(75, 68), mad = 9, n = 40)
 ```
 
@@ -102,8 +109,9 @@ backcalc_medians(mdn = c(75, 68), mad = 9, n = 40)
     Note(s):
     SE approximated from MAD and sample size using normal approximation.
 
+#### 8.  Paired medians, IQR, and n
+
 ``` r
-# 8.  Paired medians, IQR, and n
 backcalc_medians(mdn = c(45, 40), iqr = 10, n = 20, paired = TRUE)
 ```
 
@@ -114,8 +122,9 @@ backcalc_medians(mdn = c(45, 40), iqr = 10, n = 20, paired = TRUE)
     Note(s):
     SE approximated from IQR and sample size using normal approximation.
 
+#### 9.  Group medians, IQR, n, one-sided
+
 ``` r
-# 9.  Group medians, IQR, n, one-sided
 backcalc_medians(mdn = c(82, 78), iqr = 12, n = 35, one_sided = TRUE)
 ```
 
@@ -126,8 +135,9 @@ backcalc_medians(mdn = c(82, 78), iqr = 12, n = 35, one_sided = TRUE)
     Note(s):
     SE approximated from IQR and sample size using normal approximation.
 
+#### 10. two medians, two MADs, two sample sizes (no IQR used here)
+
 ``` r
-# 10. two medians, two MADs, two sample sizes (no IQR used here)
 backcalc_medians(mdn = c(92, 85), mad = c(7, 10), n = c(25, 28))
 ```
 
@@ -140,8 +150,9 @@ backcalc_medians(mdn = c(92, 85), mad = c(7, 10), n = c(25, 28))
 
 ### Insufficient Information Cases
 
+#### 11. Only IQR provided
+
 ``` r
-# 11. Only IQR provided
 backcalc_medians(iqr = 10)
 ```
 
@@ -150,8 +161,9 @@ backcalc_medians(iqr = 10)
     Cannot approximate SE: provide sample size with IQR, MAD, or range.
     Provide estimate and at least one of SE, p-value, CI, or test statistic.
 
+#### 12. Only MAD provided
+
 ``` r
-# 12. Only MAD provided
 backcalc_medians(mad = 5)
 ```
 
@@ -160,8 +172,9 @@ backcalc_medians(mad = 5)
     Cannot approximate SE: provide sample size with IQR, MAD, or range.
     Provide estimate and at least one of SE, p-value, CI, or test statistic.
 
+#### 13. Only sample size provided
+
 ``` r
-# 13. Only sample size provided
 backcalc_medians(n = 30)
 ```
 
@@ -169,8 +182,9 @@ backcalc_medians(n = 30)
     Insufficient Input:
     Provide estimate and at least one of SE, p-value, CI, or test statistic.
 
+#### 14. Median provided, no n or spread
+
 ``` r
-# 14. Median provided, no n or spread
 backcalc_medians(mdn = 50)
 ```
 
@@ -178,8 +192,9 @@ backcalc_medians(mdn = 50)
     Insufficient Input:
     Provide estimate and at least one of SE, p-value, CI, or test statistic.
 
+#### 15. Medians and sample size, but no dispersion
+
 ``` r
-# 15. Medians and sample size, but no dispersion
 backcalc_medians(mdn = c(52, 49), n = 30)
 ```
 

@@ -16,8 +16,9 @@ and input constraints.
 
 ### One Sample Cases
 
+#### 1. All info given: r, se, n (df inferred)
+
 ``` r
-# 1. All info given: r, se, n (df inferred)
 backcalc_corrs(r = 0.45, se = 0.1, n = 25)
 ```
 
@@ -28,8 +29,9 @@ backcalc_corrs(r = 0.45, se = 0.1, n = 25)
     Note(s):
     df approximated as n - 2.
 
+#### 2. r + p-value + df (infer se, CI)
+
 ``` r
-# 2. r + p-value + df (infer se, CI)
 backcalc_corrs(r = 0.52, p = 0.02, df = 18)
 ```
 
@@ -40,8 +42,9 @@ backcalc_corrs(r = 0.52, p = 0.02, df = 18)
     Note(s):
     SE approximated from p-value and df.
 
+#### 3. r + confidence interval + df (infer se, p)
+
 ``` r
-# 3. r + confidence interval + df (infer se, p)
 backcalc_corrs(r = 0.35, ci = c(0.10, 0.55), df = 20)
 ```
 
@@ -52,8 +55,9 @@ backcalc_corrs(r = 0.35, ci = c(0.10, 0.55), df = 20)
     Note(s):
     SE approximated from CI in Fisher z scale.
 
+#### 4. r + test statistic + df (infer se, p)
+
 ``` r
-# 4. r + test statistic + df (infer se, p)
 backcalc_corrs(r = 0.38, statistic = 2.2, df = 28)
 ```
 
@@ -64,8 +68,9 @@ backcalc_corrs(r = 0.38, statistic = 2.2, df = 28)
     Note(s):
     SE approximated from test statistic and df.
 
+#### 5. Only r + n (infer se, df, p, CI) with 90% confidence level
+
 ``` r
-# 5. Only r + n (infer se, df, p, CI) with 90% confidence level
 backcalc_corrs(r = 0.42, n = 40, conf.level = 0.90)
 ```
 
@@ -79,8 +84,9 @@ backcalc_corrs(r = 0.42, n = 40, conf.level = 0.90)
 
 ### Two Sample Cases
 
+#### 6. Two correlations + equal n (infer difference, se, df, p, CI)
+
 ``` r
-# 6. Two correlations + equal n (infer difference, se, df, p, CI)
 backcalc_corrs(r = c(0.60, 0.40), n = c(30, 30))
 ```
 
@@ -92,8 +98,9 @@ backcalc_corrs(r = c(0.60, 0.40), n = c(30, 30))
     df approximated as min(n) - 3 for two-sample case.
     SE derived from Fisher z difference formula.
 
+#### 7. Two correlations + unequal n (infer difference, se, df, p, CI)
+
 ``` r
-# 7. Two correlations + unequal n (infer difference, se, df, p, CI)
 backcalc_corrs(r = c(0.70, 0.50), n = c(40, 25))
 ```
 
@@ -105,8 +112,9 @@ backcalc_corrs(r = c(0.70, 0.50), n = c(40, 25))
     df approximated as min(n) - 3 for two-sample case.
     SE derived from Fisher z difference formula.
 
+#### 8. Difference in correlation + p-value + df (infer se, statistic, CI)
+
 ``` r
-# 8. Difference in correlation + p-value + df (infer se, statistic, CI)
 backcalc_corrs(r = 0.18, p = 0.03, df = 45)
 ```
 
@@ -117,8 +125,9 @@ backcalc_corrs(r = 0.18, p = 0.03, df = 45)
     Note(s):
     SE approximated from p-value and df.
 
+#### 9. Two correlations + se + equal n (infer df, p, statistic)
+
 ``` r
-# 9. Two correlations + se + equal n (infer df, p, statistic)
 backcalc_corrs(r = c(0.52, 0.34), se = 0.12, n = c(35, 35))
 ```
 
@@ -129,8 +138,9 @@ backcalc_corrs(r = c(0.52, 0.34), se = 0.12, n = c(35, 35))
     Note(s):
     df approximated as min(n) - 3 for two-sample case.
 
+#### 10. Two correlations + CI + unequal n (infer se, df, p, statistic)
+
 ``` r
-# 10. Two correlations + CI + unequal n (infer se, df, p, statistic)
 backcalc_corrs(r = c(0.65, 0.48), ci = c(0.50, 0.70), n = c(50, 40))
 ```
 
@@ -144,8 +154,9 @@ backcalc_corrs(r = c(0.65, 0.48), ci = c(0.50, 0.70), n = c(50, 40))
 
 ### Insufficient Information Cases
 
+#### 11. Missing correlation coefficient r
+
 ``` r
-# 11. Missing correlation coefficient r
 backcalc_corrs(se = 0.1, n = 20)
 ```
 
@@ -153,8 +164,9 @@ backcalc_corrs(se = 0.1, n = 20)
     Insufficient Input:
     Correlation coefficient (r) must be provided.
 
+#### 12. Invalid correlation coefficient (>1)
+
 ``` r
-# 12. Invalid correlation coefficient (>1)
 backcalc_corrs(r = 1.2, n = 20)
 ```
 
@@ -162,8 +174,9 @@ backcalc_corrs(r = 1.2, n = 20)
     Insufficient Input:
     Correlation coefficients must be between -1 and 1.
 
+#### 13. Two correlations but missing sample sizes
+
 ``` r
-# 13. Two correlations but missing sample sizes
 backcalc_corrs(r = c(0.3, 0.5))
 ```
 
@@ -171,8 +184,9 @@ backcalc_corrs(r = c(0.3, 0.5))
     Insufficient Input:
     Two correlations provided but sample sizes (n) missing or incomplete.
 
+#### 14. Only r provided, no se, n, p, df, ci or statistic
+
 ``` r
-# 14. Only r provided, no se, n, p, df, ci or statistic
 backcalc_corrs(r = 0.4)
 ```
 
@@ -180,8 +194,9 @@ backcalc_corrs(r = 0.4)
     Insufficient Input:
     Provide se, n, ci, or p with df, or statistic with df to infer missing statistics.
 
+#### 15. Invalid confidence interval length (not length 2)
+
 ``` r
-# 15. Invalid confidence interval length (not length 2)
 backcalc_corrs(r = 0.3, ci = c(0.1, 0.2, 0.3), n = 20)
 ```
 
