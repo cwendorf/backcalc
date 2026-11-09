@@ -7,7 +7,7 @@
 
 ### Overview
 
-`backcalc` is an R package designed to help researchers and students reconstruct key inferential statistics — such as standard errors, confidence intervals, test statistics, and p-values — from partial or incomplete summary data commonly found in scientific literature. Supporting various data types and designs, including single- and two-sample (independent or paired) tests with z or t distributions, it offers tailored functions for means, medians, correlations, regression coefficients, proportions, and ratio measures. 
+`backcalc` is an R package designed to help researchers and students reconstruct key inferential statistics — such as standard errors, confidence intervals, test statistics, and p-values — from partial or incomplete summary data commonly found in scientific literature. Supporting various data types and designs, including single- and two-sample (independent or paired) tests with z or t distributions, it offers tailored functions for means, medians, correlations, regression coefficients, proportions, and ratio measures.
 
 ### Installation
 
@@ -32,12 +32,6 @@ This package includes the following documentation:
 - [Introduction](./docs/README.md): A quick overview and summary of the package.
 - [Reference](./docs/man/README.md): Descriptions of all exported functions, including usage, arguments, and return values.
 - [Articles](./docs/vignettes/README.md): Examples demonstrating how to use the package.
-
-### Contact
-
-- GitHub Issues: [https://github.com/cwendorf/backcalc/issues](https://github.com/cwendorf/backcalc/issues)
-- Author Email: [cwendorf@uwsp.edu](mailto:cwendorf@uwsp.edu)
-- Author Homepage: [https://github.com/cwendorf](https://github.com/cwendorf)
 
 ### Citation
 
