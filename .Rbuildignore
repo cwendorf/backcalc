@@ -2,3 +2,4 @@
 ^source-backcalc.R
 docs/
 vignettes/
+.github/
