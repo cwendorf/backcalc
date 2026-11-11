@@ -12,18 +12,18 @@
 
 ### Installation
 
-This package is not currently on CRAN, but can be installed and loaded using these R commands
+This package is not currently available on CRAN. It can be installed directly from GitHub:
 
 ``` r
-if (!require(remotes)) install.packages("remotes")
+if (!requireNamespace("remotes", quietly = TRUE)) install.packages("remotes")
 remotes::install_github("cwendorf/backcalc")
 library(backcalc)
 ```
 
-If you do not wish a full install, the latest functions can be made available using this R command:
+If you prefer not to install the package, you can load the current functions directly:
 
 ```r
-source("http://raw.githubusercontent.com/cwendorf/backcalc/main/source-backcalc.R")
+source("https://raw.githubusercontent.com/cwendorf/backcalc/main/source-backcalc.R")
 ```
 
 ### Usage
