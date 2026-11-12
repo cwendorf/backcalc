@@ -2,7 +2,13 @@
 
 ## Reference
 
-This section is the reference for `backcalc`. Each page documents one exported function, including usage, arguments, and return values.
+This section is the reference for `backcalc`. Each page documents one exported function, including usage, arguments, return values, and examples.
+
+- [Means and Analysis of Variance](#means-and-analysis-of-variance)
+- [Nonparametric Statistics](#nonparametric-statistics)
+- [Correlation and Regression](#correlation-and-regression)
+
+---
 
 ### Means and Analysis of Variance
 

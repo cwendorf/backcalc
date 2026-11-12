@@ -2,7 +2,13 @@
 
 ## Articles
 
-`backcalc` is an R package designed to help researchers and students reconstruct key inferential statistics from partial or incomplete summary data commonly found in scientific literature. 
+This section contains articles for `backcalc`. They walk through reconstructing means, ANOVA results, nonparametric statistics, correlations, and regression coefficients from examples and published data.
+
+- [Means and Analysis of Variance](#means-and-analysis-of-variance)
+- [Nonparametric Statistics](#nonparametric-statistics)
+- [Correlation and Regression](#correlation-and-regression)
+
+---
 
 ### Means and Analysis of Variance
 

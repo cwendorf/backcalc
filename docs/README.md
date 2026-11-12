@@ -2,18 +2,16 @@
 
 ## Introduction
 
-`backcalc` provides functions to reconstruct key inferential statistics such as standard errors,
-confidence intervals, test statistics, and p-values from partial or incomplete summary information
-commonly reported in scientific literature. It also includes functions to calculate standardized
-effect sizes (Cohen's d, Hedges' g, Glass's delta) from various inputs.
+`backcalc` provides functions to reconstruct key inferential statistics such as standard errors, confidence intervals, test statistics, and p-values from partial or incomplete summary information commonly reported in scientific literature. It also includes functions to calculate standardized effect sizes (Cohen's d, Hedges' g, Glass's delta) from various inputs.
 
+- [Overview](#overview)
 - [The Challenge](#the-challenge)
 - [The Solution](#the-solution)
 - [Resources](#resources)
 
 ------------------------------------------------------------------------
 
-### The Challenge
+### Overview
 
 Scientific articles rarely report complete inferential statistics. For example, you might find:
 
@@ -51,4 +49,3 @@ Unlike calculators requiring specific inputs, `backcalc` works with whatever you
 
 - [Reference](./man/README.md): Descriptions of all exported functions, including usage, arguments, and return values.
 - [Articles](./vignettes/README.md): Examples demonstrating how to use the package.
-
